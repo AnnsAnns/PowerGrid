@@ -27,3 +27,5 @@ Cargo.lock
 # OS specific
 .DS_Store
 Thumbs.db
+
+wind_data/
