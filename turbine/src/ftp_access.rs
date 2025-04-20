@@ -26,6 +26,22 @@ pub async fn download_wind_date_for(id: usize) -> Result<String, String> {
     }
 }
 
+/// Reads text from a URL
+pub async fn read_text_from_url(url: &str) -> Result<String, String> {
+    let response = reqwest::get(url).await;
+    match response {
+        Ok(resp) => {
+            if resp.status().is_success() {
+                let text = resp.text().await.expect("Failed to read response");
+                Ok(text)
+            } else {
+                Err(format!("Failed to download file. Status: {}", resp.status()))
+            }
+        }
+        Err(e) => Err(format!("Error occurred while making request: {}", e)),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
