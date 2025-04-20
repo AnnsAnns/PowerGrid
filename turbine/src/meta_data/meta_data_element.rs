@@ -12,6 +12,16 @@ pub struct MetaDataElement {
 }
 
 impl MetaDataElement {
+    pub fn calculate_distance(
+        &self,
+        latitude: f64,
+        longitude: f64,
+    ) -> f64 {
+        let lat_diff = self.geo_breite - latitude;
+        let lon_diff = self.geo_laenge - longitude;
+        (lat_diff.powi(2) + lon_diff.powi(2)).sqrt()
+    }
+
     pub fn new(
         stations_id: String,
         von_datum: String,

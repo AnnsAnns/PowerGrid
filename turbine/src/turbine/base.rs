@@ -1,4 +1,4 @@
-use crate::meta_data::MetaDataWrapper;
+use crate::meta_data::{MetaDataElement, MetaDataWrapper};
 
 pub struct Turbine {
     rotor_dimension: f64, // in meters
@@ -43,5 +43,13 @@ impl Turbine {
 
     pub fn set_wind_speed_metadata(&mut self, metadata: MetaDataWrapper) {
         self.wind_speed_metadata = metadata;
+    }
+
+    pub fn get_temperature_metadata(&self) -> &MetaDataWrapper {
+        &self.temperature_metadata
+    }
+
+    pub fn get_wind_speed_metadata(&self) -> &MetaDataWrapper {
+        &self.wind_speed_metadata
     }
 }
