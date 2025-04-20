@@ -1,14 +1,14 @@
-use super::MetaDataWrapper;
+use super::{MetaDataElement, MetaDataWrapper};
 
 pub struct ApproximationElement {
-    pub station_id: String,
+    pub station: MetaDataElement,
     pub ratio: f64,
 }
 
 impl MetaDataWrapper {
-    /// This function tries to trianagulate the location of a turbine
+    /// This function tries to triangulate the location of a turbine
     /// based on the metadata provided. That means, that it will
-    /// give us three points, which are cloest to the turbine and
+    /// give us three points, which are closet to the turbine and
     /// the ratio of the distance to the turbine and thus
     /// the importance of the point.
     ///
@@ -37,13 +37,30 @@ impl MetaDataWrapper {
             })
             .collect();
         
-        // Calculate the total distance
-        let total_distance: f64 = distances.iter().sum();
+        // Calculate the inverse distances
+        let inverse_distances: Vec<f64> = distances
+            .iter()
+            .map(|&distance| {
+            if distance == 0.0 {
+                f64::INFINITY // Handle the case where the distance is zero
+            } else {
+                1.0 / distance
+            }
+            })
+            .collect();
+
+        // Calculate the total of inverse distances
+        let total_inverse_distance: f64 = inverse_distances.iter().sum();
+        println!("Total inverse distance: {}", total_inverse_distance);
 
         // Calculate the ratios
-        let ratios: Vec<f64> = distances
+        let ratios: Vec<f64> = inverse_distances
             .iter()
-            .map(|&distance| 1.0 - (distance / total_distance))
+            .map(|&inverse_distance| {
+            let ratio = inverse_distance / total_inverse_distance;
+            println!("Inverse Distance: {}, Ratio: {}", inverse_distance, ratio);
+            ratio
+            })
             .collect();
 
         // Create the approximation elements
@@ -51,7 +68,7 @@ impl MetaDataWrapper {
             .iter()
             .enumerate()
             .map(|(i, station)| ApproximationElement {
-                station_id: station.stations_id.clone(),
+                station: station.to_owned().clone(),
                 ratio: ratios[i],
             })
             .collect()

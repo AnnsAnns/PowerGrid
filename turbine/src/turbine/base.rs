@@ -4,8 +4,8 @@ pub struct Turbine {
     rotor_dimension: f64, // in meters
     latitude: f64, // in degrees
     longitude: f64, // in degrees
-    temperature_metadata: MetaDataWrapper,
-    wind_speed_metadata: MetaDataWrapper,
+    pub temperature_metadata: MetaDataWrapper,
+    pub wind_speed_metadata: MetaDataWrapper,
 }
 
 impl Turbine {

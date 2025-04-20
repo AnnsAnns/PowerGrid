@@ -63,10 +63,18 @@ impl MetaDataWrapper {
         self
             .meta_data
             .sort_by(|a, b| {
+                //println!("Calculating distance for station: {}", a.stationsname);
                 let dist_a = a.calculate_distance(latitude, longitude);
                 let dist_b = b.calculate_distance(latitude, longitude);
                 dist_a.partial_cmp(&dist_b).unwrap()
             });
+        
+        // println!("Station names sorted by distance:");
+        // for station in &self.meta_data {
+        //     println!("Station: {}", station.stationsname);
+        //     println!("Distance: {}", station.calculate_distance(latitude, longitude));
+        //     println!("---------------------");
+        // }
 
         // Return the nearest station
         if self.meta_data.len() < amount {

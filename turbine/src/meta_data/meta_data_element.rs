@@ -19,6 +19,16 @@ impl MetaDataElement {
     ) -> f64 {
         let lat_diff = self.geo_breite - latitude;
         let lon_diff = self.geo_laenge - longitude;
+        // println!(
+        //     "{}: Latitude difference: {}, ({}-{}) \n Longitude difference: {} ({}-{})",
+        //     self.stationsname,
+        //     lat_diff,
+        //     self.geo_breite,
+        //     latitude,
+        //     lon_diff,
+        //     self.geo_laenge,
+        //     longitude
+        // );
         (lat_diff.powi(2) + lon_diff.powi(2)).sqrt()
     }
 
@@ -48,16 +58,13 @@ impl MetaDataElement {
 
     pub fn to_string(&self) -> String {
         format!(
-            "{},{},{},{},{},{},{},{},{}",
+            "ID: {}, Height: {}, Breite: {}, Länge: {}, Name: {}, Bundesland: {}",
             self.stations_id,
-            self.von_datum,
-            self.bis_datum,
             self.stationshoehe,
             self.geo_breite,
             self.geo_laenge,
             self.stationsname,
-            self.bundesland,
-            self.abgabe
+            self.bundesland
         )
     }
 }
