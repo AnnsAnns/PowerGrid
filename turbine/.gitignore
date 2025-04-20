@@ -29,3 +29,6 @@ Cargo.lock
 Thumbs.db
 
 wind_data/
+*.zip
+*.txt
+Wind/

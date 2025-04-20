@@ -1,4 +1,4 @@
-use ftp_access::download_wind_date_for;
+use metadata::MetaDataType;
 
 mod turbine;
 mod ftp_access;
@@ -8,6 +8,5 @@ mod metadata;
 #[tokio::main]
 async fn main() {
     println!("Parsing example csv");
-    println!("{:?}", download_wind_date_for(44).await);
-
+    println!("{:?}", ftp_access::download_data_for(44, MetaDataType::Wind).await);
 }

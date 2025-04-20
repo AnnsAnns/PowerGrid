@@ -2,7 +2,10 @@ use crate::{data_parser_structs::MetaData, ftp_access};
 
 const WIND_METADATA_URL: &str = "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/10_minutes/wind/now/zehn_now_ff_Beschreibung_Stationen.txt";
 const AIR_TEMP_METADATA_URL: &str = "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/10_minutes/air_temperature/now/zehn_now_tu_Beschreibung_Stationen.txt";
+const REQUEST_URL_TEMP: &str = "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/10_minutes/air_temperature/now/10minutenwerte_TU_";
+const REQUEST_URL_WIND: &str = "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/10_minutes/wind/now/10minutenwerte_wind_";
 
+#[derive(Debug, Clone)]
 pub enum MetaDataType {
     Wind,
     AirTemperature,
@@ -18,6 +21,20 @@ impl MetaDataType {
         match self {
             MetaDataType::Wind => WIND_METADATA_URL,
             MetaDataType::AirTemperature => AIR_TEMP_METADATA_URL,
+        }
+    }
+
+    pub fn to_string(&self) -> String {
+        match self {
+            MetaDataType::Wind => "Wind".to_string(),
+            MetaDataType::AirTemperature => "AirTemperature".to_string(),
+        }
+    }
+
+    pub fn to_access_url(&self) -> String {
+        match self {
+            MetaDataType::Wind => REQUEST_URL_WIND.to_string(),
+            MetaDataType::AirTemperature => REQUEST_URL_TEMP.to_string(),
         }
     }
 }
@@ -64,5 +81,19 @@ impl MetaDataWrapper {
             }
             Err(err) => Err(format!("Failed to fetch metadata: {}", err)),
         }
+    }
+
+    /// Returns the metadata for a specific station ID
+    /// Note, if the distance is too large, it may be useless but we still return it
+    pub fn get_nearest_station(
+        &self,
+        latitude: f64,
+        longitude: f64,
+    ) -> Option<&MetaData> {
+        self.meta_data.iter().min_by(|a, b| {
+            let dist_a = ((a.geo_breite - latitude).powi(2) + (a.geo_laenge - longitude).powi(2)).sqrt();
+            let dist_b = ((b.geo_breite - latitude).powi(2) + (b.geo_laenge - longitude).powi(2)).sqrt();
+            dist_a.partial_cmp(&dist_b).unwrap()
+        })
     }
 }
