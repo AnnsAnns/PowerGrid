@@ -1,5 +1,5 @@
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
-pub struct MetaData {
+pub struct MetaDataElement {
     pub stations_id: String,
     pub von_datum: String,
     pub bis_datum: String,
@@ -11,42 +11,7 @@ pub struct MetaData {
     pub abgabe: String,
 }
 
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
-pub struct TurbineData {
-    stations_id: usize,
-    mess_datum: String,
-    qn: usize,
-    ff_10: f64,
-    dd_10: f64,
-    eor: String,
-}
-
-impl TurbineData {
-    pub fn to_string(&self) -> String {
-        format!(
-            "{},{},{},{},{},{}",
-            self.stations_id, self.mess_datum, self.qn, self.ff_10, self.dd_10, self.eor
-        )
-    }
-}
-
-/// Parses CSV data from the given path
-/// Returning a parsed array of TurbineData
-pub fn read_from_csv(csv_path: String) -> Result<Vec<TurbineData>, Box<dyn std::error::Error>> {
-    let mut reader = csv::ReaderBuilder::new()
-        .has_headers(true)
-        .delimiter(b';')
-        .from_path(csv_path)?;
-
-    let mut records = Vec::new();
-    for result in reader.deserialize() {
-        let record: TurbineData = result?;
-        records.push(record);
-    }
-    Ok(records)
-}
-
-impl MetaData {
+impl MetaDataElement {
     pub fn new(
         stations_id: String,
         von_datum: String,
@@ -58,7 +23,7 @@ impl MetaData {
         bundesland: String,
         abgabe: String,
     ) -> Self {
-        MetaData {
+        MetaDataElement {
             stations_id,
             von_datum,
             bis_datum,

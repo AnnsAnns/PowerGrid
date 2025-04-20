@@ -1,4 +1,4 @@
-use crate::metadata::MetaDataType;
+use crate::meta_data::MetaDataType;
 
 const FILE_EXTENSION: &str = "_now.zip";
 
