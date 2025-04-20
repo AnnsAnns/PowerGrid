@@ -1,5 +1,6 @@
 use super::{MetaDataElement, MetaDataWrapper};
 
+#[derive(Debug, Clone)]
 pub struct ApproximationElement {
     pub station: MetaDataElement,
     pub ratio: f64,

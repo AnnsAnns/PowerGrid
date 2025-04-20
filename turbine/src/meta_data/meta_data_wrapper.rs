@@ -1,4 +1,4 @@
-use crate::ftp_access;
+use crate::parsing::read_text_from_url;
 
 use super::{MetaDataType, MetaDataElement};
 
@@ -9,7 +9,7 @@ pub struct MetaDataWrapper {
 
 impl MetaDataWrapper {
     pub async fn new(meta_data_type: MetaDataType) -> Result<Self, String> {
-        match ftp_access::read_text_from_url(meta_data_type.to_url()).await {
+        match read_text_from_url(meta_data_type.to_url()).await {
             Ok(data) => {
                 let lines: Vec<&str> = data.lines().collect();
                 if lines.len() < 3 {
@@ -24,7 +24,7 @@ impl MetaDataWrapper {
                             return None;
                         }
                         Some(MetaDataElement::new(
-                            fields[0].to_string(),
+                            fields[0].parse().ok()?,
                             fields[1].to_string(),
                             fields[2].to_string(),
                             fields[3].parse().ok()?,

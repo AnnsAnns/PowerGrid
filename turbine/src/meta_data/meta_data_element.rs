@@ -1,6 +1,6 @@
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct MetaDataElement {
-    pub stations_id: String,
+    pub stations_id: usize,
     pub von_datum: String,
     pub bis_datum: String,
     pub stationshoehe: usize,
@@ -33,7 +33,7 @@ impl MetaDataElement {
     }
 
     pub fn new(
-        stations_id: String,
+        stations_id: usize,
         von_datum: String,
         bis_datum: String,
         stationshoehe: usize,
