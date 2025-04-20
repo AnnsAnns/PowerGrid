@@ -1,5 +1,4 @@
 mod turbine;
-mod ftp_access;
 mod meta_data;
 mod parsing;
 
@@ -20,5 +19,5 @@ async fn main() {
     );
 
     println!("Fetching metadata for the turbine...");
-    turbine.get_closest_wind_stations();
+    turbine.get_closest_wind_stations().await;
 }

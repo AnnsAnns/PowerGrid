@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use crate::meta_data::MetaDataType;
 
 const FILE_EXTENSION: &str = "_now.zip";
@@ -15,11 +17,37 @@ pub async fn download_data_for(id: usize, data_type: MetaDataType) -> Result<Str
                 if !std::path::Path::new(data_type_str.as_str()).exists() {
                     std::fs::create_dir(data_type_str.as_str()).expect("Failed to create directory");
                 }
-                let mut file = std::fs::File::create(format!("{}/{}.zip", data_type_str.as_str(), id)).expect("Failed to create file");
                 let mut content = std::io::Cursor::new(resp.bytes().await.expect("Failed to read response"));
-                std::io::copy(&mut content, &mut file).expect("Failed to write to file");
-                println!("File downloaded successfully for station id: {}", id);
-                Ok(format!("File downloaded successfully for station id: {}", id))
+                let mut path = PathBuf::from(format!("{}/{}", data_type_str.as_str(), id));
+
+                match zip_extract::extract(&mut content, &path, true) {
+                    Ok(_) => {
+                        println!("File downloaded successfully for station id: {}", id);
+
+                        // Check if a file was created within the directory
+                        let mut file_created = false;
+                        for entry in std::fs::read_dir(path).expect("Failed to read directory") {
+                            let entry = entry.expect("Failed to read entry");
+                            if entry.path().is_file() {
+                                // Delete old data.csv if it exists
+                                let old_path = entry.path().with_file_name("data.csv");
+                                if old_path.exists() {
+                                    std::fs::remove_file(&old_path).expect("Failed to delete old data.csv");
+                                }
+
+                                // Rename the file to data.csv
+                                let new_path = entry.path().with_file_name("data.csv");
+                                std::fs::rename(entry.path(), &new_path).expect("Failed to rename file");
+
+                                return Ok(format!("File downloaded successfully for station id: {}", id));
+                            }
+                        }
+                        Err(format!("No file created in the directory for station id: {}", id))
+                    }
+                    Err(e) => {
+                        return Err(format!("Failed to extract zip file: {}", e))
+                    }
+                }
             } else {
                 Err(format!("Failed to download file for station id: {}. Status: {}", id, resp.status()))
             }
