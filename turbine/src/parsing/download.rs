@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, time::Duration};
 
 use crate::meta_data::MetaDataType;
 
@@ -28,28 +28,18 @@ pub async fn download_data_for(id: usize, data_type: MetaDataType) -> Result<Str
                 match zip_extract::extract(&mut content, &path, true) {
                     Ok(_) => {
                         println!("File downloaded successfully for station id: {}", id);
+                        tokio::time::sleep(Duration::from_secs(1)).await;
 
                         // Check if a file was created within the directory
                         let mut file_created = false;
                         for entry in std::fs::read_dir(path).expect("Failed to read directory") {
                             let entry = entry.expect("Failed to read entry");
                             if entry.path().is_file() {
-                                // Delete old data.csv if it exists
-                                let old_path = entry.path().with_file_name("data.csv");
-                                if old_path.exists() {
-                                    std::fs::remove_file(&old_path)
-                                        .expect("Failed to delete old data.csv");
-                                }
-
-                                // Sleep for 1 second to ensure the file is not in use
-                                tokio::time::sleep(std::time::Duration::from_secs(1)).await;
-
                                 // Rename the file to data.csv
-                                let new_path = entry.path().with_file_name("data.csv");
-                                if entry.path() != new_path {
-                                    std::fs::rename(entry.path(), &new_path)
-                                        .expect("Failed to rename file");
-                                }
+                                let new_path = entry.path().clone().with_file_name("data.csv");
+                                println!("Renaming {}", entry.path().to_string_lossy());
+                                std::fs::rename(entry.path(), &new_path)
+                                    .expect("Failed to rename file");
                                 return Ok(format!(
                                     "File downloaded successfully for station id: {}",
                                     id
