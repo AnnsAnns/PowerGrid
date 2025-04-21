@@ -37,6 +37,10 @@ impl Turbine {
         self.rotor_dimension
     }
 
+    pub fn get_rotor_area(&self) -> f64 {
+        std::f64::consts::PI * (self.rotor_dimension / 2.0).powi(2)
+    }
+
     pub fn get_latitude(&self) -> f64 {
         self.latitude
     }
