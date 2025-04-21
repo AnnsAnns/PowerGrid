@@ -5,17 +5,17 @@ use super::{download_data_for, read_for};
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct WindData {
     #[serde(rename = "STATIONS_ID")]
-    stations_id: usize,
+    pub stations_id: usize,
     #[serde(rename = "MESS_DATUM")]
-    date: String,
+    pub date: String,
     #[serde(rename = "QN")]
-    quality_level: usize,
+    pub quality_level: usize,
     #[serde(rename = "FF_10")]
-    wind_strength: f64,
+    pub wind_strength: f64,
     #[serde(rename = "DD_10")]
-    wind_direction: f64,
+    pub wind_direction: f64,
     #[serde(rename = "eor")]
-    eor: String,
+    pub eor: String,
 }
 
 impl WindData {

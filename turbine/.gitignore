@@ -31,4 +31,5 @@ Thumbs.db
 wind_data/
 *.zip
 *.txt
+*.csv
 Wind/

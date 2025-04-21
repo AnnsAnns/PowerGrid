@@ -3,8 +3,15 @@ use crate::meta_data::MetaDataWrapper;
 use super::Turbine;
 
 const GAS_CONSTANT: f64 = 287.1; // J/(kg·K)
+pub const AIR_PRESSURE: f64 = 101.325; // Pa
 
 impl Turbine {
+    pub fn get_power_output(&self) -> f64 {
+        // Assuming a standard air density of 1.225 kg/m^3 at sea level
+        let air_density = self.calculate_air_density(AIR_PRESSURE, self.approximate_temperature.as_ref().unwrap().air_temperature); // Standard temperature in Kelvin
+        self.calculate_power(air_density, self.approximate_wind.as_ref().unwrap().wind_strength)
+    }
+
     /// Calculate the current power output (in Watt) of the turbine
     /// based on the wind speed and rotor dimension.
     pub fn calculate_power(&self, air_density: f64, wind_speed: f64) -> f64 {

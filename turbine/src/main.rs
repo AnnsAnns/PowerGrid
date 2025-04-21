@@ -20,4 +20,8 @@ async fn main() {
 
     println!("Fetching metadata for the turbine...");
     turbine.get_closest_wind_stations().await;
+    turbine.get_closest_temperature_stations().await;
+    turbine.approximate_wind_data().await;
+    turbine.approximate_temperature_data().await;
+    println!("⚡ The Turbines current power output is: {}W", turbine.get_power_output());
 }
