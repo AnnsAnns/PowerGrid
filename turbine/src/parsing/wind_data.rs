@@ -7,13 +7,13 @@ pub struct WindData {
     #[serde(rename = "STATIONS_ID")]
     stations_id: usize,
     #[serde(rename = "MESS_DATUM")]
-    mess_datum: String,
+    date: String,
     #[serde(rename = "QN")]
-    qn: usize,
+    quality_level: usize,
     #[serde(rename = "FF_10")]
-    ff_10: f64,
+    wind_strength: f64,
     #[serde(rename = "DD_10")]
-    dd_10: f64,
+    wind_direction: f64,
     #[serde(rename = "eor")]
     eor: String,
 }
@@ -33,8 +33,8 @@ impl WindData {
 
     pub fn to_string(&self) -> String {
         format!(
-            "{},{},{},{},{},{}",
-            self.stations_id, self.mess_datum, self.qn, self.ff_10, self.dd_10, self.eor
+            "Station: {}, Date: {}, Quality: {}, Strength: {}, Direction: {}",
+            self.stations_id, self.date, self.quality_level, self.wind_strength, self.wind_direction,
         )
     }
 }
