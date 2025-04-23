@@ -1,13 +1,16 @@
+import os
 import sys
 import json
 import logging
 from random import seed, randint
 from mqtt.mqtt_wrapper import MQTTWrapper
 
-# MQTT topic for publishing sensor data
-CHAOS_DATA_TOPIC = "chaossensor/1/data"
 # Seed for generating consistent random values
-SEED = 42
+SEED = os.getenv("SEED", 42)
+id = os.getenv("ID", "1")
+
+# MQTT topic for publishing sensor data
+CHAOS_DATA_TOPIC = "chaossensor/" + str(id) + "/data"
 
 # MQTT topic for receiving tick messages
 TICK_TOPIC = "tickgen/tick"
@@ -38,15 +41,11 @@ def on_message_tick(client, userdata, msg):
     client.publish(CHAOS_DATA_TOPIC, json.dumps(data))
 
 def main():
-    """
-    Main function to initialize the MQTT client, set up subscriptions, 
-    and start the message loop.
-    """
     # Set the random seed for reproducibility
     seed(SEED)
     
     # Initialize the MQTT client and connect to the broker
-    mqtt = MQTTWrapper('mqttbroker', 1883, name='chaossensor_1')
+    mqtt = MQTTWrapper('mqttbroker', 1883, name='chaossensor_' + str(id))
     
     # Subscribe to the tick topic
     mqtt.subscribe(TICK_TOPIC)
