@@ -1,35 +1,30 @@
+import os
 import sys
 import json
 from mqtt.mqtt_wrapper import MQTTWrapper
 from collections import deque
 
-# MQTT topic for publishing mean data
-MEAN_DATA_TOPIC = "sink/1/data"
-
-# MQTT topic for receiving tick messages
-CHAOS_DATA_TOPIC = "chaossensor/1/data"
+# Buffer for storing the last 42 values
 buffer = deque(maxlen=42)
+id = os.getenv("ID", "1")
 
-def on_message_sensor(client, userdata, msg):
-    global MEAN_DATA_TOPIC
-    
+def on_message_sensor(client, userdata, msg):    
     data = json.loads(msg.payload.decode("utf-8"))
-    print(f"Received data: {data}")
     buffer.append(data['payload'])
     mean = sum(buffer) / len(buffer)
     
     # Timestamp vom Tick-Generator verwenden
     new_msg = {"payload": mean, "timestamp": data['timestamp']}
-    client.publish(MEAN_DATA_TOPIC, json.dumps(new_msg))
+    client.publish("sink/" + str(id) + "/data", json.dumps(new_msg))
 
-def main():    
+def main():
     # Initialize the MQTT client and connect to the broker
-    mqtt = MQTTWrapper('mqttbroker', 1883, name='sink_1')
+    mqtt = MQTTWrapper('mqttbroker', 1883, name='sink_' + str(id))
     
     # Subscribe to the tick topic
-    mqtt.subscribe(CHAOS_DATA_TOPIC)
+    mqtt.subscribe("chaossensor/" + str(id) + "/data")
     # Subscribe with a callback function to handle incoming tick messages
-    mqtt.subscribe_with_callback(CHAOS_DATA_TOPIC, on_message_sensor)
+    mqtt.subscribe_with_callback("chaossensor/" + str(id) + "/data", on_message_sensor)
     
     try:
         # Start the MQTT loop to process incoming and outgoing messages
