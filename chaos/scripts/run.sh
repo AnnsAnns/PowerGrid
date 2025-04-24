@@ -10,7 +10,15 @@ echo "Starting Tick Generator..."
 docker run -d --net=cps-net --name tick_gen tick_gen:0.1
 
 echo "Starting dashboard..."
-docker run -d -p 127.0.0.1:1880:1880 --net=cps-net --name dashboard dashboard:0.1
+docker run -d -p 127.0.0.1:1880:1880 -v node_red_data:/data --net=cps-net --name dashboard dashboard:0.1
 
-echo "Starting Choas Sensor..."
-docker run -d --net=cps-net --name chaos_sensor chaos_sensor:0.1
+for i in {1..3}; do
+  echo "Starting Chaos Sensor $i..."
+  docker run -d --net=cps-net -e ID=$i -e SEED=$i --name chaos_sensor_${i} chaos_sensor:0.1
+
+  echo "Starting Sink $i..."
+  docker run -d --net=cps-net -e ID=$i --name sink_${i} sink:0.1 
+done
+
+# Halte das Fenster offen
+read -p "Press Enter to exit..."

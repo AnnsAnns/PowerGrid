@@ -7,5 +7,8 @@ echo -e "\n\n"
 docker build ${BASE_DIR}chaos_sensor -t chaos_sensor:0.1
 echo -e "\n\n"
 
+docker build ${BASE_DIR}sink -t sink:0.1
+echo -e "\n\n"
+
 docker build ${BASE_DIR}dashboard -t dashboard:0.1
 echo -e "\n\n"
