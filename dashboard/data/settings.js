@@ -13,7 +13,7 @@
 
 module.exports = {
     // the tcp port that the Node-RED web server is listening on
-    uiPort: process.env.PORT || 1881,
+    uiPort: process.env.PORT || 1880,
 
     // By default, the Node-RED UI accepts connections on all IPv4 interfaces.
     // To listen on all IPv6 addresses, set uiHost to "::",
@@ -70,7 +70,7 @@ module.exports = {
     // Note: once you set this property, do not change it - doing so will prevent
     // node-red from being able to decrypt your existing credentials and they will be
     // lost.
-    credentialSecret: "jsnhadfkbnjec2h323t4n8",
+    //credentialSecret: "a-secret-key",
 
     // By default, all user data is stored in a directory called `.node-red` under
     // the user's home directory. To use a different location, the following
