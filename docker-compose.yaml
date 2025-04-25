@@ -41,9 +41,10 @@ services:
   turbine:
     # Turbine Simulator
     build:
-      context: ./turbine
+      context: .
       dockerfile: Dockerfile
     container_name: turbine
+    command: ./turbine
     networks:
       - mqtt_network
     depends_on:
