@@ -1,27 +1,24 @@
-# Build-Stage
-FROM rust:latest AS builder
-
-# Setze das Arbeitsverzeichnis
+FROM lukemathwalker/cargo-chef:latest-rust-1 AS chef
 WORKDIR /app
 
-# Kopiere die Cargo-Konfigurationsdateien und den Quellcode
-COPY Cargo.toml Cargo.lock ./
-COPY src ./src
+FROM chef AS planner
+COPY src/ src/
+COPY Cargo.toml .
+COPY Cargo.lock .
+RUN cargo chef prepare --recipe-path recipe.json
 
-# Baue die Anwendung im Release-Modus
-RUN cargo build --release
+FROM chef AS builder 
+COPY --from=planner /app/recipe.json recipe.json
+# Build dependencies - this is the caching Docker layer!
+RUN cargo chef cook --release --recipe-path recipe.json
+# Build application
+COPY src/ src/
+COPY Cargo.toml .
+COPY Cargo.lock .
+RUN cargo build --release --bin turbine
 
-# Runtime-Stage
-FROM debian:bullseye-slim
-
-# Installiere notwendige Bibliotheken
-RUN apt-get update && apt-get install -y libssl-dev && rm -rf /var/lib/apt/lists/*
-
-# Setze das Arbeitsverzeichnis
+# We do not need the Rust toolchain to run the binary!
+FROM debian:bookworm-slim AS runtime
 WORKDIR /app
-
-# Kopiere das kompilierte Binary aus der Build-Stage
-COPY --from=builder /app/target/release/turbine .
-
-# Setze das Standardkommando für den Container
-CMD ["./turbine"]
+COPY --from=builder /app/target/release/turbine turbine
+ENTRYPOINT ["./turbine"]
