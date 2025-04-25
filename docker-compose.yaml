@@ -1,5 +1,6 @@
 services:
-  mosquitto_broker: # MQTT Broker
+  mosquitto_broker:
+    # MQTT Broker
     image: eclipse-mosquitto:latest
     container_name: mosquitto_broker
     ports:
@@ -12,7 +13,8 @@ services:
       - mqtt_network
     restart: always
 
-  dashboard: # Node-RED Dashboard
+  dashboard:
+    # Node-RED Dashboard
     build:
       context: ./dashboard
       dockerfile: Dockerfile
@@ -36,15 +38,16 @@ services:
     depends_on:
       - mosquitto_broker
 
-#  turbine: # Turbine Simulator
-#    build:
-#      context: ./turbine
-#      dockerfile: Dockerfile
-#    container_name: turbine
-#    networks:
-#      - mqtt_network
-#    depends_on:
-#      - mosquitto_broker
+  turbine:
+    # Turbine Simulator
+    build:
+      context: ./turbine
+      dockerfile: Dockerfile
+    container_name: turbine
+    networks:
+      - mqtt_network
+    depends_on:
+      - mosquitto_broker
 
 networks:
   mqtt_network:
