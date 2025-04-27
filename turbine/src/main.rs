@@ -17,6 +17,7 @@ async fn main() {
     mqttoptions.set_keep_alive(Duration::from_secs(5));
     let (mut client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
     client.subscribe("hello/rumqtt", QoS::AtMostOnce).await.unwrap();
+    println!("Connected to MQTT broker");
     
     let mut turbine = turbine::Turbine::new(
         ROTOR_DIMENSION,
