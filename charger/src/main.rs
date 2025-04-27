@@ -1,6 +1,7 @@
 use rumqttc::{MqttOptions, AsyncClient, QoS};
-use tokio::{task, time};
-use std::{result, time::Duration};
+use tokio::task;
+use std::time::Duration;
+use fake::{faker::lorem::de_de::Word, Fake};
 
 mod charger;
 
@@ -10,7 +11,9 @@ async fn main() {
     mqttoptions.set_keep_alive(Duration::from_secs(5));
     let (mut client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
     client.subscribe("hello/rumqtt", QoS::AtMostOnce).await.unwrap();
-    
+    let charger_name: String = Word().fake();
+
+    println!("Connecting as {}", charger_name);
 
     task::spawn(async move {
         while let Ok(notification) = eventloop.poll().await {
