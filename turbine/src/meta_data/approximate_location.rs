@@ -1,3 +1,5 @@
+use log::debug;
+
 use super::{MetaDataElement, MetaDataWrapper};
 
 #[derive(Debug, Clone)]
@@ -52,14 +54,14 @@ impl MetaDataWrapper {
 
         // Calculate the total of inverse distances
         let total_inverse_distance: f64 = inverse_distances.iter().sum();
-        println!("Total inverse distance: {}", total_inverse_distance);
+        debug!("Total inverse distance: {}", total_inverse_distance);
 
         // Calculate the ratios
         let ratios: Vec<f64> = inverse_distances
             .iter()
             .map(|&inverse_distance| {
             let ratio = inverse_distance / total_inverse_distance;
-            println!("Inverse Distance: {}, Ratio: {}", inverse_distance, ratio);
+            debug!("Inverse Distance: {}, Ratio: {}", inverse_distance, ratio);
             ratio
             })
             .collect();
