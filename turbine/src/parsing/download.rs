@@ -1,16 +1,29 @@
 use std::{path::PathBuf, time::Duration};
 
+use log::debug;
+
 use crate::meta_data::MetaDataType;
 
-const FILE_EXTENSION: &str = "_now.zip";
+const FILE_EXTENSION: &str = "_akt.zip";
 
 /// Download wind date from the DWD for the specific station id
 pub async fn download_data_for(id: usize, data_type: MetaDataType) -> Result<String, String> {
     let url = format! {"{}{:05}{}", data_type.to_access_url(), id, FILE_EXTENSION};
-    println!(
+    debug!(
         "Requested {:?} for {} - Requesting URL: {}",
         data_type, id, url
     );
+
+    // Check if the file already exists
+    let file_path = format!("{}/{}/data.csv", data_type.to_string(), id);
+    if std::path::Path::new(&file_path).exists() {
+        debug!("File already exists for station id: {}", id);
+        return Ok(format!(
+            "File already exists for station id: {}",
+            id
+        ));
+    }
+
     let response = reqwest::get(&url).await;
     match response {
         Ok(resp) => {
@@ -27,7 +40,7 @@ pub async fn download_data_for(id: usize, data_type: MetaDataType) -> Result<Str
 
                 match zip_extract::extract(&mut content, &path, true) {
                     Ok(_) => {
-                        println!("File downloaded successfully for station id: {}", id);
+                        debug!("File downloaded successfully for station id: {}", id);
                         tokio::time::sleep(Duration::from_secs(1)).await;
 
                         // Check if a file was created within the directory
@@ -37,7 +50,7 @@ pub async fn download_data_for(id: usize, data_type: MetaDataType) -> Result<Str
                             if entry.path().is_file() {
                                 // Rename the file to data.csv
                                 let new_path = entry.path().clone().with_file_name("data.csv");
-                                println!("Renaming {}", entry.path().to_string_lossy());
+                                debug!("Renaming {}", entry.path().to_string_lossy());
                                 std::fs::rename(entry.path(), &new_path)
                                     .expect("Failed to rename file");
                                 return Ok(format!(
