@@ -1,3 +1,5 @@
+use log::info;
+
 use crate::meta_data::MetaDataWrapper;
 
 use super::{power_coefficient::{find_closest_coefficient_for_wind, get_wind_power_coefficients_e101}, Turbine};
@@ -9,7 +11,7 @@ impl Turbine {
     pub fn get_power_output(&self) -> f64 {
         // Assuming a standard air density of 1.225 kg/m^3 at sea level
         let air_density = self.calculate_air_density(AIR_PRESSURE, self.approximate_temperature.as_ref().unwrap().air_temperature); // Standard temperature in Kelvin
-        println!("✈️ Air density: {} kg/m³", air_density);
+        info!("✈️ Air density: {} kg/m³", air_density);
         self.calculate_power(air_density, self.approximate_wind.as_ref().unwrap().wind_strength)
     }
 
