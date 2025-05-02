@@ -4,6 +4,7 @@ pub struct Turbine {
     rotor_dimension: f64, // in meters
     latitude: f64, // in degrees
     longitude: f64, // in degrees
+    ticker: usize, 
     pub temperature_metadata: MetaDataWrapper,
     pub wind_speed_metadata: MetaDataWrapper,
     pub closest_wind_stations: Option<Vec<ApproximationElement>>,
@@ -26,6 +27,7 @@ impl Turbine {
             longitude,
             temperature_metadata,
             wind_speed_metadata,
+            ticker: 0,
             closest_wind_stations: None,
             closest_temperature_stations: None,
             approximate_wind: None,
@@ -47,6 +49,14 @@ impl Turbine {
 
     pub fn get_longitude(&self) -> f64 {
         self.longitude
+    }
+
+    pub fn get_tick(&self) -> usize {
+        self.ticker
+    }
+
+    pub fn tick(&mut self) {
+        self.ticker += 1;
     }
 
     pub fn set_temperature_metadata(&mut self, metadata: MetaDataWrapper) {
