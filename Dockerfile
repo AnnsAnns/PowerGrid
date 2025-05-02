@@ -21,7 +21,7 @@ RUN cargo build --release
 
 # We do not need the Rust toolchain to run the binary!
 FROM debian:bookworm-slim AS runtime
-RUN apt-get update && apt install -y openssl
+RUN apt-get update && apt install -y openssl ca-certificates
 WORKDIR /app
 COPY --from=builder /app/target/release/turbine turbine
 COPY --from=builder /app/target/release/charger charger
