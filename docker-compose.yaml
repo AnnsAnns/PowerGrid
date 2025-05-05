@@ -62,6 +62,18 @@ services:
     depends_on:
       - mosquitto_broker
 
+  charger:
+    # Charger Simulator
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: charger
+    command: ./charger
+    networks:
+      - mqtt_network
+    depends_on:
+      - mosquitto_broker
+
 networks:
   mqtt_network:
     driver: bridge

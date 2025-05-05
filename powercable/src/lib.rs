@@ -7,6 +7,7 @@ pub const POWER_NETWORK_TOPIC: &str = "power/network";
 pub const POWER_TRANSFORMER_CONSUMPTION_TOPIC: &str = "power/transformer/consumption";
 pub const POWER_TRANSFORMER_GENERATION_TOPIC: &str = "power/transformer/generation";
 pub const POWER_TRANSFORMER_DIFF_TOPIC: &str = "power/transformer/diff";
+pub const POWER_CHARGER_TOPIC: &str = "power/charger";
 pub const MQTT_BROKER: &str = "mosquitto_broker";
 pub const MQTT_BROKER_PORT: u16 = 1883;
 
