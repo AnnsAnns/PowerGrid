@@ -1,5 +1,13 @@
 use rand::Rng;
 
+pub mod charger;
+
+pub const TICK_TOPIC: &str = "tickgen/tick";
+pub const POWER_NETWORK_TOPIC: &str = "power/network";
+pub const POWER_TRANSFORMER_CONSUMPTION_TOPIC: &str = "power/transformer/consumption";
+pub const POWER_TRANSFORMER_GENERATION_TOPIC: &str = "power/transformer/generation";
+pub const POWER_TRANSFORMER_DIFF_TOPIC: &str = "power/transformer/diff";
+
 pub fn generate_latitude_longitude_within_germany() -> (f64, f64) {
     let mut rng = rand::rng();
     let latitude = rng.random_range(47.2701..55.0581);
