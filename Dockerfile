@@ -25,3 +25,4 @@ RUN apt-get update && apt install -y openssl ca-certificates
 WORKDIR /app
 COPY --from=builder /app/target/release/turbine turbine
 COPY --from=builder /app/target/release/charger charger
+COPY --from=builder /app/target/release/transformer transformer

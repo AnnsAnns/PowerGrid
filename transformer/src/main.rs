@@ -1,0 +1,47 @@
+use rumqttc::{MqttOptions, AsyncClient, QoS};
+use serde::de;
+use tokio::{task, time};
+use transformer::Transformer;
+use std::{result, time::Duration};
+use log::{info, debug};
+
+mod transformer;
+
+#[tokio::main]
+async fn main() {
+    env_logger::init();
+    info!("Starting turbine simulation...");
+    let mut transformer = Transformer::new();
+
+    let mut mqttoptions = MqttOptions::new("turbine", "mosquitto_broker", 1884);
+    mqttoptions.set_keep_alive(Duration::from_secs(5));
+    let (mut client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
+    client.subscribe(powercable::TICK_TOPIC, QoS::AtMostOnce).await.unwrap();
+    info!("Connected to MQTT broker");
+
+    info!("Turbine simulation started. Waiting for messages...");
+    while let Ok(notification) = eventloop.poll().await {
+        info!("Received = {:?}", notification);
+        if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = notification {
+            match p.topic.as_str() {
+                powercable::TICK_TOPIC => {
+                    client.publish(powercable::POWER_TRANSFORMER_CONSUMPTION_TOPIC, QoS::ExactlyOnce, true, transformer.get_current_consumption().to_string()).await.unwrap();
+                    client.publish(powercable::POWER_TRANSFORMER_GENERATION_TOPIC, QoS::ExactlyOnce, true, transformer.get_current_power().to_string()).await.unwrap();
+                    client.publish(powercable::POWER_TRANSFORMER_DIFF_TOPIC, QoS::ExactlyOnce, true, transformer.get_difference().to_string()).await.unwrap();
+                    transformer.reset();
+                },
+                powercable::POWER_NETWORK_TOPIC => {
+                    let parameter: f64 = serde_json::from_slice(&p.payload).unwrap();
+                    if parameter > 0.0 {
+                        transformer.add_power(parameter);
+                    } else {
+                        transformer.add_consumption(parameter.abs());
+                    }
+                },
+                _ => {
+                    info!("Unknown topic: {}", p.topic);
+                }
+            }
+        }
+    }
+}
