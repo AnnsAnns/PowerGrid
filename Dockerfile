@@ -5,6 +5,7 @@ FROM chef AS planner
 COPY turbine/ turbine/
 COPY charger/ charger/
 COPY powercable/ powercable/
+COPY transformer/ transformer/
 COPY Cargo.toml .
 RUN cargo chef prepare --recipe-path recipe.json
 
@@ -16,6 +17,7 @@ RUN cargo chef cook --release --recipe-path recipe.json
 COPY turbine/ turbine/
 COPY charger/ charger/
 COPY powercable/ powercable/
+COPY transformer/ transformer/
 COPY Cargo.toml .
 RUN cargo build --release
 

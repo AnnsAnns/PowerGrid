@@ -9,19 +9,21 @@ mod transformer;
 
 #[tokio::main]
 async fn main() {
-    env_logger::init();
+    env_logger::builder()
+    .filter(None, log::LevelFilter::Debug)
+    .init();
     info!("Starting turbine simulation...");
     let mut transformer = Transformer::new();
 
-    let mut mqttoptions = MqttOptions::new("turbine", "mosquitto_broker", 1884);
+    let mut mqttoptions = MqttOptions::new("transformer", powercable::MQTT_BROKER, powercable::MQTT_BROKER_PORT);
     mqttoptions.set_keep_alive(Duration::from_secs(5));
     let (mut client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
     client.subscribe(powercable::TICK_TOPIC, QoS::AtMostOnce).await.unwrap();
+    client.subscribe(powercable::POWER_NETWORK_TOPIC, QoS::AtMostOnce).await.unwrap();
     info!("Connected to MQTT broker");
 
-    info!("Turbine simulation started. Waiting for messages...");
     while let Ok(notification) = eventloop.poll().await {
-        info!("Received = {:?}", notification);
+        debug!("Received = {:?}", notification);
         if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = notification {
             match p.topic.as_str() {
                 powercable::TICK_TOPIC => {
@@ -32,6 +34,7 @@ async fn main() {
                 },
                 powercable::POWER_NETWORK_TOPIC => {
                     let parameter: f64 = serde_json::from_slice(&p.payload).unwrap();
+                    log::debug!("Received parameter: {}", parameter);
                     if parameter > 0.0 {
                         transformer.add_power(parameter);
                     } else {
