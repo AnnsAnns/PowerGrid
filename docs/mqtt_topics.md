@@ -13,3 +13,4 @@
 |`power/charger/request_release/(ID)`| Releases a charger |  |
 |`power/charger/request_status/(ID)`| Requests status of a charger |  |
 |`power/charger/reservation/(ID)`| Reservation status of a charger |  |
+|`power/turbine/location`| Location of wind turbines | Every wind turbine publishes its location once. The location also serves as a unique identifier (ID) for the turbine. |

@@ -665,5 +665,28 @@
                 "file": "/usr/src/node-red/node_modules/node-red-dashboard/nodes/ui_spacer.js"
             }
         }
+    },
+    "node-red-contrib-web-worldmap": {
+        "name": "node-red-contrib-web-worldmap",
+        "version": "5.1.4",
+        "local": false,
+        "user": false,
+        "nodes": {
+            "worldmap": {
+                "name": "worldmap",
+                "types": [
+                    "worldmap",
+                    "ui_worldmap",
+                    "worldmap in",
+                    "worldmap-tracks",
+                    "worldmap-hull"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red-contrib-web-worldmap",
+                "file": "/usr/src/node-red/node_modules/node-red-contrib-web-worldmap/worldmap.js"
+            }
+        }
     }
 }

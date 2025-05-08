@@ -16,7 +16,8 @@
     ],
     "dependencies": {
         "node-red": "4.0.9",
-        "node-red-dashboard": "3.6.5"
+        "node-red-dashboard": "3.6.5",
+        "node-red-contrib-web-worldmap": "5.1.4"
     },
     "engines": {
         "node": "10.23.2"

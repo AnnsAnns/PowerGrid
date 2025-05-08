@@ -1,8 +1,7 @@
 use log::{debug, info};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
-use serde::de;
-use std::{result, time::Duration};
-use tokio::{task, time};
+use serde_json::json;
+use std::time::Duration;
 
 mod meta_data;
 mod parsing;
@@ -35,12 +34,21 @@ async fn main() {
         powercable::MQTT_BROKER_PORT,
     );
     mqttoptions.set_keep_alive(Duration::from_secs(20));
-    let (mut client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
+    let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
     client
         .subscribe(powercable::TICK_TOPIC, QoS::AtMostOnce)
         .await
         .unwrap();
     info!("Connected to MQTT broker");
+
+    let location_payload = json!({
+        "name" : "Turbine",
+        "lat": latitude,
+        "lon": longitude
+    }).to_string();
+    
+    client.publish("power/turbine/location", QoS::ExactlyOnce, true, location_payload).await.unwrap();
+    info!("Published location data: {:?}, {:?} to MQTT broker", latitude, longitude);
 
     info!("Turbine simulation started. Waiting for messages...");
     loop {
