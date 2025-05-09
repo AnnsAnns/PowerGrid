@@ -61,4 +61,8 @@ impl Charger {
             remaining_charge as isize
         }
     }
+
+    pub fn get_charge_percentage(&self) -> f64 {
+        (self.current_charge as f64 / self.capacity as f64) * 100.0
+    }
 }

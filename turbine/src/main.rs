@@ -1,4 +1,5 @@
 use log::{debug, info};
+use powercable::OfferHandler;
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use serde_json::json;
 use std::time::Duration;
@@ -39,16 +40,45 @@ async fn main() {
         .subscribe(powercable::TICK_TOPIC, QoS::AtMostOnce)
         .await
         .unwrap();
+    client
+        .subscribe(powercable::BUY_OFFER_TOPIC, QoS::AtMostOnce)
+        .await
+        .unwrap();
+    client
+        .subscribe(powercable::ACCEPT_BUY_OFFER_TOPIC, QoS::AtMostOnce)
+        .await
+        .unwrap();
+    client
+        .subscribe(powercable::ACK_ACCEPT_BUY_OFFER_TOPIC, QoS::AtMostOnce)
+        .await
+        .unwrap();
     info!("Connected to MQTT broker");
 
     let location_payload = json!({
         "name" : "Turbine",
         "lat": latitude,
         "lon": longitude
-    }).to_string();
-    
-    client.publish("power/turbine/location", QoS::ExactlyOnce, true, location_payload).await.unwrap();
-    info!("Published location data: {:?}, {:?} to MQTT broker", latitude, longitude);
+    })
+    .to_string();
+
+    turbine.approximate_wind_data().await;
+    turbine.approximate_temperature_data().await;
+    let mut current_power = turbine.get_power_output();
+    let offer_handler = OfferHandler::new();
+
+    client
+        .publish(
+            "power/turbine/location",
+            QoS::ExactlyOnce,
+            true,
+            location_payload,
+        )
+        .await
+        .unwrap();
+    info!(
+        "Published location data: {:?}, {:?} to MQTT broker",
+        latitude, longitude
+    );
 
     info!("Turbine simulation started. Waiting for messages...");
     loop {
@@ -57,21 +87,31 @@ async fn main() {
             Ok(v) => {
                 debug!("Event = {v:?}");
                 if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = v {
-                    if p.topic == powercable::TICK_TOPIC {
-                        turbine.tick();
-                        turbine.approximate_wind_data().await;
-                        turbine.approximate_temperature_data().await;
-                        let current_power = turbine.get_power_output();
-                        info!("Current power output: {} Watt", current_power);
-                        let result = client
-                            .publish(
-                                powercable::POWER_NETWORK_TOPIC,
-                                QoS::ExactlyOnce,
-                                false,
-                                current_power.to_string(),
-                            )
-                            .await;
-                        debug!("Result of publish: {:?}", result);
+                    match p.topic.as_str() {
+                        powercable::TICK_TOPIC => {
+                            offer_handler.remove_all_offers();
+                            turbine.tick();
+                            turbine.approximate_wind_data().await;
+                            turbine.approximate_temperature_data().await;
+                            current_power = turbine.get_power_output();
+                            info!("Current power output: {} Watt", current_power);
+                            let result = client
+                                .publish(
+                                    powercable::POWER_NETWORK_TOPIC,
+                                    QoS::ExactlyOnce,
+                                    false,
+                                    current_power.to_string(),
+                                )
+                                .await;
+                        }
+                        powercable::BUY_OFFER_TOPIC => {
+                            let offer: powercable::Offer = serde_json::from_slice(&p.payload).unwrap();
+                            info!("Received buy offer: {:?}", offer);
+                            turbine.add_buy_offer(offer);
+                        }
+                        &_ => {
+                            info!("Unknown topic: {}", p.topic);
+                        }
                     }
                 }
             }
