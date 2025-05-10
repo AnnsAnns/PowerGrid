@@ -1,0 +1,47 @@
+# Rust build artifacts
+/target
+**/*.rs.bk
+*.pdb
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Git files
+.git/
+.gitignore
+.github/
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE
+docs/
+
+# Caches and databases
+.cargo-cache/
+*.sqlite
+*.db
+
+# Config files that shouldn't be in Docker
+.env
+.env.*
+*.toml.example
+config.example.*
+
+# Testing
+coverage/
+.coverage/
+test-results/
+
+# Common dependency directories
+node_modules/
+vendor/

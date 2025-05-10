@@ -28,11 +28,12 @@ services:
     depends_on:
       - mosquitto_broker
 
-  tick_gen:
+  tickgen:
     build:
-      context: ./tick_gen
+      context: .
       dockerfile: Dockerfile
-    container_name: tick_gen
+    container_name: tickgen
+    command: ./tickgen
     networks:
       - mqtt_network
     depends_on:

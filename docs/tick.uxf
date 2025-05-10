@@ -1,0 +1,20 @@
+<diagram program="umletino" version="15.1"><zoom_level>13</zoom_level><element><id>UMLState</id><coordinates><x>247</x><y>416</y><w>312</w><h>182</h></coordinates><panel_attributes>Phase 1: Process
+--
+Turbine: Generate Electricity
+Consumer: Request Electricity
+Charger: Request Electricity AND
+	Advertise Current Price
+EV: (Drive OR Charge) AND
+	Calculate Battery%
+symbol=substate</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLState</id><coordinates><x>754</x><y>416</y><w>312</w><h>182</h></coordinates><panel_attributes>PHASE 2: Commerce
+--
+Turbine: Pick Highest Priority Offers
+Consumer: Accept Offer
+Charger: Accept Offers AND
+	 Charge Vehicles
+EV: Drive OR 
+	(Charge XOR
+	 	Accept Best Charger Offer)
+symbol=substate</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>546</x><y>455</y><w>234</w><h>52</h></coordinates><panel_attributes>lt=-&gt;
+TICK</panel_attributes><additional_attributes>10;20;160;20</additional_attributes></element><element><id>Relation</id><coordinates><x>546</x><y>533</y><w>234</w><h>52</h></coordinates><panel_attributes>lt=-&gt;
+TICK</panel_attributes><additional_attributes>160;20;10;20</additional_attributes></element></diagram>

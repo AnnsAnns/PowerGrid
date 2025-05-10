@@ -2,6 +2,7 @@ use rand::Rng;
 
 pub mod charger;
 pub mod offer;
+pub mod tickgen;
 
 pub use offer::Offer;
 pub use offer::offer_handler::OfferHandler;
@@ -10,6 +11,8 @@ pub const BUY_OFFER_TOPIC: &str = "market/buy_offer/+";
 pub const ACCEPT_BUY_OFFER_TOPIC: &str = "market/accept_buy_offer/+";
 pub const ACK_ACCEPT_BUY_OFFER_TOPIC: &str = "market/ack_accept_buy_offer/+";
 pub const TICK_TOPIC: &str = "tickgen/tick";
+pub const TICK_CONFIGURE: &str = "tickgen/configure";
+pub const TICK_CONFIGURE_SPEED: &str = "tickgen/configure_speed";
 pub const POWER_NETWORK_TOPIC: &str = "power/network";
 pub const POWER_TRANSFORMER_CONSUMPTION_TOPIC: &str = "power/transformer/consumption";
 pub const POWER_TRANSFORMER_GENERATION_TOPIC: &str = "power/transformer/generation";
