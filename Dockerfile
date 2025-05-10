@@ -2,11 +2,7 @@ FROM lukemathwalker/cargo-chef:latest-rust-1 AS chef
 WORKDIR /app
 
 FROM chef AS planner
-COPY turbine/ turbine/
-COPY charger/ charger/
-COPY powercable/ powercable/
-COPY transformer/ transformer/
-COPY Cargo.toml .
+COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
 FROM chef AS builder 
@@ -14,11 +10,7 @@ COPY --from=planner /app/recipe.json recipe.json
 # Build dependencies - this is the caching Docker layer!
 RUN cargo chef cook --release --recipe-path recipe.json
 # Build application
-COPY turbine/ turbine/
-COPY charger/ charger/
-COPY powercable/ powercable/
-COPY transformer/ transformer/
-COPY Cargo.toml .
+COPY . .
 RUN cargo build --release
 
 # We do not need the Rust toolchain to run the binary!
@@ -28,3 +20,4 @@ WORKDIR /app
 COPY --from=builder /app/target/release/turbine turbine
 COPY --from=builder /app/target/release/charger charger
 COPY --from=builder /app/target/release/transformer transformer
+COPY --from=builder /app/target/release/tickgen tickgen

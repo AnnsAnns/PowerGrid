@@ -1,8 +1,11 @@
 use rand::Rng;
 
 pub mod charger;
+pub mod tickgen;
 
 pub const TICK_TOPIC: &str = "tickgen/tick";
+pub const TICK_CONFIGURE: &str = "tickgen/configure";
+pub const TICK_CONFIGURE_SPEED: &str = "tickgen/configure_speed";
 pub const POWER_NETWORK_TOPIC: &str = "power/network";
 pub const POWER_TRANSFORMER_CONSUMPTION_TOPIC: &str = "power/transformer/consumption";
 pub const POWER_TRANSFORMER_GENERATION_TOPIC: &str = "power/transformer/generation";
