@@ -1,46 +1,46 @@
-<diagram program="umletino" version="15.1"><zoom_level>10</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLGeneric</id><coordinates><x>310</x><y>42</y><w>100</w><h>30</h></coordinates><panel_attributes>_:Turbine_
-group=group-0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>350</x><y>62</y><w>30</w><h>330</h></coordinates><panel_attributes>lt=.
-group=group-0</panel_attributes><additional_attributes>10;310;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>620</x><y>62</y><w>30</w><h>330</h></coordinates><panel_attributes>lt=.
-group=group-1</panel_attributes><additional_attributes>10;310;10;10</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>580</x><y>42</y><w>100</w><h>30</h></coordinates><panel_attributes>_:Charger_
-group=group-1</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>750</x><y>62</y><w>30</w><h>380</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>10;360;10;10</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>710</x><y>42</y><w>100</w><h>30</h></coordinates><panel_attributes>_:EV_</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>210</x><y>62</y><w>30</w><h>330</h></coordinates><panel_attributes>lt=.
-group=group-3</panel_attributes><additional_attributes>10;310;10;10</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>170</x><y>42</y><w>100</w><h>30</h></coordinates><panel_attributes>_:TickGen_
-group=group-3</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>490</x><y>62</y><w>30</w><h>330</h></coordinates><panel_attributes>lt=.
-group=group-4</panel_attributes><additional_attributes>10;310;10;10</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>450</x><y>42</y><w>100</w><h>30</h></coordinates><panel_attributes>_:Consumer_
-group=group-4</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>210</x><y>162</y><w>170</w><h>40</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
-TICK</panel_attributes><additional_attributes>150;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>350</x><y>162</y><w>170</w><h>40</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
-TICK</panel_attributes><additional_attributes>150;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>490</x><y>162</y><w>160</w><h>40</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
-TICK</panel_attributes><additional_attributes>140;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>620</x><y>162</y><w>160</w><h>40</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
-TICK</panel_attributes><additional_attributes>140;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>350</x><y>172</y><w>110</w><h>50</h></coordinates><panel_attributes>lt=&lt;-
+<diagram program="umletino" version="15.1"><zoom_level>6</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLGeneric</id><coordinates><x>468</x><y>0</y><w>60</w><h>18</h></coordinates><panel_attributes>_:Turbine_
+group=group-0</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>492</x><y>12</y><w>18</w><h>198</h></coordinates><panel_attributes>lt=.
+group=group-0</panel_attributes><additional_attributes>10;310;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>654</x><y>12</y><w>18</w><h>198</h></coordinates><panel_attributes>lt=.
+group=group-1</panel_attributes><additional_attributes>10;310;10;10</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>630</x><y>0</y><w>60</w><h>18</h></coordinates><panel_attributes>_:Charger_
+group=group-1</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>732</x><y>12</y><w>18</w><h>228</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>10;360;10;10</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>708</x><y>0</y><w>60</w><h>18</h></coordinates><panel_attributes>_:EV_</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>408</x><y>12</y><w>18</w><h>198</h></coordinates><panel_attributes>lt=.
+group=group-3</panel_attributes><additional_attributes>10;310;10;10</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>384</x><y>0</y><w>60</w><h>18</h></coordinates><panel_attributes>_:TickGen_
+group=group-3</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>576</x><y>12</y><w>18</w><h>198</h></coordinates><panel_attributes>lt=.
+group=group-4</panel_attributes><additional_attributes>10;310;10;10</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>552</x><y>0</y><w>60</w><h>18</h></coordinates><panel_attributes>_:Consumer_
+group=group-4</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>408</x><y>72</y><w>102</w><h>24</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+TICK</panel_attributes><additional_attributes>150;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>492</x><y>72</y><w>102</w><h>24</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+TICK</panel_attributes><additional_attributes>150;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>576</x><y>72</y><w>96</w><h>24</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+TICK</panel_attributes><additional_attributes>140;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>654</x><y>72</y><w>96</w><h>24</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+TICK</panel_attributes><additional_attributes>140;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>492</x><y>78</y><w>66</w><h>30</h></coordinates><panel_attributes>lt=&lt;-
 Generate
-Power</panel_attributes><additional_attributes>10;30;40;30;40;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>490</x><y>172</y><w>110</w><h>50</h></coordinates><panel_attributes>lt=&lt;-
+Power</panel_attributes><additional_attributes>10;30;40;30;40;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>576</x><y>78</y><w>66</w><h>30</h></coordinates><panel_attributes>lt=&lt;-
 Generate
-Demand</panel_attributes><additional_attributes>10;30;40;30;40;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>350</x><y>252</y><w>170</w><h>60</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+Demand</panel_attributes><additional_attributes>10;30;40;30;40;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>492</x><y>126</y><w>102</w><h>36</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
 Send Buy Offer(s)
 [Split into Packages]
-(∞ Price)</panel_attributes><additional_attributes>10;20;150;20</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>490</x><y>202</y><w>20</w><h>70</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>350</x><y>202</y><w>20</w><h>60</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>350</x><y>352</y><w>300</w><h>60</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+(∞ Price)</panel_attributes><additional_attributes>10;20;150;20</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>576</x><y>96</y><w>12</w><h>42</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>492</x><y>96</y><w>12</w><h>36</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>492</x><y>186</y><w>180</w><h>36</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
 Send Buy Offer(s)
 [Split into Packages]
-(1-Battery% Price)</panel_attributes><additional_attributes>10;20;280;20</additional_attributes></element><element><id>Relation</id><coordinates><x>620</x><y>192</y><w>160</w><h>50</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+(1-Battery% Price)</panel_attributes><additional_attributes>10;20;280;20</additional_attributes></element><element><id>Relation</id><coordinates><x>654</x><y>90</y><w>96</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
 Advertise Self
-(Battery% Price)</panel_attributes><additional_attributes>140;20;10;20</additional_attributes></element><element><id>UMLFrame</id><coordinates><x>590</x><y>232</y><w>200</w><h>120</h></coordinates><panel_attributes>If Charging
+(Battery% Price)</panel_attributes><additional_attributes>140;20;10;20</additional_attributes></element><element><id>UMLFrame</id><coordinates><x>636</x><y>114</y><w>120</w><h>72</h></coordinates><panel_attributes>If Charging
 
 --
 
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>620</x><y>262</y><w>160</w><h>40</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
-Add Charge</panel_attributes><additional_attributes>140;20;10;20</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>750</x><y>282</y><w>20</w><h>40</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>620</x><y>302</y><w>160</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
-Remove Charge</panel_attributes><additional_attributes>10;20;140;20</additional_attributes></element><element><id>UMLFrame</id><coordinates><x>680</x><y>372</y><w>200</w><h>120</h></coordinates><panel_attributes>If Driving
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>654</x><y>132</y><w>96</w><h>24</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+Add Charge</panel_attributes><additional_attributes>140;20;10;20</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>732</x><y>144</y><w>12</w><h>24</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>654</x><y>156</y><w>96</w><h>24</h></coordinates><panel_attributes>lt=&lt;-
+Remove Charge</panel_attributes><additional_attributes>10;20;140;20</additional_attributes></element><element><id>UMLFrame</id><coordinates><x>690</x><y>198</y><w>120</w><h>72</h></coordinates><panel_attributes>If Driving
 
 --
 
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>750</x><y>412</y><w>30</w><h>1240</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>10;1220;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>620</x><y>362</y><w>30</w><h>1290</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>10;1270;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>490</x><y>352</y><w>30</w><h>1300</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>10;1280;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>350</x><y>362</y><w>30</w><h>1290</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>10;1270;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>200</x><y>362</y><w>40</w><h>1290</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>10;1270;20;10</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>750</x><y>402</y><w>20</w><h>60</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>750</x><y>372</y><w>100</w><h>50</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
-Drive</panel_attributes><additional_attributes>10;30;50;30;50;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>760</x><y>442</y><w>90</w><h>60</h></coordinates><panel_attributes>lt=&lt;-
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>732</x><y>222</y><w>18</w><h>744</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>10;1220;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>654</x><y>192</y><w>18</w><h>774</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>10;1270;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>576</x><y>186</y><w>18</w><h>780</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>10;1280;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>492</x><y>192</y><w>18</w><h>774</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>10;1270;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>402</x><y>192</y><w>24</w><h>774</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>10;1270;20;10</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>732</x><y>216</y><w>12</w><h>36</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>732</x><y>198</y><w>60</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+Drive</panel_attributes><additional_attributes>10;30;50;30;50;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>738</x><y>240</y><w>54</w><h>36</h></coordinates><panel_attributes>lt=&lt;-
 Send
 Location
-To NodeRed</panel_attributes><additional_attributes>70;20;10;20</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>830</x><y>452</y><w>20</w><h>20</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>860</x><y>62</y><w>140</w><h>70</h></coordinates><panel_attributes>Tick Sequence
+To NodeRed</panel_attributes><additional_attributes>70;20;10;20</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>780</x><y>246</y><w>12</w><h>12</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>798</x><y>12</y><w>84</w><h>42</h></coordinates><panel_attributes>Tick Sequence
 
 v1.0
 By: Tom
-bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLFrame</id><coordinates><x>110</x><y>162</y><w>800</w><h>1450</h></coordinates><panel_attributes>loop forever
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLFrame</id><coordinates><x>348</x><y>72</y><w>480</w><h>870</h></coordinates><panel_attributes>loop forever
 --
 halign=left
 *Phase 1:*
@@ -75,26 +75,26 @@ Commerce
 
 
 
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>350</x><y>122</y><w>90</w><h>50</h></coordinates><panel_attributes>lt=&lt;-
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>492</x><y>48</y><w>54</w><h>30</h></coordinates><panel_attributes>lt=&lt;-
 Send
-Location</panel_attributes><additional_attributes>70;20;10;20</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>420</x><y>132</y><w>20</w><h>20</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>620</x><y>72</y><w>90</w><h>50</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+Location</panel_attributes><additional_attributes>70;20;10;20</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>534</x><y>54</y><w>12</w><h>12</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>654</x><y>18</y><w>54</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
 Send
-Location</panel_attributes><additional_attributes>70;20;10;20</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>690</x><y>82</y><w>20</w><h>20</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>350</x><y>72</y><w>20</w><h>70</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>490</x><y>72</y><w>20</w><h>40</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>620</x><y>72</y><w>20</w><h>20</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>750</x><y>72</y><w>90</w><h>50</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+Location</panel_attributes><additional_attributes>70;20;10;20</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>696</x><y>24</y><w>12</w><h>12</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>492</x><y>18</y><w>12</w><h>42</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>576</x><y>18</y><w>12</w><h>24</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>654</x><y>18</y><w>12</w><h>12</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>732</x><y>18</y><w>54</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
 Send
-Location</panel_attributes><additional_attributes>70;20;10;20</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>820</x><y>82</y><w>20</w><h>20</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>750</x><y>72</y><w>20</w><h>20</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>210</x><y>72</y><w>20</w><h>20</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>210</x><y>562</y><w>170</w><h>40</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
-TICK</panel_attributes><additional_attributes>150;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>350</x><y>562</y><w>170</w><h>40</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
-TICK</panel_attributes><additional_attributes>150;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>490</x><y>562</y><w>160</w><h>40</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
-TICK</panel_attributes><additional_attributes>140;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>620</x><y>562</y><w>160</w><h>40</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
-TICK</panel_attributes><additional_attributes>140;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>750</x><y>502</y><w>140</w><h>50</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+Location</panel_attributes><additional_attributes>70;20;10;20</additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>774</x><y>24</y><w>12</w><h>12</h></coordinates><panel_attributes>type=initial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>732</x><y>18</y><w>12</w><h>12</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>408</x><y>18</y><w>12</w><h>12</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>408</x><y>312</y><w>102</w><h>24</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+TICK</panel_attributes><additional_attributes>150;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>492</x><y>312</y><w>102</w><h>24</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+TICK</panel_attributes><additional_attributes>150;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>576</x><y>312</y><w>96</w><h>24</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+TICK</panel_attributes><additional_attributes>140;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>654</x><y>312</y><w>96</w><h>24</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+TICK</panel_attributes><additional_attributes>140;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>732</x><y>276</y><w>84</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
 Calculate
-Battery %</panel_attributes><additional_attributes>10;30;70;30;70;10;10;10</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>750</x><y>532</y><w>20</w><h>20</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLFrame</id><coordinates><x>240</x><y>642</y><w>500</w><h>330</h></coordinates><panel_attributes>while Turbine.energy() != 0 AND Offers.len() != 0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>350</x><y>602</y><w>20</w><h>40</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>350</x><y>572</y><w>140</w><h>50</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+Battery %</panel_attributes><additional_attributes>10;30;70;30;70;10;10;10</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>732</x><y>294</y><w>12</w><h>12</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLFrame</id><coordinates><x>426</x><y>360</y><w>300</w><h>198</h></coordinates><panel_attributes>while Turbine.energy() != 0 AND Offers.len() != 0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>492</x><y>336</y><w>12</w><h>24</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>492</x><y>318</y><w>84</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
 Sort Offers
-By Price</panel_attributes><additional_attributes>10;30;60;30;60;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>350</x><y>682</y><w>170</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes><additional_attributes>150;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>350</x><y>672</y><w>300</w><h>40</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
-Accept Highest Offer</panel_attributes><additional_attributes>280;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>490</x><y>752</y><w>160</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
-</panel_attributes><additional_attributes>10;20;140;20</additional_attributes></element><element><id>Relation</id><coordinates><x>350</x><y>752</y><w>300</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
-Ack Acceptance</panel_attributes><additional_attributes>10;20;280;20</additional_attributes></element><element><id>Relation</id><coordinates><x>350</x><y>682</y><w>130</w><h>60</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+By Price</panel_attributes><additional_attributes>10;30;60;30;60;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>492</x><y>384</y><w>102</w><h>18</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes><additional_attributes>150;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>492</x><y>378</y><w>180</w><h>24</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+Accept Highest Offer</panel_attributes><additional_attributes>280;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>576</x><y>426</y><w>96</w><h>24</h></coordinates><panel_attributes>lt=&lt;-
+</panel_attributes><additional_attributes>10;20;140;20</additional_attributes></element><element><id>Relation</id><coordinates><x>492</x><y>426</y><w>180</w><h>24</h></coordinates><panel_attributes>lt=&lt;-
+Ack Acceptance</panel_attributes><additional_attributes>10;20;280;20</additional_attributes></element><element><id>Relation</id><coordinates><x>492</x><y>384</y><w>78</w><h>36</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
 Reserve
-Energy</panel_attributes><additional_attributes>10;40;70;40;70;10;10;10</additional_attributes></element><element><id>UMLFrame</id><coordinates><x>270</x><y>792</y><w>220</w><h>160</h></coordinates><panel_attributes>If Offer Ack Target ID == Own
+Energy</panel_attributes><additional_attributes>10;40;70;40;70;10;10;10</additional_attributes></element><element><id>UMLFrame</id><coordinates><x>444</x><y>450</y><w>132</w><h>96</h></coordinates><panel_attributes>If Offer Ack Target ID == Own
 --
 then:
 
@@ -102,49 +102,49 @@ then:
 
 -.
 else:
-halign=left</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>350</x><y>822</y><w>130</w><h>60</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+halign=left</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>492</x><y>468</y><w>78</w><h>36</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
 Remove
-Energy</panel_attributes><additional_attributes>10;40;70;40;70;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>350</x><y>892</y><w>140</w><h>60</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+Energy</panel_attributes><additional_attributes>10;40;70;40;70;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>492</x><y>510</y><w>84</w><h>36</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
 Release
 Reserved
-Energy</panel_attributes><additional_attributes>10;40;70;40;70;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>620</x><y>1052</y><w>160</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
-Remove Charge</panel_attributes><additional_attributes>10;20;140;20</additional_attributes></element><element><id>Relation</id><coordinates><x>620</x><y>1012</y><w>160</w><h>40</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
-Add Charge</panel_attributes><additional_attributes>140;20;10;20</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>750</x><y>1032</y><w>20</w><h>40</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLFrame</id><coordinates><x>590</x><y>982</y><w>200</w><h>120</h></coordinates><panel_attributes>If Charging
+Energy</panel_attributes><additional_attributes>10;40;70;40;70;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>654</x><y>606</y><w>96</w><h>24</h></coordinates><panel_attributes>lt=&lt;-
+Remove Charge</panel_attributes><additional_attributes>10;20;140;20</additional_attributes></element><element><id>Relation</id><coordinates><x>654</x><y>582</y><w>96</w><h>24</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+Add Charge</panel_attributes><additional_attributes>140;20;10;20</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>732</x><y>594</y><w>12</w><h>24</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLFrame</id><coordinates><x>636</x><y>564</y><w>120</w><h>72</h></coordinates><panel_attributes>If Charging
 
 --
 
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLFrame</id><coordinates><x>680</x><y>1382</y><w>200</w><h>120</h></coordinates><panel_attributes>If Driving
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLFrame</id><coordinates><x>690</x><y>804</y><w>120</w><h>72</h></coordinates><panel_attributes>If Driving
 
 --
 
 
-group=group-9</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>750</x><y>1412</y><w>20</w><h>60</h></coordinates><panel_attributes>
-group=group-9</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>830</x><y>1462</y><w>20</w><h>20</h></coordinates><panel_attributes>type=initial
-group=group-9</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>760</x><y>1452</y><w>90</w><h>60</h></coordinates><panel_attributes>lt=&lt;-
+group=group-9</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>732</x><y>822</y><w>12</w><h>36</h></coordinates><panel_attributes>
+group=group-9</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLSpecialState</id><coordinates><x>780</x><y>852</y><w>12</w><h>12</h></coordinates><panel_attributes>type=initial
+group=group-9</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>738</x><y>846</y><w>54</w><h>36</h></coordinates><panel_attributes>lt=&lt;-
 Send
 Location
 To NodeRed
-group=group-9</panel_attributes><additional_attributes>70;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>750</x><y>1382</y><w>100</w><h>50</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+group=group-9</panel_attributes><additional_attributes>70;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>732</x><y>804</y><w>60</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
 Drive
-group=group-9</panel_attributes><additional_attributes>10;30;50;30;50;10;10;10</additional_attributes></element><element><id>UMLFrame</id><coordinates><x>540</x><y>1122</y><w>340</w><h>250</h></coordinates><panel_attributes>While Any Charger Offer Better Than Current Destination
+group=group-9</panel_attributes><additional_attributes>10;30;50;30;50;10;10;10</additional_attributes></element><element><id>UMLFrame</id><coordinates><x>606</x><y>648</y><w>204</w><h>150</h></coordinates><panel_attributes>While Any Charger Offer Better Than Current Destination
 
 --
 then:
 halign=left
 
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>750</x><y>1572</y><w>20</w><h>20</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>750</x><y>1542</y><w>140</w><h>50</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>732</x><y>918</y><w>12</w><h>12</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>732</x><y>900</y><w>84</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
 Calculate
-Battery %</panel_attributes><additional_attributes>10;30;70;30;70;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>750</x><y>1232</y><w>130</w><h>60</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+Battery %</panel_attributes><additional_attributes>10;30;70;30;70;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>732</x><y>714</y><w>78</w><h>36</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
 Set
-Destination</panel_attributes><additional_attributes>10;40;50;40;50;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>750</x><y>572</y><w>150</w><h>120</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+Destination</panel_attributes><additional_attributes>10;40;50;40;50;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>732</x><y>318</y><w>90</w><h>72</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
 Calculate
 Charger
 Offers
 (Based on
 Battery % AND
  Location AND
-Offer Price)</panel_attributes><additional_attributes>10;100;50;100;50;10;10;10</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>750</x><y>672</y><w>20</w><h>80</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>620</x><y>1162</y><w>160</w><h>40</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
-Accept Offer</panel_attributes><additional_attributes>10;20;140;20</additional_attributes></element><element><id>UMLFrame</id><coordinates><x>550</x><y>1212</y><w>320</w><h>150</h></coordinates><panel_attributes>If Charger Ack Target == Self
+Offer Price)</panel_attributes><additional_attributes>10;100;50;100;50;10;10;10</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>732</x><y>378</y><w>12</w><h>48</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>654</x><y>672</y><w>96</w><h>24</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+Accept Offer</panel_attributes><additional_attributes>10;20;140;20</additional_attributes></element><element><id>UMLFrame</id><coordinates><x>612</x><y>702</y><w>192</w><h>90</h></coordinates><panel_attributes>If Charger Ack Target == Self
 halign=left
 --
 then:
@@ -153,9 +153,9 @@ then:
 
 -.
 else:
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>620</x><y>1182</y><w>160</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
-Ack Accept</panel_attributes><additional_attributes>140;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>750</x><y>1302</y><w>130</w><h>60</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
-Iter.next()</panel_attributes><additional_attributes>10;40;50;40;50;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>620</x><y>1512</y><w>160</w><h>60</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>654</x><y>684</y><w>96</w><h>24</h></coordinates><panel_attributes>lt=&lt;-
+Ack Accept</panel_attributes><additional_attributes>140;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>732</x><y>756</y><w>78</w><h>36</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
+Iter.next()</panel_attributes><additional_attributes>10;40;50;40;50;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>654</x><y>882</y><w>96</w><h>36</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;-
 Inform Charger
 That It Is Still Target
 (Heartbeat)</panel_attributes><additional_attributes>10;20;140;20</additional_attributes></element></diagram>
