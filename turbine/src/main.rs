@@ -1,5 +1,5 @@
 use log::{debug, info};
-use powercable::OfferHandler;
+use powercable::{offer::offer_handler, OfferHandler};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use serde_json::json;
 use std::time::Duration;
@@ -107,7 +107,7 @@ async fn main() {
                         powercable::BUY_OFFER_TOPIC => {
                             let offer: powercable::Offer = serde_json::from_slice(&p.payload).unwrap();
                             info!("Received buy offer: {:?}", offer);
-                            turbine.add_buy_offer(offer);
+                            offer_handler.add_offer(offer.clone());
                         }
                         &_ => {
                             info!("Unknown topic: {}", p.topic);
