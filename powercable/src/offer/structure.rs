@@ -1,6 +1,6 @@
 use bytes::{Buf, Bytes};
 
-pub const OFFER_PACKAGE_SIZE: f64 = 100.0;
+pub const OFFER_PACKAGE_SIZE: f64 = 1.0;
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct Offer {
     id: String,

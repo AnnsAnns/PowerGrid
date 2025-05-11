@@ -6,7 +6,7 @@ use powercable::{offer::structure::OFFER_PACKAGE_SIZE, tickgen::{Phase, TickPayl
 use rumqttc::QoS;
 use tokio::sync::Mutex;
 
-use crate::TurbineHandler;
+use crate::{init, TurbineHandler};
 
 pub async fn process_tick(
     handler: Arc<Mutex<TurbineHandler>>,
@@ -18,7 +18,7 @@ pub async fn process_tick(
         handler.turbine.approximate_wind_data().await;
         handler.turbine.approximate_temperature_data().await;
         handler.remaining_power = handler.turbine.get_power_output();
-        info!("Current power output: {} Watt", handler.remaining_power);
+        debug!("Current power output: {} Watt", handler.remaining_power);
 
         (handler.client.clone(), handler.remaining_power)
     };
@@ -31,6 +31,8 @@ pub async fn process_tick(
         power.to_string(),
     )
     .await;
+
+    init::publish_location(handler.clone()).await;
 }
 
 pub async fn commerce_tick(

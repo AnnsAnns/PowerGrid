@@ -9,9 +9,9 @@ pub mod tickgen;
 pub use offer::Offer;
 pub use offer::offer_handler::OfferHandler;
 
-pub const BUY_OFFER_TOPIC: &str = "market/buy_offer/+";
-pub const ACCEPT_BUY_OFFER_TOPIC: &str = "market/accept_buy_offer/+";
-pub const ACK_ACCEPT_BUY_OFFER_TOPIC: &str = "market/ack_accept_buy_offer/+";
+pub const BUY_OFFER_TOPIC: &str = "market/buy_offer";
+pub const ACCEPT_BUY_OFFER_TOPIC: &str = "market/accept_buy_offer";
+pub const ACK_ACCEPT_BUY_OFFER_TOPIC: &str = "market/ack_accept_buy_offer";
 pub const TICK_TOPIC: &str = "tickgen/tick";
 pub const TICK_CONFIGURE: &str = "tickgen/configure";
 pub const TICK_CONFIGURE_SPEED: &str = "tickgen/configure_speed";

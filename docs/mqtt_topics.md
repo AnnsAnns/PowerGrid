@@ -12,7 +12,7 @@
 |`market/accept_buy_offer/(ID)`| Accepts a buy offer | Uses Offer Structure, Becomes void after tick |
 |`market/ack_accept_buy_offer/(ID)`| Ack acceptance | Uses Offer Structure, Becomes void after tick |
 |`power/transformer/diff`| Ratio Input - Output | Published for last tick on new tick, Becomes void after tick |
-|`power/charger`| Power consumption/generation | |
+|`power/charger`| Current stored energy | |
 |`power/charger/available`| Advertises for open chargers | Published per charger per tick |
 |`power/charger/request_reserve/(ID)`| Reserves a charger |  |
 |`power/charger/request_release/(ID)`| Releases a charger |  |
