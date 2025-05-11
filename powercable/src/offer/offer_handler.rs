@@ -48,6 +48,10 @@ impl OfferHandler {
         self.sent_offers.get(id)
     }
 
+    pub fn get_all_offers(&self) -> Vec<&Offer> {
+        self.outstanding_offers.values().collect()
+    }
+
     pub fn remove_all_offers(&mut self) {
         self.outstanding_offers.clear();
         self.sent_offers.clear();

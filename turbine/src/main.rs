@@ -1,12 +1,26 @@
+use handler::handle_tick;
 use log::{debug, info};
-use powercable::{offer::offer_handler, OfferHandler};
+use powercable::*;
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use serde_json::json;
-use std::time::Duration;
+use std::{sync::Arc, time::Duration};
+use tokio::{sync::Mutex, task};
+use turbine::Turbine;
 
+mod handler;
+mod init;
 mod meta_data;
 mod parsing;
 mod turbine;
+
+pub(crate) type SharedTurbine = Arc<Mutex<TurbineHandler>>;
+
+struct TurbineHandler {
+    pub turbine: Turbine,
+    pub offer_handler: OfferHandler,
+    pub client: AsyncClient,
+    pub remaining_power: f64,
+}
 
 #[tokio::main]
 async fn main() {
@@ -15,70 +29,9 @@ async fn main() {
         .init();
     info!("Starting turbine simulation...");
 
-    let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
+    let (handler, eventloop) = init::init().await;
 
-    let mut turbine = turbine::Turbine::new(
-        turbine::random_rotor_dimension(),
-        latitude,
-        longitude,
-        meta_data::MetaDataWrapper::new(meta_data::MetaDataType::AirTemperature)
-            .await
-            .unwrap(),
-        meta_data::MetaDataWrapper::new(meta_data::MetaDataType::Wind)
-            .await
-            .unwrap(),
-    );
-
-    let mut mqttoptions = MqttOptions::new(
-        "turbine",
-        powercable::MQTT_BROKER,
-        powercable::MQTT_BROKER_PORT,
-    );
-    mqttoptions.set_keep_alive(Duration::from_secs(20));
-    let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
-    client
-        .subscribe(powercable::TICK_TOPIC, QoS::AtMostOnce)
-        .await
-        .unwrap();
-    client
-        .subscribe(powercable::BUY_OFFER_TOPIC, QoS::AtMostOnce)
-        .await
-        .unwrap();
-    client
-        .subscribe(powercable::ACCEPT_BUY_OFFER_TOPIC, QoS::AtMostOnce)
-        .await
-        .unwrap();
-    client
-        .subscribe(powercable::ACK_ACCEPT_BUY_OFFER_TOPIC, QoS::AtMostOnce)
-        .await
-        .unwrap();
-    info!("Connected to MQTT broker");
-
-    let location_payload = json!({
-        "name" : "Turbine",
-        "lat": latitude,
-        "lon": longitude
-    })
-    .to_string();
-
-    turbine.approximate_wind_data().await;
-    turbine.approximate_temperature_data().await;
-    let mut current_power = turbine.get_power_output();
-    let offer_handler = OfferHandler::new();
-
-    client
-        .publish(
-            "power/turbine/location",
-            QoS::ExactlyOnce,
-            true,
-            location_payload,
-        )
-        .await
-        .unwrap();
-    info!(
-        "Published location data: {:?}, {:?} to MQTT broker",
-        latitude, longitude
-    );
+    init::subscribe(handler.clone()).await;
 
     info!("Turbine simulation started. Waiting for messages...");
     loop {
@@ -88,26 +41,50 @@ async fn main() {
                 debug!("Event = {v:?}");
                 if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = v {
                     match p.topic.as_str() {
-                        powercable::TICK_TOPIC => {
-                            offer_handler.remove_all_offers();
-                            turbine.tick();
-                            turbine.approximate_wind_data().await;
-                            turbine.approximate_temperature_data().await;
-                            current_power = turbine.get_power_output();
-                            info!("Current power output: {} Watt", current_power);
-                            let result = client
-                                .publish(
-                                    powercable::POWER_NETWORK_TOPIC,
-                                    QoS::ExactlyOnce,
-                                    false,
-                                    current_power.to_string(),
+                        TICK_TOPIC => {
+                            let payload =
+                                serde_json::from_slice::<powercable::tickgen::TickPayload>(
+                                    &p.payload,
                                 )
-                                .await;
+                                .unwrap();
+
+                            task::spawn(handle_tick(
+                                handler.clone(),
+                                payload,
+                            ));
                         }
                         powercable::BUY_OFFER_TOPIC => {
-                            let offer: powercable::Offer = serde_json::from_slice(&p.payload).unwrap();
+                            let offer: powercable::Offer =
+                                serde_json::from_slice(&p.payload).unwrap();
                             info!("Received buy offer: {:?}", offer);
                             offer_handler.add_offer(offer.clone());
+                        }
+                        powercable::ACCEPT_BUY_OFFER_TOPIC => {
+                            let id: String = powercable::get_id_from_topic(&p.topic);
+                            let offer = offer_handler.get_offer(id.as_str());
+                            if offer.is_some() {
+                                let offer = offer.unwrap();
+                                info!("Accepted buy offer: {:?}", offer);
+                                client
+                                    .publish(
+                                        powercable::ACK_ACCEPT_BUY_OFFER_TOPIC,
+                                        QoS::ExactlyOnce,
+                                        false,
+                                        id,
+                                    )
+                                    .await
+                                    .unwrap();
+                            } else {
+                                info!("No offer found for ID: {}", id);
+                            }
+                        }
+                        powercable::ACK_ACCEPT_BUY_OFFER_TOPIC => {
+                            let offer_id = powercable::get_id_from_topic(&p.topic);
+                            info!("Received ACK for offer: {}", offer_id);
+                            if let Some(offer) = offer_handler.get_offer(offer_id.as_str()) {
+                                info!("Offer accepted: {:?}", offer);
+                                offer_handler.remove_offer(offer_id.as_str());
+                            }
                         }
                         &_ => {
                             info!("Unknown topic: {}", p.topic);
