@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use bytes::Bytes;
 use log::info;
 use powercable::{tickgen::{Phase, TickPayload}, POWER_NETWORK_TOPIC};
 use rumqttc::QoS;
@@ -40,8 +41,14 @@ pub async fn commerce_tick(
 
 pub async fn handle_tick(
     handler: Arc<Mutex<TurbineHandler>>,
-    payload: TickPayload,
+    payload: Bytes,
 ) {
+    let payload =
+    serde_json::from_slice::<powercable::tickgen::TickPayload>(
+        &payload,
+    )
+    .unwrap();
+
     match payload.phase {
         Phase::Process => process_tick(handler.clone()).await,
         Phase::Commerce => commerce_tick(handler.clone()).await,
