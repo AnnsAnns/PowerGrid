@@ -28,6 +28,13 @@ impl OfferHandler {
         self.outstanding_offers.get(id)
     }
 
+    pub fn get_best_non_sent_offer(&self) -> Option<&Offer> {
+        self.outstanding_offers
+            .values()
+            .filter(|offer| !self.sent_offers.contains_key(offer.get_id()))
+            .min_by(|a, b| a.get_price().partial_cmp(&b.get_price()).unwrap())
+    }
+
     pub fn has_offer(&self, id: &str) -> bool {
         self.outstanding_offers.contains_key(id)
     }
@@ -50,6 +57,10 @@ impl OfferHandler {
 
     pub fn get_all_offers(&self) -> Vec<&Offer> {
         self.outstanding_offers.values().collect()
+    }
+
+    pub fn has_offers(&self) -> bool {
+        !self.outstanding_offers.is_empty()
     }
 
     pub fn remove_all_offers(&mut self) {

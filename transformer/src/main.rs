@@ -1,16 +1,17 @@
+use powercable::tickgen::{Phase, TickPayload};
 use rumqttc::{MqttOptions, AsyncClient, QoS};
 use serde::de;
 use tokio::{task, time};
 use transformer::Transformer;
 use std::{result, time::Duration};
-use log::{info, debug};
+use log::{debug, info, warn};
 
 mod transformer;
 
 #[tokio::main]
 async fn main() {
     env_logger::builder()
-    .filter(None, log::LevelFilter::Debug)
+    .filter(None, log::LevelFilter::Warn)
     .init();
     info!("Starting turbine simulation...");
     let mut transformer = Transformer::new();
@@ -27,6 +28,12 @@ async fn main() {
         if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = notification {
             match p.topic.as_str() {
                 powercable::TICK_TOPIC => {
+                    let tick_payload: TickPayload = serde_json::from_slice(&p.payload).unwrap();
+                    if tick_payload.phase == Phase::Commerce {
+                        debug!("Ignoring tick payload in commerce phase");
+                        continue;
+                    }
+
                     client.publish(powercable::POWER_TRANSFORMER_CONSUMPTION_TOPIC, QoS::ExactlyOnce, true, transformer.get_current_consumption().to_string()).await.unwrap();
                     client.publish(powercable::POWER_TRANSFORMER_GENERATION_TOPIC, QoS::ExactlyOnce, true, transformer.get_current_power().to_string()).await.unwrap();
                     client.publish(powercable::POWER_TRANSFORMER_DIFF_TOPIC, QoS::ExactlyOnce, true, transformer.get_difference().to_string()).await.unwrap();
@@ -42,7 +49,7 @@ async fn main() {
                     }
                 },
                 _ => {
-                    info!("Unknown topic: {}", p.topic);
+                    warn!("Unknown topic: {}", p.topic);
                 }
             }
         }

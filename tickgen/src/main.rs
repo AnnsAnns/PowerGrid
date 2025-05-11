@@ -7,7 +7,7 @@ use tokio::{sync::Mutex, task, time};
 #[tokio::main]
 async fn main() {
     env_logger::builder()
-        .filter(None, log::LevelFilter::Debug)
+        .filter(None, log::LevelFilter::Warn)
         .init();
     info!("Starting TickGen simulation...");
 

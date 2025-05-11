@@ -46,7 +46,7 @@ impl Turbine {
 
     pub async fn approximate_wind_data(&mut self) {
         if self.closest_wind_stations.is_none() {
-            info!("No closest wind stations found. Fetching first...");
+            warn!("No closest wind stations found. Fetching first...");
             self.get_closest_wind_stations().await;
         }
 
@@ -86,7 +86,7 @@ impl Turbine {
                 data.wind_direction += current_data.wind_direction * station.ratio;
             }
 
-            info!(
+            debug!(
                 "Station: {} at ratio {} has strength {} and direction {}",
                 station.station.stationsname,
                 station.ratio,
@@ -95,7 +95,7 @@ impl Turbine {
             );
         }
 
-        info!(
+        debug!(
             "Approximate wind data for station - Strength: {} Direction: {}",
             data.wind_strength, data.wind_direction
         );
@@ -133,7 +133,7 @@ impl Turbine {
             data.dew_point_temperature += first_data.dew_point_temperature * station.ratio;
             data.air_temperature_ground += first_data.air_temperature_ground * station.ratio;
 
-            info!(
+            debug!(
                 "Station: {} at ratio {} has temperature {} and pressure {}",
                 station.station.stationsname,
                 station.ratio,
@@ -142,7 +142,7 @@ impl Turbine {
             );
         }
 
-        info!(
+        debug!(
             "Approximate temperature data for station - Temperature: {} Pressure: {}",
             data.air_temperature, data.air_pressure
         );

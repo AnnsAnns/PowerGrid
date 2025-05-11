@@ -1,4 +1,4 @@
-use handler::{accept_buy_offer, ack_buy_offer, handle_buy_offer, handle_tick};
+use handler::{ack_buy_offer, handle_buy_offer, handle_tick};
 use log::{debug, info};
 use powercable::*;
 use rumqttc::{AsyncClient, MqttOptions, QoS};
@@ -16,6 +16,7 @@ mod turbine;
 pub(crate) type SharedTurbine = Arc<Mutex<TurbineHandler>>;
 
 struct TurbineHandler {
+    pub name: String,
     pub turbine: Turbine,
     pub offer_handler: OfferHandler,
     pub client: AsyncClient,
@@ -29,7 +30,8 @@ async fn main() {
         .init();
     info!("Starting turbine simulation...");
 
-    let (handler, mut eventloop) = init::init().await;
+    let name = generate_unique_name();
+    let (handler, mut eventloop) = init::init(name.clone()).await;
 
     init::subscribe(handler.clone()).await;
 
@@ -45,10 +47,7 @@ async fn main() {
                         BUY_OFFER_TOPIC => {
                             task::spawn(handle_buy_offer(handler.clone(), p.payload.clone()))
                         }
-                        ACCEPT_BUY_OFFER_TOPIC => {
-                            task::spawn(accept_buy_offer(handler.clone(), p.topic.clone()))
-                        }
-                        ACK_ACCEPT_BUY_OFFER_TOPIC => task::spawn(ack_buy_offer(handler.clone(), p.topic.clone())),
+                        ACK_ACCEPT_BUY_OFFER_TOPIC => task::spawn(ack_buy_offer(handler.clone(), p.payload.clone())),
                         _ => task::spawn(async move {
                             debug!("Unknown topic: {}", p.topic);
                         }),

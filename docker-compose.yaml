@@ -56,24 +56,29 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: turbine
     command: ./turbine
     networks:
       - mqtt_network
     depends_on:
       - mosquitto_broker
+    deploy:
+      replicas: 1
+      mode: replicated
 
   charger:
     # Charger Simulator
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: charger
     command: ./charger
     networks:
       - mqtt_network
     depends_on:
       - mosquitto_broker
+    deploy:
+      replicas: 3
+      mode: replicated
+    
 
 networks:
   mqtt_network:

@@ -1,40 +1,75 @@
-use fake::{faker::lorem::de_de::Word, Fake};
-use rumqttc::{MqttOptions, AsyncClient, QoS};
-use serde::de;
-use tokio::{task, time};
-use std::{result, time::Duration};
-use log::{info, debug};
+use charger::Charger;
+use log::{debug, info};
+use powercable::{generate_unique_name, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, TICK_TOPIC};
+use rumqttc::{AsyncClient, MqttOptions, QoS};
+use std::{result, sync::Arc, time::Duration};
+use tokio::{sync::Mutex, task, time};
+use topic_handler::{accept_offer_handler, tick_handler};
 
 mod charger;
+mod topic_handler;
+
+type SharedCharger = Arc<Mutex<ChargerHandler>>;
+
+struct ChargerHandler {
+    pub name: String,
+    pub charger: Charger,
+    pub client: AsyncClient,
+    pub offer_handler: OfferHandler,
+}
 
 #[tokio::main]
 async fn main() {
     env_logger::builder()
-    .filter(None, log::LevelFilter::Debug)
-    .init();
+        .filter(None, log::LevelFilter::Warn)
+        .init();
     info!("Starting turbine simulation...");
-    let charger_name: String = Word().fake();
+    let charger_name: String = generate_unique_name();
     let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
-    let mut charger = charger::Charger::new(latitude, longitude, 10000, 500, 5, charger_name);
+    let mut charger =
+        charger::Charger::new(latitude, longitude, 5000, 500, 5, charger_name.clone());
 
-    let mut mqttoptions = MqttOptions::new("charger", powercable::MQTT_BROKER, powercable::MQTT_BROKER_PORT);
+    let mut mqttoptions = MqttOptions::new(
+        charger_name.clone(),
+        powercable::MQTT_BROKER,
+        powercable::MQTT_BROKER_PORT,
+    );
     mqttoptions.set_keep_alive(Duration::from_secs(5));
     let (mut client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
-    client.subscribe(powercable::TICK_TOPIC, QoS::AtMostOnce).await.unwrap();
-    client.subscribe(powercable::POWER_TRANSFORMER_DIFF_TOPIC, QoS::AtMostOnce).await.unwrap();
+    client
+        .subscribe(powercable::TICK_TOPIC, QoS::AtMostOnce)
+        .await
+        .unwrap();
+    client
+        .subscribe(powercable::ACCEPT_BUY_OFFER_TOPIC, QoS::AtMostOnce)
+        .await
+        .unwrap();
     info!("Connected to MQTT broker");
+
+    let shared_charger = Arc::new(Mutex::new(ChargerHandler {
+        name: charger_name.clone(),
+        charger,
+        client: client.clone(),
+        offer_handler: OfferHandler::new(),
+    }));
 
     while let Ok(notification) = eventloop.poll().await {
         debug!("Received = {:?}", notification);
         if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = notification {
             match p.topic.as_str() {
-                powercable::TICK_TOPIC => {
-                    
-                },
+                TICK_TOPIC => {
+                    let _ = task::spawn(tick_handler(shared_charger.clone(), p.payload));
+                }
+                ACCEPT_BUY_OFFER_TOPIC => {
+                    let _ = task::spawn(accept_offer_handler(shared_charger.clone(), p.payload));
+                }
                 _ => {
-                    info!("Unknown topic: {}", p.topic);
+                    let _ = task::spawn(async move {
+                        debug!("Unknown topic: {}", p.topic);
+                    });
                 }
             }
         }
     }
+    info!("Exiting charger simulation...");
 }

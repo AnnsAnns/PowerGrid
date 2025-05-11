@@ -1,6 +1,6 @@
 use std::{sync::Arc, time::Duration};
 
-use log::info;
+use log::{debug, info};
 use powercable::*;
 use rumqttc::{AsyncClient, EventLoop, MqttOptions, QoS};
 use serde_json::json;
@@ -8,7 +8,7 @@ use tokio::sync::Mutex;
 
 use crate::{handler, meta_data, turbine, SharedTurbine, TurbineHandler};
 
-pub async fn init() -> (SharedTurbine, EventLoop) {
+pub async fn init(name: String) -> (SharedTurbine, EventLoop) {
     let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
 
     let mut turbine = turbine::Turbine::new(
@@ -24,7 +24,7 @@ pub async fn init() -> (SharedTurbine, EventLoop) {
     );
 
     let mut mqttoptions = MqttOptions::new(
-        "turbine",
+        name.clone(),
         MQTT_BROKER,
         MQTT_BROKER_PORT,
     );
@@ -36,10 +36,34 @@ pub async fn init() -> (SharedTurbine, EventLoop) {
     let current_power = turbine.get_power_output();
     let offer_handler = OfferHandler::new();
 
+    (
+        Arc::new(Mutex::new(TurbineHandler {
+            name,
+            turbine,
+            offer_handler,
+            client,
+            remaining_power: current_power,
+        })),
+        eventloop,
+    )
+}
+
+pub async fn publish_location(
+    handler: SharedTurbine,
+) {
+    let mut handler = handler.lock().await;
+    // Extract all values before mutably borrowing client
+    let name = handler.name.clone();
+    let latitude = handler.turbine.get_latitude();
+    let longitude = handler.turbine.get_longitude();
+    let power = handler.turbine.get_power_output();
+    let client = &mut handler.client;
     let location_payload = json!({
-        "name" : "Turbine",
+        "name" : name,
         "lat": latitude,
-        "lon": longitude
+        "lon": longitude,
+        "icon": ":zap:",
+        "label": format!("{:.1}kW", power),
     })
     .to_string();
 
@@ -52,21 +76,6 @@ pub async fn init() -> (SharedTurbine, EventLoop) {
         )
         .await
         .unwrap();
-
-    info!(
-        "Published location data: {:?}, {:?} to MQTT broker",
-        latitude, longitude
-    );
-
-    (
-        Arc::new(Mutex::new(TurbineHandler {
-            turbine,
-            offer_handler,
-            client,
-            remaining_power: current_power,
-        })),
-        eventloop,
-    )
 }
 
 pub async fn subscribe(handler: SharedTurbine) {
@@ -78,10 +87,6 @@ pub async fn subscribe(handler: SharedTurbine) {
         .unwrap();
     client
         .subscribe(BUY_OFFER_TOPIC, QoS::AtMostOnce)
-        .await
-        .unwrap();
-    client
-        .subscribe(ACCEPT_BUY_OFFER_TOPIC, QoS::AtMostOnce)
         .await
         .unwrap();
     client
