@@ -29,31 +29,29 @@ async fn main() {
         .init();
     info!("Starting turbine simulation...");
 
-    let (handler, eventloop) = init::init().await;
+    let (handler, mut eventloop) = init::init().await;
 
     init::subscribe(handler.clone()).await;
 
     info!("Turbine simulation started. Waiting for messages...");
     loop {
         let event = eventloop.poll().await;
-        match &event {
+        match event {
             Ok(v) => {
                 debug!("Event = {v:?}");
                 if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = v {
                     match p.topic.as_str() {
-                        TICK_TOPIC => task::spawn(handle_tick(handler.clone(), p.payload)),
-                        BUY_OFFER_TOPIC => task::spawn(handle_buy_offer(
-                            handler.clone(),
-                            p.payload,
-                        )),
-                        ACCEPT_BUY_OFFER_TOPIC => task::spawn(accept_buy_offer(
-                            handler.clone(),
-                            p.topic,
-                        )),
-                        ACK_ACCEPT_BUY_OFFER_TOPIC => task::spawn(ack_buy_offer(handler, p.topic)),
-                        _ => {
-                            debug!("Unknown topic: {}", p.topic);
+                        TICK_TOPIC => task::spawn(handle_tick(handler.clone(), p.payload.clone())),
+                        BUY_OFFER_TOPIC => {
+                            task::spawn(handle_buy_offer(handler.clone(), p.payload.clone()))
                         }
+                        ACCEPT_BUY_OFFER_TOPIC => {
+                            task::spawn(accept_buy_offer(handler.clone(), p.topic.clone()))
+                        }
+                        ACK_ACCEPT_BUY_OFFER_TOPIC => task::spawn(ack_buy_offer(handler.clone(), p.topic.clone())),
+                        _ => task::spawn(async move {
+                            debug!("Unknown topic: {}", p.topic);
+                        }),
                     };
                 };
             }

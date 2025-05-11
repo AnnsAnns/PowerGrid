@@ -23,7 +23,7 @@ pub async fn process_tick(
         (handler.client.clone(), handler.remaining_power)
     };
 
-    client
+    let _ = client
     .publish(
         POWER_NETWORK_TOPIC,
         QoS::ExactlyOnce,

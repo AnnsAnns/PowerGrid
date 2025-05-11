@@ -1,1 +1,4 @@
 # PowerGrid
+
+http://127.0.0.1:1880 for config
+http://127.0.0.1:1880/ui for dashboard
