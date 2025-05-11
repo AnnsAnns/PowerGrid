@@ -28,21 +28,8 @@ async fn main() {
         debug!("Received = {:?}", notification);
         if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = notification {
             match p.topic.as_str() {
-                powercable::POWER_TRANSFORMER_DIFF_TOPIC => {
-                    let parameter: f64 = serde_json::from_slice(&p.payload).unwrap();
-                    debug!("Received parameter: {}", parameter);
-                    let taken = if parameter > 0.0 {
-                        -1*charger.add_charge(parameter as usize)
-                    } else {
-                        charger.remove_charge(parameter.abs() as usize)
-                    };
-
-                    info!("Charger added {} kWh", taken);
-                    client.publish(powercable::POWER_NETWORK_TOPIC, QoS::ExactlyOnce, false, taken.to_string()).await.unwrap();
-                    client.publish(powercable::POWER_CHARGER_TOPIC, QoS::ExactlyOnce, false, taken.to_string()).await.unwrap();
-                },
                 powercable::TICK_TOPIC => {
-                    // @TODO: Advertise the charger status
+                    
                 },
                 _ => {
                     info!("Unknown topic: {}", p.topic);

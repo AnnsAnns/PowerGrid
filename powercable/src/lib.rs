@@ -1,8 +1,15 @@
 use rand::Rng;
 
 pub mod charger;
+pub mod offer;
 pub mod tickgen;
 
+pub use offer::Offer;
+pub use offer::offer_handler::OfferHandler;
+
+pub const BUY_OFFER_TOPIC: &str = "market/buy_offer/+";
+pub const ACCEPT_BUY_OFFER_TOPIC: &str = "market/accept_buy_offer/+";
+pub const ACK_ACCEPT_BUY_OFFER_TOPIC: &str = "market/ack_accept_buy_offer/+";
 pub const TICK_TOPIC: &str = "tickgen/tick";
 pub const TICK_CONFIGURE: &str = "tickgen/configure";
 pub const TICK_CONFIGURE_SPEED: &str = "tickgen/configure_speed";
@@ -19,4 +26,15 @@ pub fn generate_latitude_longitude_within_germany() -> (f64, f64) {
     let latitude = rng.random_range(47.2701..55.0581);
     let longitude = rng.random_range(5.8663..15.0419);
     (latitude, longitude)
+}
+
+pub fn get_id_from_topic(topic: &str) -> String {
+    // Split the topic into parts
+    let parts: Vec<&str> = topic.split('/').collect();
+    // Check if we have enough parts to extract an ID
+    if parts.len() > 2 {
+        // Return the ID portion (last part)
+        return parts[parts.len() - 1].to_string();
+    }
+    "".to_string()
 }
