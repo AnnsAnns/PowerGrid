@@ -8,7 +8,7 @@ use tokio::sync::Mutex;
 
 use crate::{handler, meta_data, turbine, SharedTurbine, TurbineHandler};
 
-pub async fn init() -> (SharedTurbine, EventLoop) {
+pub async fn init(name: String) -> (SharedTurbine, EventLoop) {
     let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
 
     let mut turbine = turbine::Turbine::new(
@@ -24,7 +24,7 @@ pub async fn init() -> (SharedTurbine, EventLoop) {
     );
 
     let mut mqttoptions = MqttOptions::new(
-        "turbine",
+        name.clone(),
         MQTT_BROKER,
         MQTT_BROKER_PORT,
     );
@@ -37,7 +37,7 @@ pub async fn init() -> (SharedTurbine, EventLoop) {
     let offer_handler = OfferHandler::new();
 
     let location_payload = json!({
-        "name" : "Turbine",
+        "name" : name.clone(),
         "lat": latitude,
         "lon": longitude
     })
@@ -60,6 +60,7 @@ pub async fn init() -> (SharedTurbine, EventLoop) {
 
     (
         Arc::new(Mutex::new(TurbineHandler {
+            name,
             turbine,
             offer_handler,
             client,
@@ -78,10 +79,6 @@ pub async fn subscribe(handler: SharedTurbine) {
         .unwrap();
     client
         .subscribe(BUY_OFFER_TOPIC, QoS::AtMostOnce)
-        .await
-        .unwrap();
-    client
-        .subscribe(ACCEPT_BUY_OFFER_TOPIC, QoS::AtMostOnce)
         .await
         .unwrap();
     client

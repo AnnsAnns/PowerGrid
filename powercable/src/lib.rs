@@ -1,3 +1,5 @@
+use fake::faker::lorem::de_de::Word;
+use fake::Fake;
 use rand::Rng;
 
 pub mod charger;
@@ -37,4 +39,8 @@ pub fn get_id_from_topic(topic: &str) -> String {
         return parts[parts.len() - 1].to_string();
     }
     "".to_string()
+}
+
+pub fn generate_unique_name() -> String {
+    Word().fake()
 }
