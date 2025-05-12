@@ -1,12 +1,27 @@
+use std::{sync::Arc, time::Duration};
+
 use battery::Battery;
-use log::info;
+use log::{debug, info};
 use rand::Rng;
+use rumqttc::{AsyncClient, MqttOptions, QoS};
+use tokio::{sync::Mutex, task};
+use topic_handler::tick_handler;
 use vehicle::Vehicle;
 
 mod vehicle;
 mod battery;
+mod topic_handler;
 
-fn main() {
+type SharedVehicle = Arc<Mutex<VehicleHandler>>;
+
+struct VehicleHandler {
+    pub name: String,
+    pub vehicle: Vehicle,
+    pub client: AsyncClient,
+}
+
+#[tokio::main]
+async fn main() {
     env_logger::builder()
         .filter(None, log::LevelFilter::Info)
         .init();
@@ -28,12 +43,46 @@ fn main() {
     let vehicle_name: String = powercable::generate_unique_name();
     let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
     let mut vehicle = Vehicle::new(
-        vehicle_name,
+        vehicle_name.clone(),
         latitude,
         longitude,
         battery,
     );
-
     println!("{:#?}", vehicle);
+
+    let mut mqttoptions = MqttOptions::new(
+        vehicle_name.clone(),
+        powercable::MQTT_BROKER,
+        powercable::MQTT_BROKER_PORT,
+    );
+    mqttoptions.set_keep_alive(Duration::from_secs(5));
+    let (mut client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
+    client
+        .subscribe(powercable::TICK_TOPIC, QoS::AtMostOnce)
+        .await
+        .unwrap();
+    info!("Connected to MQTT broker");
+
+    let shared_vehicle = Arc::new(Mutex::new(VehicleHandler {
+        name: vehicle_name.clone(),
+        vehicle,
+        client: client.clone(),
+    }));
+
+    while let Ok(notification) = eventloop.poll().await {
+        debug!("Received = {:?}", notification);
+        if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = notification {
+            match p.topic.as_str() {
+                TICK_TOPIC => {
+                    let _ = task::spawn(tick_handler(shared_vehicle.clone(), p.payload));
+                }
+                _ => {
+                    let _ = task::spawn(async move {
+                        debug!("Unknown topic: {}", p.topic);
+                    });
+                }
+            }
+        }
+    }
     info!("Exiting electric vehicle simulation...");
 }

@@ -79,6 +79,20 @@ services:
       replicas: 3
       mode: replicated
     
+  vehicle:
+    # Vehicle Simulator
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./vehicle
+    networks:
+      - mqtt_network
+    depends_on:
+      - mosquitto_broker
+    deploy:
+      replicas: 5
+      mode: replicated
+    
 
 networks:
   mqtt_network:

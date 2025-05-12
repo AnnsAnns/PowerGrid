@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use crate::battery::Battery;
 
 #[derive(Debug)]
@@ -35,7 +37,7 @@ impl Vehicle {
         self.destination
     }
 
-    pub fn get_battery(&mut self) -> &mut Battery {
+    pub fn battery(&mut self) -> &mut Battery {
         &mut self.battery
     }
 
@@ -43,4 +45,28 @@ impl Vehicle {
         self.destination = (latitude, longitude);
     }
 
+    pub fn drive(&mut self) {
+        // simple placeholder implementation
+        let mut rng = rand::rng();
+        if self.location.0 < self.destination.0 {
+            self.location.0 += rng.random_range(-0.002..0.02);
+        }
+        if self.location.0 > self.destination.0 {
+            self.location.0 -= rng.random_range(-0.002..0.02);
+        }
+        if self.location.1 < self.destination.1 {
+            self.location.1 += rng.random_range(-0.002..0.02);
+        }
+        if self.location.1 > self.destination.1 {
+            self.location.1 -= rng.random_range(-0.002..0.02);
+        }
+        if self.is_close(0.02) {
+            self.location = self.destination
+        }
+    }
+
+    fn is_close(&self, tolerance: f64) -> bool {
+        (self.location.0 - self.destination.0).abs() < tolerance &&
+        (self.location.1 - self.destination.1).abs() < tolerance
+    }
 }

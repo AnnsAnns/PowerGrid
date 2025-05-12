@@ -33,7 +33,7 @@ impl Battery {
     }
 
     pub fn state_of_charge(&self) -> f64 {
-        (self.level / self.capacity) * 100.0
+        self.level / self.capacity
     }
 
     pub fn add_charge(&mut self, charge: f64, tick_time: f64, ambient_temperature: f64) -> f64 {
@@ -85,16 +85,16 @@ impl Battery {
         let soc = self.state_of_charge();
 
         // trickle charging (0..10%)
-        if soc < 10.0 {
+        if soc < 0.1 {
             0.1
         }
         // constant current (10..80%)
-        else if soc < 80.0 {
+        else if soc < 0.8 {
             1.0
         }
         // constant voltage (80..100%)
         else {
-            let linear_scale = (100.0 - soc) / (100.0 - 80.0);
+            let linear_scale = (1.0 - soc) / (1.0 - 0.8);
             linear_scale.powf(1.5)
         }
     }
