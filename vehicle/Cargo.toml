@@ -1,0 +1,11 @@
+[package]
+name = "vehicle"
+edition = "2024"
+version.workspace = true
+authors.workspace = true
+
+[dependencies]
+env_logger = "0.11.8"
+log = "0.4.27"
+powercable = { path = "../powercable" }
+rand = "0.9.1"
