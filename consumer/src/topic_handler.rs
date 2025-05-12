@@ -4,10 +4,10 @@ use powercable::{offer::structure::OFFER_PACKAGE_SIZE, tickgen::{Phase, TickPayl
 use rumqttc::QoS;
 use serde_json::json;
 
-use crate::SharedCharger;
+use crate::{SharedConsumer};
 
 pub async fn tick_handler(
-    handler: SharedCharger,
+    handler: SharedConsumer,
     payload: Bytes
 ) {
     let payload: TickPayload = serde_json::from_slice(&payload).unwrap();
@@ -22,10 +22,10 @@ pub async fn tick_handler(
 }
 
 pub async fn process_tick(
-    handler: SharedCharger,
+    handler: SharedConsumer,
 ) {
     handler.lock().await.offer_handler.remove_all_offers();
-    let mut packages_askable = handler.lock().await.charger.amount_of_needed_packages();
+    let mut packages_askable = handler.lock().await.consumer.amount_of_needed_packages();
     if packages_askable == 0 {
         info!("No packages available for sale");
         return;
@@ -38,7 +38,7 @@ pub async fn process_tick(
     for i in 0..packages_askable {
         let mut handler = handler.lock().await;
         let offer_id = format!("{}-{}", handler.name, i);
-        let offer = Offer::new(offer_id, handler.charger.get_price_if_had_charge(i * OFFER_PACKAGE_SIZE as usize), OFFER_PACKAGE_SIZE);
+        let offer = Offer::new(offer_id, handler.consumer.get_price_if_had_charge(i * OFFER_PACKAGE_SIZE as usize), OFFER_PACKAGE_SIZE);
 
         handler.offer_handler.add_offer(offer.clone());
 
@@ -54,70 +54,33 @@ pub async fn process_tick(
 }
 
 pub async fn commerce_tick(
-    handler: SharedCharger,
+    handler: SharedConsumer,
 ) {
-    let handler = handler.lock().await;
-    let current_power = handler.charger.get_current_charge();
-
-    handler.client.publish(
-        POWER_CHARGER_TOPIC,
-        rumqttc::QoS::ExactlyOnce,
-        false,
-        current_power.to_string(),
-    ).await.unwrap();
+    // do nothing
 }
 
 pub async fn accept_offer_handler(
-    handler: SharedCharger,
+    handler: SharedConsumer,
     payload: Bytes
 ) {
-    let mut offer: Offer = serde_json::from_slice(&payload).unwrap();
-    if offer.get_accepted_by().is_none() {
-        warn!("Received ACK for offer {} without accepted_by field", offer.get_id());
-        return;
-    }
 
-    let mut handler = handler.lock().await;
-    
-    if !handler.offer_handler.has_sent_offer(&offer.get_id()) {
-        offer.set_ack_for(offer.get_accepted_by().unwrap().clone());
-
-        handler.offer_handler.add_sent_offer(offer.clone());
-        handler.client.publish(
-            ACK_ACCEPT_BUY_OFFER_TOPIC,
-            rumqttc::QoS::ExactlyOnce,
-            false,
-            offer.to_bytes().unwrap(),
-        ).await.unwrap();
-        debug!("ACK for offer {} sent", offer.get_id());
-
-        handler.charger.add_charge(offer.get_amount() as usize);
-
-        handler.client.publish(
-            POWER_NETWORK_TOPIC,
-            rumqttc::QoS::ExactlyOnce,
-            false,
-            (-1 * offer.get_amount() as i32).to_string()
-        ).await.unwrap();
-    }
 }
 
 pub async fn publish_location(
-    handler: SharedCharger,
+    handler: SharedConsumer,
 ) {
     let mut handler = handler.lock().await;
     // Extract all values before mutably borrowing client
     let name = handler.name.clone();
-    let latitude = handler.charger.get_latitude();
-    let longitude = handler.charger.get_longitude();
-    let percentage = handler.charger.get_charge_percentage() * 100.0;
+    let latitude = handler.consumer.get_latitude();
+    let longitude = handler.consumer.get_longitude();
+    let consumer_type = handler.consumer.get_consumer_type();
     let client = &mut handler.client;
     let location_payload = json!({
         "name" : name,
         "lat": latitude,
         "lon": longitude,
-        "icon": ":battery:",
-        "label": format!("{:.1}%", percentage),
+        "icon": format!("{:?}", consumer_type),
     })
     .to_string();
 
@@ -130,5 +93,5 @@ pub async fn publish_location(
         )
         .await
         .unwrap();
-    debug!("Location published: {}", location_payload);
+    debug!("Published location: {:?}", location_payload);
 }

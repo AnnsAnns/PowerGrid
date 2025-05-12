@@ -78,8 +78,33 @@ services:
     deploy:
       replicas: 3
       mode: replicated
-    
+  
+  g0:
+    # Consumer Simulator
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./consumer
+    networks:
+      - mqtt_network
+    depends_on:
+      - mosquitto_broker
+    environment:
+      - CONSUMER_TYPE=G0
 
+  h0:
+    # Consumer Simulator
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./consumer
+    networks:
+      - mqtt_network
+    depends_on:
+      - mosquitto_broker
+    environment:
+      - CONSUMER_TYPE=H0
+    
 networks:
   mqtt_network:
     driver: bridge

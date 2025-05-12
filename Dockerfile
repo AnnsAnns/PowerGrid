@@ -21,3 +21,4 @@ COPY --from=builder /app/target/release/turbine turbine
 COPY --from=builder /app/target/release/charger charger
 COPY --from=builder /app/target/release/transformer transformer
 COPY --from=builder /app/target/release/tickgen tickgen
+COPY --from=builder /app/target/release/consumer consumer
