@@ -1,11 +1,11 @@
-use consumer::{Consumer, ConsumerType};
-use log::{debug, info, trace, warn, };
-use powercable::*;
+use log::{debug, info, trace, warn};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration, env};
 use tokio::{sync::Mutex, task};
+
+use powercable::*;
+use consumer::{Consumer, ConsumerType};
 use topic_handler::{accept_offer_handler, tick_handler, scale_handler};
-use serde_json::json;
 
 mod consumer;
 mod topic_handler;
@@ -23,13 +23,14 @@ struct ConsumerHandler {
 async fn main() {
     env_logger::builder()
         .filter(None, log::LevelFilter::Debug)
+        .filter_module("rumqttc::state", log::LevelFilter::Info)
         .init();
     info!("Starting consumer simulation...");
 
     let consumer_name = env::var("CONSUMER_NAME").unwrap_or(generate_unique_name());
     let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
-    let consumer_type_str= env::var("CONSUMER_TYPE").unwrap_or(ConsumerType::G0.to_string());
-    let consumer_type = ConsumerType::from_str(&consumer_type_str);
+    let consumer_type_str= env::var("CONSUMER_TYPE").unwrap_or(ConsumerType::G0.to_string()); // TODO: simplify
+    let consumer_type = ConsumerType::from_str(&consumer_type_str); // TODO: simplify
     let consumer =
         Consumer::new(latitude, longitude, consumer_name.clone(), consumer_type);
     debug!("Created {} of type {}", consumer_name, consumer_type_str);
@@ -41,19 +42,22 @@ async fn main() {
     );
     mqttoptions.set_keep_alive(Duration::from_secs(5));
     let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
+    debug!("Connected to MQTT broker as {}", consumer_name);
     client
         .subscribe(powercable::TICK_TOPIC, QoS::AtMostOnce)
         .await
         .unwrap();
+    trace!("Subscribed to {} topic", TICK_TOPIC);
     client
-        .subscribe(powercable::ACCEPT_BUY_OFFER_TOPIC, QoS::AtMostOnce)
+        .subscribe(ACCEPT_BUY_OFFER_TOPIC, QoS::AtMostOnce)
         .await
         .unwrap();
+    trace!("Subscribed to {} topic", ACCEPT_BUY_OFFER_TOPIC);
     client
         .subscribe(powercable::POWER_CONSUMER_SCALE, QoS::AtMostOnce)
         .await
         .unwrap();
-    debug!("Connected to MQTT broker as {}", consumer_name);
+    trace!("Subscribed to {} topic", POWER_CONSUMER_SCALE);
 
     
     let shared_consumer = Arc::new(Mutex::new(ConsumerHandler {

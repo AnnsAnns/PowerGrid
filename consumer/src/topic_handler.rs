@@ -1,9 +1,8 @@
 use bytes::Bytes;
 use chrono::{NaiveDateTime, NaiveTime, Timelike};
-use log::{debug, info, warn};
+use log::{debug, info, trace, warn};
 use powercable::{offer::structure::OFFER_PACKAGE_SIZE, tickgen::{Phase, TickPayload}, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, BUY_OFFER_TOPIC, POWER_CONSUMER_TOPIC, POWER_LOCATION_TOPIC, POWER_NETWORK_TOPIC};
 use rumqttc::QoS::*;
-use serde::de;
 use serde_json::json;
 
 use crate::{SharedConsumer};
@@ -32,12 +31,12 @@ pub async fn process_tick(
     //Generate demand
     let tick_payload: TickPayload = serde_json::from_slice(&payload).unwrap();
     let timestamp = tick_payload.timestamp;
-    debug!("Extracted timestamp: {}", timestamp);
+    trace!("Extracted timestamp: {}", timestamp);
     let trimmed = timestamp.strip_suffix(" UTC").unwrap();
     let dt = NaiveDateTime::parse_from_str(trimmed, "%Y-%m-%d %H:%M:%S%.f").unwrap();
     let rounded_time = round_to_15min(dt);
     let demand = handler.lock().await.consumer.get_demand(rounded_time).await.unwrap_or(0.0);
-    debug!("Demand (without scale): {:?}", demand);
+    trace!("Demand (without scale): {:?}", demand);
 
 
     //aus dem charger kopiert
@@ -74,7 +73,7 @@ pub async fn commerce_tick(
     handler: SharedConsumer,
 ) {
     let handler = handler.lock().await;
-    // Publish location
+    // publish location and current consumption
     let location_payload = json!({
         "name" : handler.consumer.get_name(),
         "lat": handler.consumer.get_latitude(),
@@ -118,7 +117,7 @@ pub async fn accept_offer_handler(
             false,
             offer.to_bytes().unwrap(),
         ).await.unwrap();
-        debug!("ACK for offer {} sent", offer.get_id());
+        trace!("ACK for offer {} sent", offer.get_id());
 
         // publish consumption to network
         handler.client.publish(
@@ -126,6 +125,14 @@ pub async fn accept_offer_handler(
             ExactlyOnce,
             false,
             (-1 * offer.get_amount() as i32).to_string()
+        ).await.unwrap();
+
+        // publish consumption to consumer for only consumer data
+        handler.client.publish(
+            format!("{}/{}", POWER_CONSUMER_TOPIC, handler.consumer.get_name()),
+            ExactlyOnce,
+            false,
+            handler.consumer.get_current_consumption().to_string(),
         ).await.unwrap();
     }
 }
@@ -138,7 +145,7 @@ pub async fn scale_handler(
     let scale: u8 = serde_json::from_slice(&payload).unwrap();
     let mut handler = handler.lock().await;
     handler.consumer.set_current_scale(scale);
-    debug!("Consumer {} scale set to {}", handler.name, scale);
+    trace!("Consumer {} scale set to {}", handler.name, scale);
 }
 
 fn round_to_15min(dt: NaiveDateTime) -> NaiveTime {
