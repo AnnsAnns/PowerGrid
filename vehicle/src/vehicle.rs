@@ -46,6 +46,11 @@ impl Vehicle {
     }
 
     pub fn drive(&mut self) {
+        let soc = self.battery.state_of_charge();
+        if soc <= 0.0 {
+            return;
+        }
+
         // simple placeholder implementation
         let mut rng = rand::rng();
         if self.location.0 < self.destination.0 {
@@ -63,6 +68,9 @@ impl Vehicle {
         if self.is_close(0.02) {
             self.location = self.destination
         }
+
+        // placeholder args
+        self.battery.remove_charge(0.5, 5.0, 20.0);
     }
 
     fn is_close(&self, tolerance: f64) -> bool {
