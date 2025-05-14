@@ -1,7 +1,7 @@
 [workspace]
-members = ["powercable","turbine", "charger", "transformer", "tickgen", "vehicle"]
+members = ["powercable","turbine", "charger", "transformer", "tickgen", "vehicle", "consumer"]
 resolver = "2"
 
 [workspace.package]
 version = "0.0.1"
-authors = ["AnnsAnn"]
+authors = ["AnnsAnn", "lukasseb"]

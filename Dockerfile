@@ -22,3 +22,7 @@ COPY --from=builder /app/target/release/charger charger
 COPY --from=builder /app/target/release/transformer transformer
 COPY --from=builder /app/target/release/tickgen tickgen
 COPY --from=builder /app/target/release/vehicle vehicle
+COPY --from=builder /app/target/release/consumer consumer
+# Only for consumer relevant
+COPY ./consumer/configs/slp.csv /tmp/slp.csv
+

@@ -4,7 +4,7 @@
             "view": {
                 "view-show-grid": true,
                 "view-snap-grid": true,
-                "view-grid-size": 20,
+                "view-grid-size": "20",
                 "view-node-status": true,
                 "view-node-show-label": true,
                 "view-show-tips": true,
@@ -15,6 +15,13 @@
             "tours": {
                 "welcome": "4.0.9"
             }
+        },
+        "debug": {
+            "filter": "filterSelected",
+            "filteredNodes": [
+                "c479afe10a0959d2",
+                "821af3b53b75f91b"
+            ]
         }
     }
 }

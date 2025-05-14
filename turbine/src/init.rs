@@ -69,7 +69,7 @@ pub async fn publish_location(
 
     client
         .publish(
-            "power/turbine/location",
+            POWER_LOCATION_TOPIC,
             QoS::ExactlyOnce,
             true,
             location_payload,

@@ -1,6 +1,6 @@
 use bytes::Bytes;
 use log::{debug, info, warn};
-use powercable::{offer::structure::OFFER_PACKAGE_SIZE, tickgen::{Phase, TickPayload}, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, BUY_OFFER_TOPIC, POWER_CHARGER_TOPIC, POWER_NETWORK_TOPIC};
+use powercable::{offer::structure::OFFER_PACKAGE_SIZE, tickgen::{Phase, TickPayload}, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, BUY_OFFER_TOPIC, POWER_CHARGER_TOPIC, POWER_NETWORK_TOPIC, POWER_LOCATION_TOPIC};
 use rumqttc::QoS;
 use serde_json::json;
 
@@ -123,11 +123,12 @@ pub async fn publish_location(
 
     client
         .publish(
-            "power/turbine/location",
+            POWER_LOCATION_TOPIC,
             QoS::ExactlyOnce,
             true,
-            location_payload,
+            location_payload.clone(),
         )
         .await
         .unwrap();
+    debug!("Location published: {}", location_payload);
 }

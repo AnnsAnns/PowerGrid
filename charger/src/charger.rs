@@ -1,4 +1,4 @@
-use log::{debug, info};
+use log::{debug};
 use powercable::offer::structure::OFFER_PACKAGE_SIZE;
 
 pub struct Charger {
@@ -80,7 +80,7 @@ impl Charger {
     }
 
     pub fn get_charge_percentage(&self) -> f64 {
-        (self.current_charge as f64 / self.capacity as f64)
+        self.current_charge as f64 / self.capacity as f64
     }
 
     pub fn get_current_price(&self) -> f64 {
