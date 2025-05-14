@@ -13,6 +13,7 @@ pub struct Battery {
 impl Battery {
     pub fn new(
         capacity: f64,
+        soc: f64, // State of Charge (0..1)
         temperature: f64,
         cooling_rate: f64,
         max_charge: f64,
@@ -22,7 +23,7 @@ impl Battery {
     ) -> Self {
         Battery {
             capacity,
-            level: capacity * 0.9, // start at 90%
+            level: capacity * soc,
             temperature,
             cooling_rate,
             max_charge,

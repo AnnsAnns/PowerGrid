@@ -2,10 +2,11 @@ use std::{sync::Arc, time::Duration};
 
 use battery::Battery;
 use log::{debug, info};
+use powercable::{TICK_TOPIC, WORLDMAP_EVENT_TOPIC};
 use rand::Rng;
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use tokio::{sync::Mutex, task};
-use topic_handler::tick_handler;
+use topic_handler::{tick_handler, worldmap_event_handler};
 use vehicle::Vehicle;
 
 mod vehicle;
@@ -31,6 +32,7 @@ async fn main() {
     let mut rng = rand::rng();
     let battery = Battery::new(
         rng.random_range(21.3..118.0),
+        rng.random_range(0.5..1.0),
         25.0,
         rng.random_range(0.02..0.12),
         rng.random_range(7.0..350.0),
@@ -61,6 +63,10 @@ async fn main() {
         .subscribe(powercable::TICK_TOPIC, QoS::AtMostOnce)
         .await
         .unwrap();
+    client
+        .subscribe(powercable::WORLDMAP_EVENT_TOPIC, QoS::AtMostOnce)
+        .await
+        .unwrap();
     info!("Connected to MQTT broker");
 
     let shared_vehicle = Arc::new(Mutex::new(VehicleHandler {
@@ -75,6 +81,9 @@ async fn main() {
             match p.topic.as_str() {
                 TICK_TOPIC => {
                     let _ = task::spawn(tick_handler(shared_vehicle.clone(), p.payload));
+                }
+                WORLDMAP_EVENT_TOPIC => {
+                    let _ = task::spawn(worldmap_event_handler(shared_vehicle.clone(), p.payload));
                 }
                 _ => {
                     let _ = task::spawn(async move {
