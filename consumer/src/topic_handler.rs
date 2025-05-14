@@ -92,6 +92,14 @@ pub async fn commerce_tick(
         .await
         .unwrap();
     debug!("Published location: {:?}", location_payload);
+
+    // publish consumption to consumer for only consumer data
+    handler.client.publish(
+        format!("{}/{}", POWER_CONSUMER_TOPIC, handler.consumer.get_name()),
+        ExactlyOnce,
+        false,
+        handler.consumer.get_current_consumption().to_string(),
+    ).await.unwrap();
 }
 
 pub async fn accept_offer_handler(
@@ -125,14 +133,6 @@ pub async fn accept_offer_handler(
             ExactlyOnce,
             false,
             (-1 * offer.get_amount() as i32).to_string()
-        ).await.unwrap();
-
-        // publish consumption to consumer for only consumer data
-        handler.client.publish(
-            format!("{}/{}", POWER_CONSUMER_TOPIC, handler.consumer.get_name()),
-            ExactlyOnce,
-            false,
-            handler.consumer.get_current_consumption().to_string(),
         ).await.unwrap();
     }
 }

@@ -80,7 +80,6 @@ services:
       mode: replicated
   
   h0:
-    # Consumer Simulator
     build:
       context: .
       dockerfile: Dockerfile
@@ -94,7 +93,6 @@ services:
       - CONSUMER_NAME=Meier
 
   g3:
-    # Consumer Simulator
     build:
       context: .
       dockerfile: Dockerfile
@@ -108,7 +106,6 @@ services:
       - CONSUMER_NAME=Tesla
 
   g5:
-    # Consumer Simulator
     build:
       context: .
       dockerfile: Dockerfile
