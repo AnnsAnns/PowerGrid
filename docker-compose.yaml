@@ -4,7 +4,7 @@ services:
     image: eclipse-mosquitto:latest
     container_name: mosquitto_broker
     ports:
-      - "${MQTT_BROKER_PORT}:${MQTT_BROKER_PORT}" # MQTT port
+      - 1883:1883 # MQTT port
     volumes:
       - ./mosquitto/config:/mosquitto/config # Configuration files
       - ./mosquitto/log:/mosquitto/log # Log files
@@ -20,7 +20,7 @@ services:
       dockerfile: Dockerfile
     container_name: own_dashboard
     ports:
-      - 127.0.0.1:${NODE_RED_PORT}:${NODE_RED_PORT} # Node-RED port
+      - 1880:1880 # Node-RED port
     volumes:
       - ./dashboard/data:/data # Node-RED data
     networks:
@@ -78,8 +78,46 @@ services:
     deploy:
       replicas: 3
       mode: replicated
-    
+  
+  h0:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./consumer
+    networks:
+      - mqtt_network
+    depends_on:
+      - mosquitto_broker
+    environment:
+      - CONSUMER_TYPE=H0
+      - CONSUMER_NAME=Meier
 
+  g3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./consumer
+    networks:
+      - mqtt_network
+    depends_on:
+      - mosquitto_broker
+    environment:
+      - CONSUMER_TYPE=G3
+      - CONSUMER_NAME=Tesla
+
+  g5:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./consumer
+    networks:
+      - mqtt_network
+    depends_on:
+      - mosquitto_broker
+    environment:
+      - CONSUMER_TYPE=G5
+      - CONSUMER_NAME=Backhus
+    
 networks:
   mqtt_network:
     driver: bridge
