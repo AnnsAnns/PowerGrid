@@ -1,5 +1,5 @@
 use bytes::Bytes;
-use powercable::tickgen::{Phase, TickPayload};
+use powercable::{tickgen::{Phase, TickPayload}, POWER_LOCATION_TOPIC};
 use rumqttc::QoS;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -84,7 +84,7 @@ pub async fn publish_location(
 
     client
         .publish(
-            "power/turbine/location",
+            POWER_LOCATION_TOPIC,
             QoS::ExactlyOnce,
             true,
             location_payload,
