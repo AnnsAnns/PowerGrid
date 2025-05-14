@@ -62,7 +62,7 @@ module.exports = {
 
     // To enabled pretty-printing of the flow within the flow file, set the following
     //  property to true:
-    //flowFilePretty: true,
+    flowFilePretty: true,
 
     // By default, credentials are encrypted in storage using a generated key. To
     // specify your own secret, set the following property.
@@ -71,7 +71,7 @@ module.exports = {
     // node-red from being able to decrypt your existing credentials and they will be
     // lost.
     credentialSecret: "jsnhadfkbnjec2h323t4n8",
-
+    
     // By default, all user data is stored in a directory called `.node-red` under
     // the user's home directory. To use a different location, the following
     // property can be used
