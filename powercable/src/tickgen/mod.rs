@@ -1,7 +1,8 @@
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum Phase {
     Process,
-    Commerce
+    Commerce,
+    PowerImport,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]

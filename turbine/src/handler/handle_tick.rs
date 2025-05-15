@@ -78,5 +78,8 @@ pub async fn handle_tick(
     match payload.phase {
         Phase::Process => process_tick(handler.clone()).await,
         Phase::Commerce => commerce_tick(handler.clone()).await,
+        Phase::PowerImport => {
+            // No action needed
+        }
     }
 }
