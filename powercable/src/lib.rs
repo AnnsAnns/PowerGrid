@@ -27,10 +27,19 @@ pub const WORLDMAP_EVENT_TOPIC: &str = "worldmap/event";
 pub const MQTT_BROKER: &str = "mosquitto_broker";
 pub const MQTT_BROKER_PORT: u16 = 1883;
 
+// Around Neumünster
+const NORTH_LIMIT: (f64, f64) = (54.08200660036042, 9.916791893513686);
+// Around A24 between Trittau & Schwarzenbek
+const EAST_LIMIT: (f64, f64) = (53.5519537146248, 10.67829930807445);
+// Around Brackel
+const SOUTH_LIMIT: (f64, f64) = (53.29354767455468, 10.043061643463892);
+// Around Stade
+const WEST_LIMIT: (f64, f64) = (53.59095432811228, 9.430617993044924);
+
 pub fn generate_latitude_longitude_within_germany() -> (f64, f64) {
     let mut rng = rand::rng();
-    let latitude = rng.random_range(47.2701..55.0581);
-    let longitude = rng.random_range(5.8663..15.0419);
+    let latitude = rng.random_range(SOUTH_LIMIT.0..NORTH_LIMIT.0);
+    let longitude = rng.random_range(WEST_LIMIT.1..EAST_LIMIT.1);
     (latitude, longitude)
 }
 

@@ -49,6 +49,9 @@ async fn main() {
                     config.phase = powercable::tickgen::Phase::Commerce;
                 }
                 powercable::tickgen::Phase::Commerce => {
+                    config.phase = powercable::tickgen::Phase::PowerImport;
+                }
+                powercable::tickgen::Phase::PowerImport => {
                     config.tick += 1;
                     config.phase = powercable::tickgen::Phase::Process;
                 }

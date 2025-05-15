@@ -18,6 +18,9 @@ pub async fn tick_handler(
         Phase::Commerce => {
             commerce_tick(handler).await;
         }
+        Phase::PowerImport => {
+            // No action needed
+        }
     }
 }
 
