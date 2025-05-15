@@ -1,5 +1,5 @@
 [workspace]
-members = ["powercable","turbine", "charger", "transformer", "tickgen", "consumer"]
+members = ["powercable","turbine", "charger", "transformer", "tickgen", "vehicle", "consumer"]
 resolver = "2"
 
 [workspace.package]
