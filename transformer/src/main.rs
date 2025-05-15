@@ -1,9 +1,7 @@
 use powercable::tickgen::{Phase, TickPayload};
 use rumqttc::{MqttOptions, AsyncClient, QoS};
-use serde::de;
-use tokio::{task, time};
 use transformer::Transformer;
-use std::{result, time::Duration};
+use std::time::Duration;
 use log::{debug, info, warn};
 
 mod transformer;
@@ -18,7 +16,7 @@ async fn main() {
 
     let mut mqttoptions = MqttOptions::new("transformer", powercable::MQTT_BROKER, powercable::MQTT_BROKER_PORT);
     mqttoptions.set_keep_alive(Duration::from_secs(5));
-    let (mut client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
+    let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
     client.subscribe(powercable::TICK_TOPIC, QoS::AtMostOnce).await.unwrap();
     client.subscribe(powercable::POWER_NETWORK_TOPIC, QoS::AtMostOnce).await.unwrap();
     info!("Connected to MQTT broker");

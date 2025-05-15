@@ -1,5 +1,4 @@
 use std::{sync::Arc, time::Duration};
-
 use battery::Battery;
 use log::{debug, info};
 use powercable::{TICK_TOPIC, WORLDMAP_EVENT_TOPIC};
@@ -44,7 +43,7 @@ async fn main() {
     // init vehicle
     let vehicle_name: String = powercable::generate_unique_name();
     let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
-    let mut vehicle = Vehicle::new(
+    let vehicle = Vehicle::new(
         vehicle_name.clone(),
         latitude,
         longitude,
@@ -58,7 +57,7 @@ async fn main() {
         powercable::MQTT_BROKER_PORT,
     );
     mqttoptions.set_keep_alive(Duration::from_secs(5));
-    let (mut client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
+    let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
     client
         .subscribe(powercable::TICK_TOPIC, QoS::AtMostOnce)
         .await

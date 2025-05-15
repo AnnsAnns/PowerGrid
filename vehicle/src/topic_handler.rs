@@ -46,7 +46,7 @@ pub async fn process_tick(
     handler: SharedVehicle,
 ) {
     {
-        let mut vehicle = &mut handler.lock().await.vehicle;
+        let vehicle = &mut handler.lock().await.vehicle;
 
         if vehicle.get_location() == vehicle.get_destination() {
             let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();

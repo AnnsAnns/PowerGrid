@@ -1,7 +1,6 @@
-use log::{debug, error, info};
+use log::{debug, info};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
-use serde::de;
-use std::{result, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task, time};
 
 #[tokio::main]
@@ -17,7 +16,7 @@ async fn main() {
         powercable::MQTT_BROKER_PORT,
     );
     mqttoptions.set_keep_alive(Duration::from_secs(10));
-    let (mut client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
+    let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
     client
         .subscribe(powercable::TICK_CONFIGURE, QoS::AtMostOnce)
         .await
