@@ -13,7 +13,6 @@ mod topic_handler;
 type SharedConsumer = Arc<Mutex<ConsumerHandler>>;
 
 struct ConsumerHandler {
-    pub name: String,
     pub consumer: Consumer,
     pub client: AsyncClient,
     pub offer_handler: OfferHandler,
@@ -27,22 +26,22 @@ async fn main() {
         .init();
     info!("Starting consumer simulation...");
 
-    let consumer_name = env::var("CONSUMER_NAME").unwrap_or(generate_unique_name());
     let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
-    let consumer_type_str= env::var("CONSUMER_TYPE").unwrap_or(ConsumerType::G0.to_string()); // TODO: simplify
+    let consumer_type_str= env::var("CONSUMER_TYPE").unwrap_or(ConsumerType::H.to_string()); // TODO: simplify
     let consumer_type = ConsumerType::from_str(&consumer_type_str); // TODO: simplify
     let consumer =
-        Consumer::new(latitude, longitude, consumer_name.clone(), consumer_type);
-    debug!("Created {} of type {}", consumer_name, consumer_type_str);
+        Consumer::new(latitude, longitude, consumer_type);
+    debug!("Created {}", consumer_type_str);
 
     let mut mqttoptions = MqttOptions::new(
-        consumer_name.clone(),
+        consumer_type.to_string(),
         powercable::MQTT_BROKER,
         powercable::MQTT_BROKER_PORT,
     );
     mqttoptions.set_keep_alive(Duration::from_secs(5));
     let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
-    debug!("Connected to MQTT broker as {}", consumer_name);
+    debug!("Connected to MQTT broker as {}", consumer_type.to_string());
+
     client
         .subscribe(powercable::TICK_TOPIC, QoS::AtMostOnce)
         .await
@@ -61,7 +60,6 @@ async fn main() {
 
     
     let shared_consumer = Arc::new(Mutex::new(ConsumerHandler {
-        name: consumer_name.clone(),
         consumer,
         client: client.clone(),
         offer_handler: OfferHandler::new(),

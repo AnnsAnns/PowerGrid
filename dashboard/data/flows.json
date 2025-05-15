@@ -704,7 +704,7 @@
         "type": "mqtt in",
         "z": "5992b366.f9457c",
         "name": "",
-        "topic": "power/consumer/Tesla",
+        "topic": "power/consumer/H",
         "qos": "2",
         "datatype": "utf8",
         "broker": "c1c49a80.e500e",
@@ -712,7 +712,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 320,
+        "x": 310,
         "y": 1300,
         "wires": [
             [
@@ -729,7 +729,7 @@
         "order": 5,
         "width": "8",
         "height": "4",
-        "label": "Tesla Demand",
+        "label": "Haushalt Demand",
         "chartType": "line",
         "legend": "false",
         "xformat": "HH:mm:ss",
@@ -758,7 +758,7 @@
         "outputs": 1,
         "useDifferentColor": false,
         "className": "",
-        "x": 680,
+        "x": 690,
         "y": 1300,
         "wires": [
             []
@@ -843,7 +843,7 @@
         "type": "mqtt in",
         "z": "5992b366.f9457c",
         "name": "",
-        "topic": "power/consumer/Meier",
+        "topic": "power/consumer/G",
         "qos": "2",
         "datatype": "utf8",
         "broker": "c1c49a80.e500e",
@@ -851,7 +851,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 320,
+        "x": 310,
         "y": 1380,
         "wires": [
             [
@@ -868,72 +868,7 @@
         "order": 5,
         "width": "8",
         "height": "4",
-        "label": "Meier Demand",
-        "chartType": "line",
-        "legend": "false",
-        "xformat": "HH:mm:ss",
-        "interpolate": "linear",
-        "nodata": "",
-        "dot": false,
-        "ymin": "",
-        "ymax": "",
-        "removeOlder": 1,
-        "removeOlderPoints": "",
-        "removeOlderUnit": "3600",
-        "cutout": 0,
-        "useOneColor": false,
-        "useUTC": false,
-        "colors": [
-            "#1f77b4",
-            "#aec7e8",
-            "#ff7f0e",
-            "#2ca02c",
-            "#98df8a",
-            "#d62728",
-            "#ff9896",
-            "#9467bd",
-            "#c5b0d5"
-        ],
-        "outputs": 1,
-        "useDifferentColor": false,
-        "className": "",
-        "x": 680,
-        "y": 1380,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "d3b331530e914d8c",
-        "type": "mqtt in",
-        "z": "5992b366.f9457c",
-        "name": "",
-        "topic": "power/consumer/Backhus",
-        "qos": "2",
-        "datatype": "utf8",
-        "broker": "c1c49a80.e500e",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 330,
-        "y": 1460,
-        "wires": [
-            [
-                "571caf638c5ff83b"
-            ]
-        ]
-    },
-    {
-        "id": "571caf638c5ff83b",
-        "type": "ui_chart",
-        "z": "5992b366.f9457c",
-        "name": "",
-        "group": "a82e0630cb9ec36b",
-        "order": 5,
-        "width": "8",
-        "height": "4",
-        "label": "Backhus Demand",
+        "label": "Gewerbe Demand",
         "chartType": "line",
         "legend": "false",
         "xformat": "HH:mm:ss",
@@ -963,6 +898,71 @@
         "useDifferentColor": false,
         "className": "",
         "x": 690,
+        "y": 1380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d3b331530e914d8c",
+        "type": "mqtt in",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "topic": "power/consumer/L",
+        "qos": "2",
+        "datatype": "utf8",
+        "broker": "c1c49a80.e500e",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 310,
+        "y": 1460,
+        "wires": [
+            [
+                "571caf638c5ff83b"
+            ]
+        ]
+    },
+    {
+        "id": "571caf638c5ff83b",
+        "type": "ui_chart",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "group": "a82e0630cb9ec36b",
+        "order": 5,
+        "width": "8",
+        "height": "4",
+        "label": "Landwirtschaftlicher Betrieb Demand",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 750,
         "y": 1460,
         "wires": [
             []

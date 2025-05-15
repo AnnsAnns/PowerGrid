@@ -93,7 +93,7 @@ services:
       replicas: 5
       mode: replicated
 
-  h0:
+  haushalt:
     build:
       context: .
       dockerfile: Dockerfile
@@ -103,10 +103,9 @@ services:
     depends_on:
       - mosquitto_broker
     environment:
-      - CONSUMER_TYPE=H0
-      - CONSUMER_NAME=Meier
+      - CONSUMER_TYPE=H
 
-  g3:
+  gewerbe:
     build:
       context: .
       dockerfile: Dockerfile
@@ -116,10 +115,9 @@ services:
     depends_on:
       - mosquitto_broker
     environment:
-      - CONSUMER_TYPE=G3
-      - CONSUMER_NAME=Tesla
+      - CONSUMER_TYPE=G
 
-  g5:
+  bauernhof:
     build:
       context: .
       dockerfile: Dockerfile
@@ -129,8 +127,7 @@ services:
     depends_on:
       - mosquitto_broker
     environment:
-      - CONSUMER_TYPE=G5
-      - CONSUMER_NAME=Backhus
+      - CONSUMER_TYPE=L
     
 networks:
   mqtt_network:

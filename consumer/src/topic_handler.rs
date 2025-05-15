@@ -29,7 +29,7 @@ pub async fn process_tick(
     handler: SharedConsumer,
     payload: Bytes
 ) {
-    handler.lock().await.offer_handler.remove_all_offers();
+    handler.lock().await.offer_handler.remove_all_offers(); //remove old offers
 
     //Generate demand
     let tick_payload: TickPayload = serde_json::from_slice(&payload).unwrap();
@@ -38,13 +38,12 @@ pub async fn process_tick(
     let trimmed = timestamp.strip_suffix(" UTC").unwrap();
     let dt = NaiveDateTime::parse_from_str(trimmed, "%Y-%m-%d %H:%M:%S%.f").unwrap();
     let rounded_time = round_to_15min(dt);
-    let demand = handler.lock().await.consumer.get_demand(rounded_time).await.unwrap_or(0.0);
-    trace!("Demand (without scale): {:?}", demand);
+    let packages_askable = handler.lock().await.consumer.get_demand(rounded_time).await.unwrap_or(0);
+    trace!("Demand (without scale): {:?}", packages_askable);
 
 
     //aus dem charger kopiert
-    let packages_askable = demand as u32 * handler.lock().await.consumer.get_current_scale() as u32;
-    handler.lock().await.consumer.set_current_consumption(packages_askable as f32);
+    handler.lock().await.consumer.set_current_consumption(packages_askable);
     debug!("Packages askable: {:?}", packages_askable);
     if packages_askable == 0 {
         info!("No packages available for sale");
@@ -54,7 +53,7 @@ pub async fn process_tick(
     // for every energy package, create an offer
     for i in 0..packages_askable {
         let mut handler = handler.lock().await;
-        let offer_id = format!("{}-{}", handler.name, i);
+        let offer_id = format!("{}-{}", handler.consumer.get_consumer_type().to_string(), i);
         // offer with max price
         let offer = Offer::new(offer_id, f64::MAX, OFFER_PACKAGE_SIZE);
 
@@ -78,7 +77,7 @@ pub async fn commerce_tick(
     let handler = handler.lock().await;
     // publish location and current consumption
     let location_payload = json!({
-        "name" : handler.consumer.get_name(),
+        "name" : handler.consumer.get_consumer_type().to_string(),
         "lat": handler.consumer.get_latitude(),
         "lon": handler.consumer.get_longitude(),
         "icon": handler.consumer.get_consumer_type().to_icon(),
@@ -98,7 +97,7 @@ pub async fn commerce_tick(
 
     // publish consumption to consumer for only consumer data
     handler.client.publish(
-        format!("{}/{}", POWER_CONSUMER_TOPIC, handler.consumer.get_name()),
+        format!("{}/{}", POWER_CONSUMER_TOPIC, handler.consumer.get_consumer_type().to_string()),
         ExactlyOnce,
         false,
         handler.consumer.get_current_consumption().to_string(),
@@ -145,10 +144,10 @@ pub async fn scale_handler(
     payload: Bytes
 ) {
     debug!("Received scale: {:?}", payload);
-    let scale: u8 = serde_json::from_slice(&payload).unwrap();
+    let scale = serde_json::from_slice(&payload).unwrap();
     let mut handler = handler.lock().await;
     handler.consumer.set_current_scale(scale);
-    trace!("Consumer {} scale set to {}", handler.name, scale);
+    trace!("Consumer {} scale set to {}", handler.consumer.get_consumer_type().to_string(), scale);
 }
 
 fn round_to_15min(dt: NaiveDateTime) -> NaiveTime {

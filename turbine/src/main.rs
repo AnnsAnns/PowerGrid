@@ -1,9 +1,8 @@
 use handler::{ack_buy_offer, handle_buy_offer, handle_tick};
 use log::{debug, info};
 use powercable::*;
-use rumqttc::{AsyncClient, MqttOptions, QoS};
-use serde_json::json;
-use std::{sync::Arc, time::Duration};
+use rumqttc::AsyncClient;
+use std::sync::Arc;
 use tokio::{sync::Mutex, task};
 use turbine::Turbine;
 
