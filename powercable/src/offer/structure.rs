@@ -1,18 +1,21 @@
 use bytes::Bytes;
+use bitcode::{Encode, Decode};
 
 pub const OFFER_PACKAGE_SIZE: f64 = 1.0;
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+#[derive(Debug, Clone, Encode, Decode)]
 pub struct Offer {
     id: String,
     price: f64,
     amount: f64,
+    latitude: f64,
+    longitude: f64,
     accepted_by: Option<String>,
     ack_for: Option<String>,
 }
 
 impl Offer {
-    pub fn new(id: String, price: f64, amount: f64) -> Self {
-        Offer { id, price, amount, accepted_by: None, ack_for: None }
+    pub fn new(id: String, price: f64, amount: f64, latitude: f64, longitude: f64) -> Self {
+        Offer { id, price, amount, latitude, longitude, accepted_by: None, ack_for: None }
     }
 
     pub fn get_id(&self) -> &str {
@@ -21,6 +24,14 @@ impl Offer {
 
     pub fn get_price(&self) -> f64 {
         self.price
+    }
+
+    pub fn get_longitude(&self) -> f64 {
+        self.longitude
+    }
+
+    pub fn get_latitude(&self) -> f64 {
+        self.latitude
     }
 
     pub fn get_amount(&self) -> f64 {
@@ -43,12 +54,11 @@ impl Offer {
         self.ack_for = Some(ack_for);
     }
 
-    pub fn from_bytes(bytes: Bytes) -> Result<Self, serde_json::Error> {
-        serde_json::from_slice(&bytes)
+    pub fn from_bytes(bytes: Bytes) -> Result<Self, bitcode::Error> {
+        bitcode::decode(&bytes)
     }
 
-    pub fn to_bytes(&self) -> Result<Bytes, serde_json::Error> {
-        let json = serde_json::to_string(self)?;
-        Ok(Bytes::from(json))
+    pub fn to_bytes(&self) -> Bytes {
+        Bytes::from(bitcode::encode(self))
     }
 }

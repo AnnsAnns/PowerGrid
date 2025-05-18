@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use crate::{meta_data::{ApproximationElement, MetaDataWrapper}, parsing::{TemperatureData, WindData}};
 
 pub struct Turbine {

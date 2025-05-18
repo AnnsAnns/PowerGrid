@@ -5,7 +5,7 @@ use powercable::Offer;
 use crate::SharedTurbine;
 
 pub async fn handle_buy_offer(handler: SharedTurbine, payload: Bytes) {
-    let offer: Offer = serde_json::from_slice(&payload).unwrap();
+    let offer: Offer = Offer::from_bytes(payload).unwrap();
     debug!("Received buy offer: {:?}", offer);
     {
         let mut handler = handler.lock().await;
@@ -14,7 +14,7 @@ pub async fn handle_buy_offer(handler: SharedTurbine, payload: Bytes) {
 }
 
 pub async fn ack_buy_offer(handler: SharedTurbine, payload: Bytes) {
-    let offer: Offer = serde_json::from_slice(&payload).unwrap();
+    let offer: Offer = Offer::from_bytes(payload).unwrap();
 
     if offer.get_ack_for().is_none() {
         warn!("Received ACK for offer {} without ack_for field", offer.get_id());

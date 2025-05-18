@@ -59,7 +59,7 @@ pub async fn commerce_tick(
             ACCEPT_BUY_OFFER_TOPIC,
             QoS::ExactlyOnce,
             false,
-            offer.to_bytes().unwrap(),
+            offer.to_bytes(),
         ).await.unwrap();
     }
 }
