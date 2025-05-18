@@ -19,6 +19,7 @@ impl Turbine {
         self.closest_wind_stations = Some(approx.clone());
 
         for station in approx {
+            self.set_wind_date_to_cache(station.station.stations_id).await;
             debug!("Station: {}", station.station.to_string());
             debug!("Ratio: {}", station.ratio);
             debug!("---------------------");
@@ -35,6 +36,7 @@ impl Turbine {
         self.closest_temperature_stations = Some(approx.clone());
 
         for station in approx {
+            self.set_temperature_date_to_cache(station.station.stations_id).await;
             debug!("Station: {}", station.station.to_string());
             debug!("Ratio: {}", station.ratio);
             debug!("---------------------");
@@ -57,7 +59,7 @@ impl Turbine {
         };
 
         for station in self.closest_wind_stations.as_ref().unwrap() {
-            let wind_data = WindData::for_id(station.station.stations_id).await;
+            let wind_data = self.get_wind_date_from_cache(station.station.stations_id).await.unwrap();
 
             let tick = self.get_tick() % wind_data.len();
 
@@ -118,9 +120,10 @@ impl Turbine {
         };
 
         for station in self.closest_temperature_stations.as_ref().unwrap() {
-            let temperature_data = TemperatureData::for_id(station.station.stations_id).await;
-
-
+            let temperature_data = self
+                .get_temperature_date_from_cache(station.station.stations_id)
+                .await
+                .unwrap();
             let tick = self.get_tick() % temperature_data.len();
 
             let first_data = temperature_data.get(tick).unwrap();

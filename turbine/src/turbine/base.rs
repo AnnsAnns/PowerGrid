@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use crate::{meta_data::{ApproximationElement, MetaDataWrapper}, parsing::{TemperatureData, WindData}};
+use crate::{meta_data::{ApproximationElement, MetaDataWrapper}, parsing::{Cache, TemperatureData, WindData}};
 
 pub struct Turbine {
     rotor_dimension: f64, // in meters
@@ -13,6 +13,7 @@ pub struct Turbine {
     pub closest_temperature_stations: Option<Vec<ApproximationElement>>,
     pub approximate_wind: Option<WindData>,
     pub approximate_temperature: Option<TemperatureData>,
+    pub cache: Cache,
 }
 
 impl Turbine {
@@ -34,6 +35,7 @@ impl Turbine {
             closest_temperature_stations: None,
             approximate_wind: None,
             approximate_temperature: None,
+            cache: Cache::new(),
         }
     }
 
