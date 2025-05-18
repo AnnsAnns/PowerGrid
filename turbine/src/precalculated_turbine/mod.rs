@@ -1,5 +1,3 @@
-use tokio::runtime::Runtime;
-
 use crate::turbine::Turbine;
 
 const CACHED_ENTRIES: usize = 70000;
