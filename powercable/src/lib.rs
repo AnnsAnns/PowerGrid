@@ -5,9 +5,11 @@ use rand::Rng;
 pub mod charger;
 pub mod offer;
 pub mod tickgen;
+pub mod chart_entry;
 
 pub use offer::Offer;
 pub use offer::offer_handler::OfferHandler;
+pub use chart_entry::ChartEntry;
 
 pub const BUY_OFFER_TOPIC: &str = "market/buy_offer";
 pub const ACCEPT_BUY_OFFER_TOPIC: &str = "market/accept_buy_offer";
@@ -26,6 +28,7 @@ pub const POWER_CONSUMER_SCALE: &str = "power/consumer/scale";
 pub const WORLDMAP_EVENT_TOPIC: &str = "worldmap/event";
 pub const MQTT_BROKER: &str = "mosquitto_broker";
 pub const MQTT_BROKER_PORT: u16 = 1883;
+pub const MAP_UPDATE_SPEED_IN_SECS: u64 = 1;
 
 // Around Neumünster
 const NORTH_LIMIT: (f64, f64) = (54.08200660036042, 9.916791893513686);

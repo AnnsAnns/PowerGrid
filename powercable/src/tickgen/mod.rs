@@ -1,3 +1,5 @@
+use bytes::Bytes;
+
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum Phase {
     Process,
@@ -9,7 +11,7 @@ pub enum Phase {
 pub struct TickPayload {
     pub tick: u64,
     pub phase: Phase,
-    pub timestamp: String,
+    pub timestamp: usize,
     pub configuration: TickConfig,
 }
 
@@ -18,4 +20,10 @@ pub struct TickConfig {
     /// The wait inbetween ticks in seconds
     pub speed: f64,
     pub start_date: String,
+}
+
+impl TickPayload {
+    pub fn from_bytes(bytes: Bytes) -> Result<Self, serde_json::Error> {
+        serde_json::from_slice(&bytes)
+    }
 }

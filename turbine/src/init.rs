@@ -6,7 +6,7 @@ use rumqttc::{AsyncClient, EventLoop, MqttOptions, QoS};
 use serde_json::json;
 use tokio::sync::Mutex;
 
-use crate::{meta_data, turbine, SharedTurbine, TurbineHandler};
+use crate::{meta_data, precalculated_turbine::{self, PrecalculatedTurbine}, turbine, SharedTurbine, TurbineHandler};
 
 pub async fn init(name: String) -> (SharedTurbine, EventLoop) {
     let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
@@ -31,18 +31,16 @@ pub async fn init(name: String) -> (SharedTurbine, EventLoop) {
     mqttoptions.set_keep_alive(Duration::from_secs(20));
     let (client, eventloop) = AsyncClient::new(mqttoptions, 10);
 
-    turbine.approximate_wind_data().await;
-    turbine.approximate_temperature_data().await;
-    let current_power = turbine.get_power_output();
+    let precalculated_turbine = PrecalculatedTurbine::from_turbine(turbine).await;
     let offer_handler = OfferHandler::new();
 
     (
         Arc::new(Mutex::new(TurbineHandler {
             name,
-            turbine,
+            turbine: precalculated_turbine,
             offer_handler,
             client,
-            remaining_power: current_power,
+            remaining_power: 0.0,
         })),
         eventloop,
     )

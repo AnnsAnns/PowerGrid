@@ -9,6 +9,7 @@ use topic_handler::{accept_offer_handler, tick_handler, scale_handler};
 
 mod consumer;
 mod topic_handler;
+mod map_handler;
 
 type SharedConsumer = Arc<Mutex<ConsumerHandler>>;
 
@@ -21,7 +22,7 @@ struct ConsumerHandler {
 #[tokio::main]
 async fn main() {
     env_logger::builder()
-        .filter(None, log::LevelFilter::Debug)
+        .filter(None, log::LevelFilter::Info)
         .filter_module("rumqttc::state", log::LevelFilter::Info)
         .init();
     info!("Starting consumer simulation...");
@@ -29,7 +30,7 @@ async fn main() {
     let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
     let consumer_type_str= env::var("CONSUMER_TYPE").unwrap_or(ConsumerType::H.to_string()); // TODO: simplify
     let consumer_type = ConsumerType::from_str(&consumer_type_str); // TODO: simplify
-    let consumer =
+    let mut consumer =
         Consumer::new(latitude, longitude, consumer_type);
     debug!("Created {}", consumer_type_str);
 
@@ -58,12 +59,15 @@ async fn main() {
         .unwrap();
     trace!("Subscribed to {} topic", POWER_CONSUMER_SCALE);
 
+    consumer.parse_csv().await.unwrap();
     
     let shared_consumer = Arc::new(Mutex::new(ConsumerHandler {
         consumer,
         client: client.clone(),
         offer_handler: OfferHandler::new(),
     }));
+
+    task::spawn(map_handler::map_update_task(shared_consumer.clone()));
 
     // while loop over notifications
     while let Ok(notification) = eventloop.poll().await {

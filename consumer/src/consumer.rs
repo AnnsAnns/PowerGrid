@@ -1,6 +1,9 @@
 use chrono::NaiveTime;
 use log::{debug, trace};
-use tokio::{fs::File, io::{AsyncBufReadExt, BufReader}};
+use tokio::{
+    fs::File,
+    io::{AsyncBufReadExt, BufReader},
+};
 
 #[derive(Debug, Clone, Copy)]
 pub enum ConsumerType {
@@ -27,6 +30,14 @@ impl ConsumerType {
         }
     }
 
+    pub fn to_detailed_string(&self) -> String {
+        match self {
+            ConsumerType::H => "Haushalt".to_string(),
+            ConsumerType::G => "Gewerbe".to_string(),
+            ConsumerType::L => "Landwirt".to_string(),
+        }
+    }
+
     pub fn to_icon(&self) -> String {
         match self {
             ConsumerType::H => ":derelict_house_building:".to_string(),
@@ -36,27 +47,26 @@ impl ConsumerType {
     }
 }
 
-
 pub struct Consumer {
     latitude: f64,
     longitude: f64,
     consumer_type: ConsumerType,
     current_consumption: usize,
     current_scale: usize,
+    timeline: Vec<f32>,
+    current_pointer: usize,
 }
 
 impl Consumer {
-    pub fn new(
-        latitude: f64,
-        longitude: f64,
-        consumer_type: ConsumerType,
-    ) -> Self {
+    pub fn new(latitude: f64, longitude: f64, consumer_type: ConsumerType) -> Self {
         Consumer {
             latitude,
             longitude,
             consumer_type,
             current_consumption: 0,
             current_scale: 1,
+            timeline: Vec::new(),
+            current_pointer: 0,
         }
     }
 
@@ -80,39 +90,45 @@ impl Consumer {
         self.current_consumption
     }
 
+    pub fn tick(&mut self) {
+        self.current_pointer = (self.current_pointer + 1) % self.timeline.len();
+    }
     /**
-     * Get the demand for the given time from the CSV file.
-     * 
-     * @param time The time to get the demand for.
-     * @return The demand for the given time. Already rounded and scaled.
-     *         Returns None if the time is not found in the CSV file.
+     * Parse the CSV file and load the demand timeline into memory.
+     * This should be called at initialization.
      */
-    pub async fn get_demand(&self, time: NaiveTime) -> Option<usize> {
-        let file = File::open("../tmp/slp.csv").await.ok()?;
+    pub async fn parse_csv(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        let file = File::open("../tmp/slp.csv").await?;
         let reader = BufReader::new(file);
         let mut lines = reader.lines();
 
-        while let Some(line) = lines.next_line().await.ok()? {
+        self.timeline.clear();
+
+        while let Some(line) = lines.next_line().await? {
             let columns: Vec<&str> = line.split(';').collect();
             trace!("Column: {:?}", columns);
-            if let Some(record_time) = columns.get(0) {
-                if let Ok(parsed_time) = NaiveTime::parse_from_str(record_time, "%H:%M") {
-                    if parsed_time == time {
-                        if let Some(value) = columns.get(self.consumer_type.clone() as usize + 1) {
-                            debug!("Value: {:?}", value);
-                            if let Ok(demand) = value.parse::<f32>() {
-                                trace!("Parsed demand: {:?}", demand);
-                                trace!("Current scale: {:?}", self.get_current_scale());
-                                let result = (demand * self.get_current_scale() as f32).round() as usize;
-                                debug!("Demand: {:?}", result);
-                                return Some(result);
-                            }
-                        }
-                    }
+
+            if let Some(value) = columns.get(self.consumer_type as usize + 1) {
+                debug!("Value: {:?}", value);
+                if let Ok(demand) = value.parse::<f32>() {
+                    trace!("Parsed demand: {:?}", demand);
+                    self.timeline.push(demand as f32);
                 }
             }
         }
-        None
+
+        Ok(())
+    }
+
+    /**
+     * Get the demand for the current time.
+     *
+     * @return The demand for the current time. Already rounded and scaled.
+     *         Returns None if the timeline is empty or current_pointer is out of bounds.
+     */
+    pub fn get_demand(&self) -> usize {
+        (self.timeline.get(self.current_pointer).unwrap().clone() * self.current_scale as f32)
+            as usize
     }
 
     pub fn set_current_scale(&mut self, scale: usize) {

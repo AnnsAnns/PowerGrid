@@ -4,8 +4,8 @@ use log::{debug, info, trace, warn};
 use powercable::{
     offer::structure::OFFER_PACKAGE_SIZE,
     tickgen::{Phase, TickPayload},
-    Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, BUY_OFFER_TOPIC, POWER_CONSUMER_TOPIC, POWER_LOCATION_TOPIC,
-    POWER_NETWORK_TOPIC,
+    ChartEntry, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, BUY_OFFER_TOPIC, POWER_CONSUMER_TOPIC,
+    POWER_LOCATION_TOPIC, POWER_NETWORK_TOPIC, POWER_TRANSFORMER_CONSUMPTION_TOPIC,
 };
 use rumqttc::QoS::*;
 use serde_json::json;
@@ -19,7 +19,7 @@ pub async fn tick_handler(handler: SharedConsumer, payload: Bytes) {
             process_tick(handler, payload).await;
         }
         Phase::Commerce => {
-            commerce_tick(handler).await;
+            commerce_tick(handler, payload).await;
         }
         Phase::PowerImport => {
             // No action needed
@@ -28,22 +28,13 @@ pub async fn tick_handler(handler: SharedConsumer, payload: Bytes) {
 }
 
 pub async fn process_tick(handler: SharedConsumer, payload: Bytes) {
-    handler.lock().await.offer_handler.remove_all_offers(); //remove old offers
+    let packages_askable = {
+        let mut handler = handler.lock().await;
+        handler.consumer.tick();
+        handler.offer_handler.remove_all_offers();
+        handler.consumer.get_demand()
+    };
 
-    //Generate demand
-    let tick_payload: TickPayload = serde_json::from_slice(&payload).unwrap();
-    let timestamp = tick_payload.timestamp;
-    trace!("Extracted timestamp: {}", timestamp);
-    let trimmed = timestamp.strip_suffix(" UTC").unwrap();
-    let dt = NaiveDateTime::parse_from_str(trimmed, "%Y-%m-%d %H:%M:%S%.f").unwrap();
-    let rounded_time = round_to_15min(dt);
-    let packages_askable = handler
-        .lock()
-        .await
-        .consumer
-        .get_demand(rounded_time)
-        .await
-        .unwrap_or(0);
     trace!("Demand (without scale): {:?}", packages_askable);
 
     //aus dem charger kopiert
@@ -76,52 +67,28 @@ pub async fn process_tick(handler: SharedConsumer, payload: Bytes) {
         // publish offer
         handler
             .client
-            .publish(
-                BUY_OFFER_TOPIC,
-                ExactlyOnce,
-                false,
-                offer.to_bytes(),
-            )
+            .publish(BUY_OFFER_TOPIC, ExactlyOnce, false, offer.to_bytes())
             .await
             .unwrap()
     }
 }
 
-pub async fn commerce_tick(handler: SharedConsumer) {
+pub async fn commerce_tick(handler: SharedConsumer, payload: Bytes) {
     let handler = handler.lock().await;
-    // publish location and current consumption
-    let location_payload = json!({
-        "name" : handler.consumer.get_consumer_type().to_string(),
-        "lat": handler.consumer.get_latitude(),
-        "lon": handler.consumer.get_longitude(),
-        "icon": handler.consumer.get_consumer_type().to_icon(),
-        "label": format!("{:.1}kW", handler.consumer.get_current_consumption()),
-    })
-    .to_string();
-    handler
-        .client
-        .publish(
-            POWER_LOCATION_TOPIC,
-            ExactlyOnce,
-            true,
-            location_payload.clone(),
-        )
-        .await
-        .unwrap();
-    debug!("Published location: {:?}", location_payload);
-
+    let tick_payload = TickPayload::from_bytes(payload).unwrap();
     // publish consumption to consumer for only consumer data
     handler
         .client
         .publish(
-            format!(
-                "{}/{}",
-                POWER_CONSUMER_TOPIC,
-                handler.consumer.get_consumer_type().to_string()
-            ),
+            POWER_TRANSFORMER_CONSUMPTION_TOPIC,
             ExactlyOnce,
             false,
-            handler.consumer.get_current_consumption().to_string(),
+            ChartEntry::new(
+                handler.consumer.get_consumer_type().to_detailed_string(),
+                handler.consumer.get_current_consumption() as isize,
+                tick_payload.timestamp,
+            )
+            .to_string(),
         )
         .await
         .unwrap();
@@ -180,10 +147,4 @@ pub async fn scale_handler(handler: SharedConsumer, payload: Bytes) {
         handler.consumer.get_consumer_type().to_string(),
         scale
     );
-}
-
-fn round_to_15min(dt: NaiveDateTime) -> NaiveTime {
-    let minutes = dt.minute();
-    let rounded = minutes - (minutes % 15);
-    return NaiveTime::from_hms_opt(dt.hour(), rounded, 0).unwrap();
 }

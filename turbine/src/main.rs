@@ -1,6 +1,7 @@
 use handler::{ack_buy_offer, handle_buy_offer, handle_tick};
 use log::{debug, info};
 use powercable::*;
+use precalculated_turbine::PrecalculatedTurbine;
 use rumqttc::AsyncClient;
 use std::sync::Arc;
 use tokio::{sync::Mutex, task};
@@ -11,12 +12,13 @@ mod init;
 mod meta_data;
 mod parsing;
 mod turbine;
+mod precalculated_turbine;
 
 pub(crate) type SharedTurbine = Arc<Mutex<TurbineHandler>>;
 
 struct TurbineHandler {
     pub name: String,
-    pub turbine: Turbine,
+    pub turbine: PrecalculatedTurbine,
     pub offer_handler: OfferHandler,
     pub client: AsyncClient,
     pub remaining_power: f64,
