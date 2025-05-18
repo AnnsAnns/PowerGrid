@@ -368,17 +368,17 @@
         "name": "",
         "topic": "power/transformer/consumption",
         "qos": "2",
-        "datatype": "utf8",
+        "datatype": "json",
         "broker": "c1c49a80.e500e",
         "nl": false,
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 390,
+        "x": 230,
         "y": 1020,
         "wires": [
             [
-                "49f72289542aa70b"
+                "a51664a99e0eb2ed"
             ]
         ]
     },
@@ -393,16 +393,16 @@
         "height": "6",
         "label": "Power Consumption",
         "chartType": "line",
-        "legend": "false",
-        "xformat": "HH:mm:ss",
+        "legend": "true",
+        "xformat": "dd HH:mm",
         "interpolate": "linear",
         "nodata": "",
         "dot": false,
         "ymin": "",
         "ymax": "",
-        "removeOlder": "2",
-        "removeOlderPoints": "1000",
-        "removeOlderUnit": "3600",
+        "removeOlder": "1",
+        "removeOlderPoints": "10000",
+        "removeOlderUnit": "604800",
         "cutout": 0,
         "useOneColor": false,
         "useUTC": false,
@@ -420,7 +420,7 @@
         "outputs": 1,
         "useDifferentColor": false,
         "className": "",
-        "x": 700,
+        "x": 780,
         "y": 1020,
         "wires": [
             []
@@ -433,17 +433,17 @@
         "name": "",
         "topic": "power/transformer/generation",
         "qos": "2",
-        "datatype": "utf8",
+        "datatype": "json",
         "broker": "c1c49a80.e500e",
         "nl": false,
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 380,
+        "x": 240,
         "y": 1080,
         "wires": [
             [
-                "66a3388ee9d6020b"
+                "c3e79c32a768de90"
             ]
         ]
     },
@@ -458,16 +458,16 @@
         "height": "6",
         "label": "Power Generation",
         "chartType": "line",
-        "legend": "false",
-        "xformat": "HH:mm:ss",
+        "legend": "true",
+        "xformat": "dd HH:mm",
         "interpolate": "linear",
         "nodata": "",
         "dot": false,
         "ymin": "",
         "ymax": "",
         "removeOlder": 1,
-        "removeOlderPoints": "",
-        "removeOlderUnit": "3600",
+        "removeOlderPoints": "10000",
+        "removeOlderUnit": "604800",
         "cutout": 0,
         "useOneColor": false,
         "useUTC": false,
@@ -485,7 +485,7 @@
         "outputs": 1,
         "useDifferentColor": false,
         "className": "",
-        "x": 690,
+        "x": 770,
         "y": 1080,
         "wires": [
             []
@@ -498,17 +498,17 @@
         "name": "",
         "topic": "power/transformer/diff",
         "qos": "2",
-        "datatype": "utf8",
+        "datatype": "json",
         "broker": "c1c49a80.e500e",
         "nl": false,
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 360,
+        "x": 280,
         "y": 820,
         "wires": [
             [
-                "0664c069053c0964"
+                "d9374dcded931d27"
             ]
         ]
     },
@@ -525,7 +525,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 330,
+        "x": 310,
         "y": 900,
         "wires": [
             [
@@ -666,81 +666,16 @@
         "height": "4",
         "label": "Network Diff",
         "chartType": "line",
-        "legend": "false",
-        "xformat": "HH:mm:ss",
+        "legend": "true",
+        "xformat": "dd HH:mm",
         "interpolate": "linear",
         "nodata": "",
         "dot": false,
         "ymin": "",
         "ymax": "",
         "removeOlder": 1,
-        "removeOlderPoints": "",
-        "removeOlderUnit": "3600",
-        "cutout": 0,
-        "useOneColor": false,
-        "useUTC": false,
-        "colors": [
-            "#1f77b4",
-            "#aec7e8",
-            "#ff7f0e",
-            "#2ca02c",
-            "#98df8a",
-            "#d62728",
-            "#ff9896",
-            "#9467bd",
-            "#c5b0d5"
-        ],
-        "outputs": 1,
-        "useDifferentColor": false,
-        "className": "",
-        "x": 670,
-        "y": 820,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "046227ecfabda660",
-        "type": "mqtt in",
-        "z": "5992b366.f9457c",
-        "name": "",
-        "topic": "power/consumer/H",
-        "qos": "2",
-        "datatype": "utf8",
-        "broker": "c1c49a80.e500e",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 310,
-        "y": 1300,
-        "wires": [
-            [
-                "592f1062c4634b3a"
-            ]
-        ]
-    },
-    {
-        "id": "592f1062c4634b3a",
-        "type": "ui_chart",
-        "z": "5992b366.f9457c",
-        "name": "",
-        "group": "a82e0630cb9ec36b",
-        "order": 5,
-        "width": "8",
-        "height": "4",
-        "label": "Haushalt Demand",
-        "chartType": "line",
-        "legend": "false",
-        "xformat": "HH:mm:ss",
-        "interpolate": "linear",
-        "nodata": "",
-        "dot": false,
-        "ymin": "",
-        "ymax": "",
-        "removeOlder": 1,
-        "removeOlderPoints": "",
-        "removeOlderUnit": "3600",
+        "removeOlderPoints": "10000",
+        "removeOlderUnit": "604800",
         "cutout": 0,
         "useOneColor": false,
         "useUTC": false,
@@ -759,7 +694,7 @@
         "useDifferentColor": false,
         "className": "",
         "x": 690,
-        "y": 1300,
+        "y": 820,
         "wires": [
             []
         ]
@@ -837,136 +772,6 @@
         "x": 800,
         "y": 400,
         "wires": []
-    },
-    {
-        "id": "92f5a0cbdb268a6b",
-        "type": "mqtt in",
-        "z": "5992b366.f9457c",
-        "name": "",
-        "topic": "power/consumer/G",
-        "qos": "2",
-        "datatype": "utf8",
-        "broker": "c1c49a80.e500e",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 310,
-        "y": 1380,
-        "wires": [
-            [
-                "874301e46ec568f0"
-            ]
-        ]
-    },
-    {
-        "id": "874301e46ec568f0",
-        "type": "ui_chart",
-        "z": "5992b366.f9457c",
-        "name": "",
-        "group": "a82e0630cb9ec36b",
-        "order": 5,
-        "width": "8",
-        "height": "4",
-        "label": "Gewerbe Demand",
-        "chartType": "line",
-        "legend": "false",
-        "xformat": "HH:mm:ss",
-        "interpolate": "linear",
-        "nodata": "",
-        "dot": false,
-        "ymin": "",
-        "ymax": "",
-        "removeOlder": 1,
-        "removeOlderPoints": "",
-        "removeOlderUnit": "3600",
-        "cutout": 0,
-        "useOneColor": false,
-        "useUTC": false,
-        "colors": [
-            "#1f77b4",
-            "#aec7e8",
-            "#ff7f0e",
-            "#2ca02c",
-            "#98df8a",
-            "#d62728",
-            "#ff9896",
-            "#9467bd",
-            "#c5b0d5"
-        ],
-        "outputs": 1,
-        "useDifferentColor": false,
-        "className": "",
-        "x": 690,
-        "y": 1380,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "d3b331530e914d8c",
-        "type": "mqtt in",
-        "z": "5992b366.f9457c",
-        "name": "",
-        "topic": "power/consumer/L",
-        "qos": "2",
-        "datatype": "utf8",
-        "broker": "c1c49a80.e500e",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 310,
-        "y": 1460,
-        "wires": [
-            [
-                "571caf638c5ff83b"
-            ]
-        ]
-    },
-    {
-        "id": "571caf638c5ff83b",
-        "type": "ui_chart",
-        "z": "5992b366.f9457c",
-        "name": "",
-        "group": "a82e0630cb9ec36b",
-        "order": 5,
-        "width": "8",
-        "height": "4",
-        "label": "Landwirtschaftlicher Betrieb Demand",
-        "chartType": "line",
-        "legend": "false",
-        "xformat": "HH:mm:ss",
-        "interpolate": "linear",
-        "nodata": "",
-        "dot": false,
-        "ymin": "",
-        "ymax": "",
-        "removeOlder": 1,
-        "removeOlderPoints": "",
-        "removeOlderUnit": "3600",
-        "cutout": 0,
-        "useOneColor": false,
-        "useUTC": false,
-        "colors": [
-            "#1f77b4",
-            "#aec7e8",
-            "#ff7f0e",
-            "#2ca02c",
-            "#98df8a",
-            "#d62728",
-            "#ff9896",
-            "#9467bd",
-            "#c5b0d5"
-        ],
-        "outputs": 1,
-        "useDifferentColor": false,
-        "className": "",
-        "x": 750,
-        "y": 1460,
-        "wires": [
-            []
-        ]
     },
     {
         "id": "21530c700d59c885",
@@ -1094,5 +899,65 @@
         "x": 740,
         "y": 1740,
         "wires": []
+    },
+    {
+        "id": "c3e79c32a768de90",
+        "type": "function",
+        "z": "5992b366.f9457c",
+        "name": "ParsePayload",
+        "func": "return {payload: msg.payload[\"payload\"], topic: msg.payload[\"topic\"], timestamp: msg.payload[\"timestamp\"]}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 1080,
+        "wires": [
+            [
+                "66a3388ee9d6020b"
+            ]
+        ]
+    },
+    {
+        "id": "a51664a99e0eb2ed",
+        "type": "function",
+        "z": "5992b366.f9457c",
+        "name": "ParsePayload",
+        "func": "return {payload: msg.payload[\"payload\"], topic: msg.payload[\"topic\"], timestamp: msg.payload[\"timestamp\"]}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 1020,
+        "wires": [
+            [
+                "49f72289542aa70b"
+            ]
+        ]
+    },
+    {
+        "id": "d9374dcded931d27",
+        "type": "function",
+        "z": "5992b366.f9457c",
+        "name": "ParsePayload",
+        "func": "return {payload: msg.payload[\"payload\"], topic: msg.payload[\"topic\"], timestamp: msg.payload[\"timestamp\"]}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 820,
+        "wires": [
+            [
+                "0664c069053c0964"
+            ]
+        ]
     }
 ]

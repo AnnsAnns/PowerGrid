@@ -30,6 +30,14 @@ impl ConsumerType {
         }
     }
 
+    pub fn to_detailed_string(&self) -> String {
+        match self {
+            ConsumerType::H => "Haushalt".to_string(),
+            ConsumerType::G => "Gewerbe".to_string(),
+            ConsumerType::L => "Landwirt".to_string(),
+        }
+    }
+
     pub fn to_icon(&self) -> String {
         match self {
             ConsumerType::H => ":derelict_house_building:".to_string(),

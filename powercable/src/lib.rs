@@ -5,9 +5,11 @@ use rand::Rng;
 pub mod charger;
 pub mod offer;
 pub mod tickgen;
+pub mod chart_entry;
 
 pub use offer::Offer;
 pub use offer::offer_handler::OfferHandler;
+pub use chart_entry::ChartEntry;
 
 pub const BUY_OFFER_TOPIC: &str = "market/buy_offer";
 pub const ACCEPT_BUY_OFFER_TOPIC: &str = "market/accept_buy_offer";

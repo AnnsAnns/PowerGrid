@@ -30,7 +30,7 @@ async fn main() {
     let configuration = Arc::new(Mutex::new(powercable::tickgen::TickPayload {
         tick: 0,
         phase: powercable::tickgen::Phase::Process,
-        timestamp: String::new(),
+        timestamp: 0,
         configuration: powercable::tickgen::TickConfig {
             speed: 10.0,
             start_date: chrono::Utc::now().to_string(),
@@ -39,43 +39,43 @@ async fn main() {
 
     let configuration_clone = Arc::clone(&configuration);
     task::spawn(async move {
-        let mut speed ;
+        let mut speed;
         loop {
             {
-            let mut config = configuration_clone.lock().await;
-            speed = config.configuration.speed;
-            match config.phase {
-                powercable::tickgen::Phase::Process => {
-                    config.phase = powercable::tickgen::Phase::Commerce;
+                let mut config = configuration_clone.lock().await;
+                speed = config.configuration.speed;
+                match config.phase {
+                    powercable::tickgen::Phase::Process => {
+                        config.phase = powercable::tickgen::Phase::Commerce;
+                    }
+                    powercable::tickgen::Phase::Commerce => {
+                        config.phase = powercable::tickgen::Phase::PowerImport;
+                    }
+                    powercable::tickgen::Phase::PowerImport => {
+                        config.tick += 1;
+                        config.phase = powercable::tickgen::Phase::Process;
+                    }
                 }
-                powercable::tickgen::Phase::Commerce => {
-                    config.phase = powercable::tickgen::Phase::PowerImport;
-                }
-                powercable::tickgen::Phase::PowerImport => {
-                    config.tick += 1;
-                    config.phase = powercable::tickgen::Phase::Process;
-                }
+                let start_date = config
+                    .configuration
+                    .start_date
+                    .parse::<chrono::DateTime<chrono::Utc>>()
+                    .unwrap();
+                // Each tick is 15 minutes
+                config.timestamp = (start_date
+                    + chrono::Duration::minutes((config.tick * 15).try_into().unwrap()))
+                .timestamp_millis() as usize;
+                client
+                    .publish(
+                        powercable::TICK_TOPIC,
+                        QoS::ExactlyOnce,
+                        true,
+                        serde_json::to_string(&*config).unwrap(),
+                    )
+                    .await
+                    .unwrap();
             }
-            let start_date = config
-                .configuration
-                .start_date
-                .parse::<chrono::DateTime<chrono::Utc>>()
-                .unwrap();
-            // Each tick is 15 minutes
-            config.timestamp = (start_date
-                + chrono::Duration::minutes((config.tick * 15).try_into().unwrap()))
-            .to_string();
-            client
-                .publish(
-                    powercable::TICK_TOPIC,
-                    QoS::ExactlyOnce,
-                    true,
-                    serde_json::to_string(&*config).unwrap(),
-                )
-                .await
-                .unwrap();
-            }
-            time::sleep(Duration::from_secs_f64(speed/2.0)).await;
+            time::sleep(Duration::from_secs_f64(speed / 2.0)).await;
         }
     });
 

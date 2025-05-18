@@ -4,8 +4,8 @@ use log::{debug, info, trace, warn};
 use powercable::{
     offer::structure::OFFER_PACKAGE_SIZE,
     tickgen::{Phase, TickPayload},
-    Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, BUY_OFFER_TOPIC, POWER_CONSUMER_TOPIC, POWER_LOCATION_TOPIC,
-    POWER_NETWORK_TOPIC,
+    ChartEntry, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, BUY_OFFER_TOPIC, POWER_CONSUMER_TOPIC,
+    POWER_LOCATION_TOPIC, POWER_NETWORK_TOPIC, POWER_TRANSFORMER_CONSUMPTION_TOPIC,
 };
 use rumqttc::QoS::*;
 use serde_json::json;
@@ -28,7 +28,7 @@ pub async fn tick_handler(handler: SharedConsumer, payload: Bytes) {
 }
 
 pub async fn process_tick(handler: SharedConsumer, payload: Bytes) {
-    let packages_askable = { 
+    let packages_askable = {
         let mut handler = handler.lock().await;
         handler.consumer.tick();
         handler.offer_handler.remove_all_offers();
@@ -67,12 +67,7 @@ pub async fn process_tick(handler: SharedConsumer, payload: Bytes) {
         // publish offer
         handler
             .client
-            .publish(
-                BUY_OFFER_TOPIC,
-                ExactlyOnce,
-                false,
-                offer.to_bytes(),
-            )
+            .publish(BUY_OFFER_TOPIC, ExactlyOnce, false, offer.to_bytes())
             .await
             .unwrap()
     }
@@ -80,18 +75,20 @@ pub async fn process_tick(handler: SharedConsumer, payload: Bytes) {
 
 pub async fn commerce_tick(handler: SharedConsumer, payload: Bytes) {
     let handler = handler.lock().await;
+    let tick_payload = TickPayload::from_bytes(payload).unwrap();
     // publish consumption to consumer for only consumer data
     handler
         .client
         .publish(
-            format!(
-                "{}/{}",
-                POWER_CONSUMER_TOPIC,
-                handler.consumer.get_consumer_type().to_string()
-            ),
+            POWER_TRANSFORMER_CONSUMPTION_TOPIC,
             ExactlyOnce,
             false,
-            handler.consumer.get_current_consumption().to_string(),
+            ChartEntry::new(
+                handler.consumer.get_consumer_type().to_detailed_string(),
+                handler.consumer.get_current_consumption() as isize,
+                tick_payload.timestamp,
+            )
+            .to_string(),
         )
         .await
         .unwrap();
