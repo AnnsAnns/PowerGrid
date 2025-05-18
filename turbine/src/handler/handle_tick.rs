@@ -12,10 +12,8 @@ pub async fn process_tick(
 ) {
     let (client, power) = {
         let mut handler = handler.lock().await;
-        handler.offer_handler.remove_all_offers();
         handler.turbine.tick();
-        handler.turbine.approximate_wind_data().await;
-        handler.turbine.approximate_temperature_data().await;
+        handler.offer_handler.remove_all_offers();
         handler.remaining_power = handler.turbine.get_power_output();
         debug!("Current power output: {} Watt", handler.remaining_power);
 
