@@ -1,12 +1,12 @@
 use std::{sync::Arc, time::Duration};
 
-use log::{debug, info};
+use log::info;
 use powercable::*;
 use rumqttc::{AsyncClient, EventLoop, MqttOptions, QoS};
 use serde_json::json;
 use tokio::sync::Mutex;
 
-use crate::{handler, meta_data, turbine, SharedTurbine, TurbineHandler};
+use crate::{meta_data, turbine, SharedTurbine, TurbineHandler};
 
 pub async fn init(name: String) -> (SharedTurbine, EventLoop) {
     let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();

@@ -1,15 +1,8 @@
-use std::sync::Arc;
-
 use bytes::Bytes;
-use log::{debug, info, warn};
-use powercable::{
-    tickgen::{Phase, TickPayload},
-    Offer, POWER_NETWORK_TOPIC,
-};
-use rumqttc::QoS;
-use tokio::sync::Mutex;
+use log::{debug, warn};
+use powercable::Offer;
 
-use crate::{SharedTurbine, TurbineHandler};
+use crate::SharedTurbine;
 
 pub async fn handle_buy_offer(handler: SharedTurbine, payload: Bytes) {
     let offer: Offer = serde_json::from_slice(&payload).unwrap();

@@ -1,4 +1,4 @@
-use bytes::{Buf, Bytes};
+use bytes::Bytes;
 
 pub const OFFER_PACKAGE_SIZE: f64 = 1.0;
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
