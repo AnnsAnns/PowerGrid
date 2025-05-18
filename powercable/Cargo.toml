@@ -17,3 +17,4 @@ tokio = { version = "1", features = ["full"] }
 rand = "0.9.1"
 bytes = "1.10.1"
 fake = { version = "4", features = ["derive"] }
+bitcode = "0.6.6"
