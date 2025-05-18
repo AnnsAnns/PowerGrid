@@ -1,9 +1,6 @@
 use log::{debug, info, warn};
 
-use crate::{
-    meta_data::MetaDataType,
-    parsing::{TemperatureData, WindData},
-};
+use crate::parsing::{TemperatureData, WindData};
 
 use super::Turbine;
 
@@ -127,7 +124,15 @@ impl Turbine {
             let tick = self.get_tick() % temperature_data.len();
 
             let first_data = temperature_data.get(tick).unwrap();
-            data.air_temperature += first_data.air_temperature * station.ratio;
+            if first_data.air_temperature == -999.0 {
+                warn!(
+                    "Air temperature is -999.0 for station {}. Using fallback...",
+                    station.station.stationsname
+                );
+                data.air_temperature += AIR_TEMPERATURE_FALLBACK * station.ratio;
+            } else {
+                data.air_temperature += first_data.air_temperature * station.ratio;
+            }
             data.air_pressure += first_data.air_pressure * station.ratio;
             data.relative_humidity += first_data.relative_humidity * station.ratio;
             data.dew_point_temperature += first_data.dew_point_temperature * station.ratio;

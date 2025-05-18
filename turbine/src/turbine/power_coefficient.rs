@@ -2,6 +2,7 @@
 pub struct WindPowerCoefficient {
     pub wind_speed: f64, // Wind speed in m/s
     pub power_coefficient: f64, // Coefficient (Cp)
+    #[allow(dead_code)]
     pub power_estimation: f64, // Estimated power output in Watts
 }
 

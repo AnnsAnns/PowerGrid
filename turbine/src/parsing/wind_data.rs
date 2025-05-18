@@ -30,11 +30,4 @@ impl WindData {
         }
         records
     }
-
-    pub fn to_string(&self) -> String {
-        format!(
-            "Station: {}, Date: {}, Quality: {}, Strength: {}, Direction: {}",
-            self.stations_id, self.date, self.quality_level, self.wind_strength, self.wind_direction,
-        )
-    }
 }

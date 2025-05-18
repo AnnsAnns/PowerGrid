@@ -33,14 +33,6 @@ impl Transformer {
         self.current_power
     }
 
-    pub fn get_total_consumption(&self) -> f64 {
-        self.total_consumption
-    }
-
-    pub fn get_total_power(&self) -> f64 {
-        self.total_power
-    }
-
     pub fn reset(&mut self) {
         self.current_consumption = 0.0;
         self.current_power = 0.0;

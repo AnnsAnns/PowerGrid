@@ -36,7 +36,7 @@ pub async fn download_data_for(id: usize, data_type: MetaDataType) -> Result<Str
                 }
                 let mut content =
                     std::io::Cursor::new(resp.bytes().await.expect("Failed to read response"));
-                let mut path = PathBuf::from(format!("{}/{}", data_type_str.as_str(), id));
+                let path = PathBuf::from(format!("{}/{}", data_type_str.as_str(), id));
 
                 match zip_extract::extract(&mut content, &path, true) {
                     Ok(_) => {
@@ -44,7 +44,6 @@ pub async fn download_data_for(id: usize, data_type: MetaDataType) -> Result<Str
                         tokio::time::sleep(Duration::from_secs(1)).await;
 
                         // Check if a file was created within the directory
-                        let mut file_created = false;
                         for entry in std::fs::read_dir(path).expect("Failed to read directory") {
                             let entry = entry.expect("Failed to read entry");
                             if entry.path().is_file() {

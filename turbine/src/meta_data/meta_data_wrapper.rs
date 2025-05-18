@@ -3,6 +3,7 @@ use crate::parsing::read_text_from_url;
 use super::{MetaDataType, MetaDataElement};
 
 pub struct MetaDataWrapper {
+    #[allow(dead_code)] // Removing this would make debugging harder
     pub meta_data_type: MetaDataType,
     pub meta_data: Vec<MetaDataElement>,
 }
