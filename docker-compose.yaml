@@ -34,6 +34,8 @@ services:
       dockerfile: Dockerfile
     container_name: tickgen
     command: ./tickgen
+    volumes:
+      - ./.docker_data/logs:/app/logs
     networks:
       - mqtt_network
     depends_on:
@@ -46,6 +48,8 @@ services:
       dockerfile: Dockerfile
     container_name: transformer
     command: ./transformer
+    volumes:
+      - ./.docker_data/logs:/app/logs
     networks:
       - mqtt_network
     depends_on:
@@ -57,12 +61,16 @@ services:
       context: .
       dockerfile: Dockerfile
     command: ./turbine
+    volumes:
+      - ./.docker_data/Wind:/app/Wind
+      - ./.docker_data/AirTemperature:/app/AirTemperature
+      - ./.docker_data/logs:/app/logs
     networks:
       - mqtt_network
     depends_on:
       - mosquitto_broker
     deploy:
-      replicas: 1
+      replicas: 3
       mode: replicated
 
   charger:
@@ -71,6 +79,8 @@ services:
       context: .
       dockerfile: Dockerfile
     command: ./charger
+    volumes:
+      - ./.docker_data/logs:/app/logs
     networks:
       - mqtt_network
     depends_on:
@@ -85,6 +95,8 @@ services:
       context: .
       dockerfile: Dockerfile
     command: ./vehicle
+    volumes:
+      - ./.docker_data/logs:/app/logs
     networks:
       - mqtt_network
     depends_on:
@@ -98,6 +110,8 @@ services:
       context: .
       dockerfile: Dockerfile
     command: ./consumer
+    volumes:
+      - ./.docker_data/logs:/app/logs
     networks:
       - mqtt_network
     depends_on:
@@ -110,6 +124,8 @@ services:
       context: .
       dockerfile: Dockerfile
     command: ./consumer
+    volumes:
+      - ./.docker_data/logs:/app/logs
     networks:
       - mqtt_network
     depends_on:
@@ -122,6 +138,8 @@ services:
       context: .
       dockerfile: Dockerfile
     command: ./consumer
+    volumes:
+      - ./.docker_data/logs:/app/logs
     networks:
       - mqtt_network
     depends_on:

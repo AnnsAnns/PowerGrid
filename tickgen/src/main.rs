@@ -5,9 +5,8 @@ use tokio::{sync::Mutex, task, time};
 
 #[tokio::main]
 async fn main() {
-    env_logger::builder()
-        .filter(None, log::LevelFilter::Warn)
-        .init();
+    let log_path = format!("logs/tickgen.log");
+    let _log2 = log2::open(log_path.as_str()).level("info").start();
     info!("Starting TickGen simulation...");
 
     let mut mqttoptions = MqttOptions::new(

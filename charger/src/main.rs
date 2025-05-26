@@ -16,15 +16,16 @@ struct ChargerHandler {
     pub charger: Charger,
     pub client: AsyncClient,
     pub offer_handler: OfferHandler,
+    pub consumed_last_tick: f64,
 }
 
 #[tokio::main]
 async fn main() {
-    env_logger::builder()
-        .filter(None, log::LevelFilter::Warn)
-        .init();
+    let charger_name: String = format!("Charger {}", generate_unique_name());
+    let log_path = format!("logs/charger_{}.log", charger_name.clone().replace(" ", "_"));
+    let _log2 = log2::open(log_path.as_str()).level("info").start();
     info!("Starting charger simulation...");
-    let charger_name: String = generate_unique_name();
+
     let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
     let charger =
         charger::Charger::new(latitude, longitude, 5000, 500, 5, charger_name.clone());
@@ -51,6 +52,7 @@ async fn main() {
         charger,
         client: client.clone(),
         offer_handler: OfferHandler::new(),
+        consumed_last_tick: 0.0,
     }));
 
     while let Ok(notification) = eventloop.poll().await {

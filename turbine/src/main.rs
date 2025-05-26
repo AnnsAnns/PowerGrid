@@ -13,6 +13,7 @@ mod meta_data;
 mod parsing;
 mod turbine;
 mod precalculated_turbine;
+mod locations;
 
 pub(crate) type SharedTurbine = Arc<Mutex<TurbineHandler>>;
 
@@ -26,13 +27,15 @@ struct TurbineHandler {
 
 #[tokio::main]
 async fn main() {
-    env_logger::builder()
-        .filter(None, log::LevelFilter::Info)
-        .init();
-    info!("Starting turbine simulation...");
+    // Print working directory
+    println!("Current working directory: {:?}", std::env::current_dir());
 
-    let name = generate_unique_name();
-    let (handler, mut eventloop) = init::init(name.clone()).await;
+    let (handler, mut eventloop) = init::init().await;
+
+    let name = handler.lock().await.name.clone();
+    let log_path = format!("logs/turbine_{}.log", name.clone().replace(" ", "_"));
+    let _log2 = log2::open(log_path.as_str()).level("info").start();
+    info!("Turbine simulation started with name: {}", name);
 
     init::subscribe(handler.clone()).await;
 
