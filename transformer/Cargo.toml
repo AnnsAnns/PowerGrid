@@ -7,7 +7,7 @@ authors.workspace = true
 [dependencies]
 rumqttc = "0.24.0"
 tokio = { version = "1", features = ["full"] }
-env_logger = "0.11.8"
+log2 = "0.2.1"
 log = "0.4.27"
 powercable = { path = "../powercable" }
 serde = {version = "1.0", features = ["derive"]}

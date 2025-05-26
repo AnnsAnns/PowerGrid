@@ -45,3 +45,7 @@ test-results/
 # Common dependency directories
 node_modules/
 vendor/
+
+# Specifics
+dashboard/
+mosquitto/

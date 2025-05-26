@@ -22,11 +22,6 @@ struct VehicleHandler {
 
 #[tokio::main]
 async fn main() {
-    env_logger::builder()
-        .filter(None, log::LevelFilter::Info)
-        .init();
-    info!("Starting electric vehicle simulation...");
-
     // init battery
     let mut rng = rand::rng();
     let battery = Battery::new(
@@ -49,7 +44,11 @@ async fn main() {
         longitude,
         battery,
     );
-    println!("{:#?}", vehicle);
+
+    let log_path = format!("logs/vehicle_{}.log", vehicle_name.clone().replace(" ", "_"));
+    let _log2 = log2::open(log_path.as_str()).level("info").start();
+
+    info!("{:#?}", vehicle);
 
     let mut mqttoptions = MqttOptions::new(
         vehicle_name.clone(),

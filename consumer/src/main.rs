@@ -21,17 +21,14 @@ struct ConsumerHandler {
 
 #[tokio::main]
 async fn main() {
-    env_logger::builder()
-        .filter(None, log::LevelFilter::Info)
-        .filter_module("rumqttc::state", log::LevelFilter::Info)
-        .init();
-    info!("Starting consumer simulation...");
-
     let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
     let consumer_type_str= env::var("CONSUMER_TYPE").unwrap_or(ConsumerType::H.to_string()); // TODO: simplify
     let consumer_type = ConsumerType::from_str(&consumer_type_str); // TODO: simplify
     let mut consumer =
         Consumer::new(latitude, longitude, consumer_type);
+
+    let log_path = format!("logs/consumer_{}.log", consumer_type_str.replace(" ", "_"));
+    let _log2 = log2::open(log_path.as_str()).level("info").start();
     debug!("Created {}", consumer_type_str);
 
     let mut mqttoptions = MqttOptions::new(
