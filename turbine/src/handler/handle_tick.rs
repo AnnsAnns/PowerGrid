@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use bytes::Bytes;
 use log::{debug, warn};
-use powercable::{offer::structure::OFFER_PACKAGE_SIZE, tickgen::{Phase, TickPayload}, ChartEntry, ACCEPT_BUY_OFFER_TOPIC, POWER_NETWORK_TOPIC, POWER_TRANSFORMER_GENERATION_TOPIC};
+use powercable::{offer::structure::OFFER_PACKAGE_SIZE, tickgen::{Phase, TickPayload}, ChartEntry, ACCEPT_BUY_OFFER_TOPIC, POWER_TRANSFORMER_GENERATION_TOPIC};
 use rumqttc::QoS;
 use tokio::sync::Mutex;
 

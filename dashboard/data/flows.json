@@ -538,11 +538,11 @@
         "type": "ui_chart",
         "z": "5992b366.f9457c",
         "name": "",
-        "group": "b716f2f0eaa43633",
+        "group": "d54d87a82fb70f0c",
         "order": 5,
         "width": "12",
         "height": "4",
-        "label": "Current Total Battery Charge",
+        "label": "Current Total Charger Battery",
         "chartType": "line",
         "legend": "false",
         "xformat": "HH:mm:ss",
@@ -654,50 +654,6 @@
         "x": 450,
         "y": 280,
         "wires": []
-    },
-    {
-        "id": "0664c069053c0964",
-        "type": "ui_chart",
-        "z": "5992b366.f9457c",
-        "name": "",
-        "group": "b716f2f0eaa43633",
-        "order": 4,
-        "width": "12",
-        "height": "4",
-        "label": "Network Diff",
-        "chartType": "line",
-        "legend": "true",
-        "xformat": "dd HH:mm",
-        "interpolate": "linear",
-        "nodata": "",
-        "dot": false,
-        "ymin": "",
-        "ymax": "",
-        "removeOlder": 1,
-        "removeOlderPoints": "10000",
-        "removeOlderUnit": "604800",
-        "cutout": 0,
-        "useOneColor": false,
-        "useUTC": false,
-        "colors": [
-            "#1f77b4",
-            "#aec7e8",
-            "#ff7f0e",
-            "#2ca02c",
-            "#98df8a",
-            "#d62728",
-            "#ff9896",
-            "#9467bd",
-            "#c5b0d5"
-        ],
-        "outputs": 1,
-        "useDifferentColor": false,
-        "className": "",
-        "x": 690,
-        "y": 820,
-        "wires": [
-            []
-        ]
     },
     {
         "id": "09a24ee730d98287",
@@ -956,8 +912,121 @@
         "y": 820,
         "wires": [
             [
-                "0664c069053c0964"
+                "b4d5e3ffb645f994"
             ]
         ]
+    },
+    {
+        "id": "66b3efdb72acae1c",
+        "type": "mqtt in",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "topic": "power/transformer/stats",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "c1c49a80.e500e",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 280,
+        "y": 760,
+        "wires": [
+            [
+                "7355ad46ef5777b7"
+            ]
+        ]
+    },
+    {
+        "id": "7fa78730c17e863b",
+        "type": "ui_chart",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "group": "b716f2f0eaa43633",
+        "order": 4,
+        "width": "19",
+        "height": "5",
+        "label": "Total Network Stats",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "dd HH:mm",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "10000",
+        "removeOlderUnit": "604800",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 710,
+        "y": 760,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7355ad46ef5777b7",
+        "type": "function",
+        "z": "5992b366.f9457c",
+        "name": "ParsePayload",
+        "func": "return {payload: msg.payload[\"payload\"], topic: msg.payload[\"topic\"], timestamp: msg.payload[\"timestamp\"]}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 760,
+        "wires": [
+            [
+                "7fa78730c17e863b"
+            ]
+        ]
+    },
+    {
+        "id": "b4d5e3ffb645f994",
+        "type": "ui_gauge",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "group": "b716f2f0eaa43633",
+        "order": 3,
+        "width": "5",
+        "height": "5",
+        "gtype": "gage",
+        "title": "Power Difference",
+        "label": "units",
+        "format": "{{value}}",
+        "min": "-3000",
+        "max": "3000",
+        "colors": [
+            "#d62728",
+            "#f9f06b",
+            "#2ca02c"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 710,
+        "y": 820,
+        "wires": []
     }
 ]

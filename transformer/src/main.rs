@@ -1,15 +1,17 @@
 use log::{debug, info, warn};
-use powercable::{tickgen::{Phase, TickPayload}, ChartEntry};
+use powercable::{tickgen::{Phase, TickPayload, INTERVAL_15_MINS}, ChartEntry};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::time::Duration;
 use transformer::Transformer;
 
 mod transformer;
 
+const OWN_TOPIC: &str = "Total";
+
 #[tokio::main]
 async fn main() {
     let log_path = format!("logs/transformer.log");
-    let _log2 = log2::open(log_path.as_str()).level("info").start();
+    let _log2 = log2::open(log_path.as_str()).level("debug").start();
     info!("Starting turbine simulation...");
     
     let mut transformer = Transformer::new();
@@ -26,7 +28,11 @@ async fn main() {
         .await
         .unwrap();
     client
-        .subscribe(powercable::POWER_NETWORK_TOPIC, QoS::AtMostOnce)
+        .subscribe(powercable::POWER_TRANSFORMER_CONSUMPTION_TOPIC, QoS::AtMostOnce)
+        .await
+        .unwrap();
+    client
+        .subscribe(powercable::POWER_TRANSFORMER_GENERATION_TOPIC, QoS::AtMostOnce)
         .await
         .unwrap();
     info!("Connected to MQTT broker");
@@ -44,26 +50,26 @@ async fn main() {
 
                     client
                         .publish(
-                            powercable::POWER_TRANSFORMER_CONSUMPTION_TOPIC,
+                            powercable::POWER_TRANSFORMER_STATS_TOPIC,
                             QoS::ExactlyOnce,
                             true,
                             ChartEntry::new(
-                                "Total".to_string(),
+                                "Consumption".to_string(),
                                 transformer.get_current_consumption() as isize,
-                                tick_payload.timestamp,
+                                tick_payload.timestamp - INTERVAL_15_MINS,
                             ).to_string(),
                         )
                         .await
                         .unwrap();
                     client
                         .publish(
-                            powercable::POWER_TRANSFORMER_GENERATION_TOPIC,
+                            powercable::POWER_TRANSFORMER_STATS_TOPIC,
                             QoS::ExactlyOnce,
                             true,
                             ChartEntry::new(
-                                "Total".to_string(),
+                                "Generation".to_string(),
                                 transformer.get_current_power() as isize,
-                                tick_payload.timestamp,
+                                tick_payload.timestamp - INTERVAL_15_MINS,
                             ).to_string(),
                         )
                         .await
@@ -74,23 +80,32 @@ async fn main() {
                             QoS::ExactlyOnce,
                             true,
                             ChartEntry::new(
-                                "Total".to_string(),
+                                OWN_TOPIC.to_string(),
                                 transformer.get_difference() as isize,
-                                tick_payload.timestamp,
+                                tick_payload.timestamp - INTERVAL_15_MINS,
                             ).to_string(),
                         )
                         .await
                         .unwrap();
                     transformer.reset();
                 }
-                powercable::POWER_NETWORK_TOPIC => {
-                    let parameter: f64 = serde_json::from_slice(&p.payload).unwrap();
-                    log::debug!("Received parameter: {}", parameter);
-                    if parameter > 0.0 {
-                        transformer.add_power(parameter);
-                    } else {
-                        transformer.add_consumption(parameter.abs());
+                powercable::POWER_TRANSFORMER_GENERATION_TOPIC => {
+                    let payload = ChartEntry::from_bytes(p.payload).unwrap();
+                    if payload.topic == OWN_TOPIC {
+                        continue;
                     }
+                    debug!("Received generation data: {:?}", payload);
+                    
+                    transformer.add_power(payload.payload as f64);
+                }
+                powercable::POWER_TRANSFORMER_CONSUMPTION_TOPIC => {
+                    let payload = ChartEntry::from_bytes(p.payload).unwrap();
+                    if payload.topic == OWN_TOPIC {
+                        continue;
+                    }
+                    debug!("Received consumption data: {:?}", payload);
+                    
+                    transformer.add_consumption(payload.payload as f64);
                 }
                 _ => {
                     warn!("Unknown topic: {}", p.topic);
@@ -98,4 +113,6 @@ async fn main() {
             }
         }
     }
+
+    info!("Exiting transformer simulation");
 }

@@ -5,7 +5,7 @@ use powercable::{
     offer::structure::OFFER_PACKAGE_SIZE,
     tickgen::{Phase, TickPayload},
     ChartEntry, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, BUY_OFFER_TOPIC, POWER_CONSUMER_TOPIC,
-    POWER_LOCATION_TOPIC, POWER_NETWORK_TOPIC, POWER_TRANSFORMER_CONSUMPTION_TOPIC,
+    POWER_LOCATION_TOPIC, POWER_TRANSFORMER_CONSUMPTION_TOPIC,
 };
 use rumqttc::QoS::*;
 use serde_json::json;
@@ -122,18 +122,6 @@ pub async fn accept_offer_handler(handler: SharedConsumer, payload: Bytes) {
             .await
             .unwrap();
         trace!("ACK for offer {} sent", offer.get_id());
-
-        // publish consumption to network
-        handler
-            .client
-            .publish(
-                POWER_NETWORK_TOPIC,
-                ExactlyOnce,
-                false,
-                (-1 * offer.get_amount() as i32).to_string(),
-            )
-            .await
-            .unwrap();
     }
 }
 
