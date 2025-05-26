@@ -1,10 +1,7 @@
 use bytes::Bytes;
 use log::{debug, info, warn};
 use powercable::{
-    offer::structure::OFFER_PACKAGE_SIZE,
-    tickgen::{Phase, TickPayload},
-    Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, BUY_OFFER_TOPIC, POWER_CHARGER_TOPIC, POWER_LOCATION_TOPIC,
-    POWER_NETWORK_TOPIC,
+    offer::structure::OFFER_PACKAGE_SIZE, tickgen::{Phase, TickPayload, INTERVAL_15_MINS}, ChartEntry, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, BUY_OFFER_TOPIC, POWER_CHARGER_TOPIC, POWER_LOCATION_TOPIC, POWER_NETWORK_TOPIC, POWER_TRANSFORMER_CONSUMPTION_TOPIC
 };
 use rumqttc::QoS;
 use serde_json::json;
@@ -15,7 +12,7 @@ pub async fn tick_handler(handler: SharedCharger, payload: Bytes) {
     let payload: TickPayload = serde_json::from_slice(&payload).unwrap();
     match payload.phase {
         Phase::Process => {
-            process_tick(handler).await;
+            process_tick(handler, payload).await;
         }
         Phase::Commerce => {
             commerce_tick(handler).await;
@@ -26,7 +23,26 @@ pub async fn tick_handler(handler: SharedCharger, payload: Bytes) {
     }
 }
 
-pub async fn process_tick(handler: SharedCharger) {
+pub async fn process_tick(handler: SharedCharger, payload: TickPayload) {
+    // Publish the amount of power we consumed in the last tick
+    {
+        let mut handler = handler.lock().await;
+        let last_timestamp = payload.timestamp - INTERVAL_15_MINS;
+
+        handler.client.publish(
+            POWER_TRANSFORMER_CONSUMPTION_TOPIC,
+            QoS::ExactlyOnce,
+            false,
+            ChartEntry::new(
+                handler.name.clone(),
+                handler.consumed_last_tick as isize,
+                last_timestamp,
+            ).to_string(),
+        ).await.unwrap();
+
+        handler.consumed_last_tick = 0.0;
+    }
+
     handler.lock().await.offer_handler.remove_all_offers();
     let mut packages_askable = handler.lock().await.charger.amount_of_needed_packages();
     if packages_askable == 0 {
@@ -113,17 +129,7 @@ pub async fn accept_offer_handler(handler: SharedCharger, payload: Bytes) {
         debug!("ACK for offer {} sent", offer.get_id());
 
         handler.charger.add_charge(offer.get_amount() as usize);
-
-        handler
-            .client
-            .publish(
-                POWER_NETWORK_TOPIC,
-                rumqttc::QoS::ExactlyOnce,
-                false,
-                (-1 * offer.get_amount() as i32).to_string(),
-            )
-            .await
-            .unwrap();
+        handler.consumed_last_tick += offer.get_amount();
     }
 }
 
