@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use bytes::Bytes;
 use log::{debug, warn};
-use powercable::{offer::structure::OFFER_PACKAGE_SIZE, tickgen::Phase, ACCEPT_BUY_OFFER_TOPIC, POWER_NETWORK_TOPIC};
+use powercable::{offer::structure::OFFER_PACKAGE_SIZE, tickgen::{Phase, TickPayload}, ChartEntry, ACCEPT_BUY_OFFER_TOPIC, POWER_NETWORK_TOPIC, POWER_TRANSFORMER_GENERATION_TOPIC};
 use rumqttc::QoS;
 use tokio::sync::Mutex;
 
@@ -9,23 +9,29 @@ use crate::{init, TurbineHandler};
 
 pub async fn process_tick(
     handler: Arc<Mutex<TurbineHandler>>,
+    payload: TickPayload,
 ) {
-    let (client, power) = {
+
+    let (client, power, name) = {
         let mut handler = handler.lock().await;
         handler.turbine.tick();
         handler.offer_handler.remove_all_offers();
         handler.remaining_power = handler.turbine.get_power_output();
         debug!("Current power output: {} Watt", handler.remaining_power);
 
-        (handler.client.clone(), handler.remaining_power)
+        (handler.client.clone(), handler.remaining_power, handler.name.clone())
     };
 
     let _ = client
     .publish(
-        POWER_NETWORK_TOPIC,
+        POWER_TRANSFORMER_GENERATION_TOPIC,
         QoS::ExactlyOnce,
         false,
-        power.to_string(),
+        ChartEntry::new(
+            name.clone(),
+            power as isize,
+            payload.timestamp,
+        ).to_string()
     )
     .await;
 
@@ -73,7 +79,7 @@ pub async fn handle_tick(
     .unwrap();
 
     match payload.phase {
-        Phase::Process => process_tick(handler.clone()).await,
+        Phase::Process => process_tick(handler.clone(), payload).await,
         Phase::Commerce => commerce_tick(handler.clone()).await,
         Phase::PowerImport => {
             // No action needed

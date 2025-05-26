@@ -1,5 +1,7 @@
 use bytes::Bytes;
 
+pub const INTERVAL_15_MINS: usize = 900; // 15 minutes in seconds
+
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum Phase {
     Process,

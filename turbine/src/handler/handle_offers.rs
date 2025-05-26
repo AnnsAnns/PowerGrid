@@ -1,8 +1,9 @@
 use bytes::Bytes;
 use log::{debug, warn};
 use powercable::Offer;
+use tokio::task;
 
-use crate::SharedTurbine;
+use crate::{handler::handle_tick::commerce_tick, SharedTurbine};
 
 pub async fn handle_buy_offer(handler: SharedTurbine, payload: Bytes) {
     let offer: Offer = Offer::from_bytes(payload).unwrap();
@@ -25,6 +26,9 @@ pub async fn ack_buy_offer(handler: SharedTurbine, payload: Bytes) {
         if offer.get_ack_for().unwrap() != handler.lock().await.name.as_str() {
             debug!("Received ACK for offer {} from {} - We didn't get it, freeing reserved energy again 😔", offer.get_id(), offer.get_ack_for().unwrap());
             handler.lock().await.remaining_power += offer.get_amount();
+            task::spawn(async move {
+                commerce_tick(handler.clone()).await;
+            });
         } else {
             debug!("Received ACK for own offer {} from {} - We did it 😄", offer.get_id(), offer.get_ack_for().unwrap());
         }
