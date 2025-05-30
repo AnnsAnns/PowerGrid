@@ -28,6 +28,10 @@ impl OfferHandler {
         self.outstanding_offers.get(id)
     }
 
+    pub fn get_first_offer(&self) -> Option<&Offer> {
+        self.outstanding_offers.values().next()
+    }
+
     pub fn get_best_non_sent_offer(&self) -> Option<&Offer> {
         self.outstanding_offers
             .values()

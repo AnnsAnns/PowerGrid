@@ -671,7 +671,7 @@
         "topic": "topic",
         "topicType": "msg",
         "min": "1",
-        "max": "20",
+        "max": "100",
         "step": "1",
         "className": "",
         "x": 490,

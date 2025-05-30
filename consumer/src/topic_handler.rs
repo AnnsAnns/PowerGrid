@@ -56,7 +56,7 @@ pub async fn process_tick(handler: SharedConsumer, payload: Bytes) {
         // offer with max price
         let offer = Offer::new(
             offer_id,
-            f64::MAX,
+            1.0,
             OFFER_PACKAGE_SIZE,
             handler.consumer.get_latitude(),
             handler.consumer.get_longitude(),

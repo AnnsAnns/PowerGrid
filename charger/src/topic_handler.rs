@@ -53,6 +53,11 @@ pub async fn process_tick(handler: SharedCharger, payload: TickPayload) {
 
     handler.lock().await.offer_handler.remove_all_offers();
     let mut packages_askable = handler.lock().await.charger.amount_of_needed_packages();
+    debug!(
+        "Packages askable: {}, current charge: {}",
+        packages_askable,
+        handler.lock().await.charger.get_current_charge()
+    );
     if packages_askable == 0 {
         info!("No packages available for sale");
         return;
