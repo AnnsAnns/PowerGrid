@@ -23,6 +23,7 @@ struct TurbineHandler {
     pub offer_handler: OfferHandler,
     pub client: AsyncClient,
     pub remaining_power: f64,
+    pub total_earned: f64,
 }
 
 #[tokio::main]

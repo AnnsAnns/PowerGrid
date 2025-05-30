@@ -3,13 +3,13 @@ use fake::Fake;
 use rand::Rng;
 
 pub mod charger;
+pub mod chart_entry;
 pub mod offer;
 pub mod tickgen;
-pub mod chart_entry;
 
-pub use offer::Offer;
-pub use offer::offer_handler::OfferHandler;
 pub use chart_entry::ChartEntry;
+pub use offer::offer_handler::OfferHandler;
+pub use offer::Offer;
 
 pub const BUY_OFFER_TOPIC: &str = "market/buy_offer";
 pub const ACCEPT_BUY_OFFER_TOPIC: &str = "market/accept_buy_offer";
@@ -21,6 +21,7 @@ pub const POWER_TRANSFORMER_CONSUMPTION_TOPIC: &str = "power/transformer/consump
 pub const POWER_TRANSFORMER_GENERATION_TOPIC: &str = "power/transformer/generation";
 pub const POWER_TRANSFORMER_STATS_TOPIC: &str = "power/transformer/stats";
 pub const POWER_TRANSFORMER_DIFF_TOPIC: &str = "power/transformer/diff";
+pub const POWER_TRANSFORMER_EARNED_TOPIC: &str = "power/transformer/stats/earnings";
 pub const POWER_CHARGER_TOPIC: &str = "power/charger";
 pub const POWER_CONSUMER_TOPIC: &str = "power/consumer";
 pub const POWER_LOCATION_TOPIC: &str = "power/location";

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use bytes::Bytes;
 use log::{debug, warn};
-use powercable::{offer::structure::OFFER_PACKAGE_SIZE, tickgen::{Phase, TickPayload}, ChartEntry, ACCEPT_BUY_OFFER_TOPIC, POWER_TRANSFORMER_GENERATION_TOPIC};
+use powercable::{offer::structure::OFFER_PACKAGE_SIZE, tickgen::{Phase, TickPayload}, ChartEntry, ACCEPT_BUY_OFFER_TOPIC, POWER_TRANSFORMER_EARNED_TOPIC, POWER_TRANSFORMER_GENERATION_TOPIC};
 use rumqttc::QoS;
 use tokio::sync::Mutex;
 
@@ -22,6 +22,8 @@ pub async fn process_tick(
         (handler.client.clone(), handler.remaining_power, handler.name.clone())
     };
 
+    let power_minus_leftovers = power - (power % OFFER_PACKAGE_SIZE);
+
     let _ = client
     .publish(
         POWER_TRANSFORMER_GENERATION_TOPIC,
@@ -29,13 +31,24 @@ pub async fn process_tick(
         false,
         ChartEntry::new(
             name.clone(),
-            power as isize,
+            power_minus_leftovers as isize,
             payload.timestamp,
         ).to_string()
     )
     .await;
 
     init::publish_location(handler.clone()).await;
+
+    client.publish(
+        POWER_TRANSFORMER_EARNED_TOPIC,
+        QoS::ExactlyOnce,
+        false,
+        ChartEntry::new(
+            name,
+            handler.lock().await.total_earned as isize,
+            payload.timestamp,
+        ).to_string(),
+    ).await.unwrap();
 }
 
 pub async fn commerce_tick(

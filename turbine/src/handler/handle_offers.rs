@@ -26,6 +26,7 @@ pub async fn ack_buy_offer(handler: SharedTurbine, payload: Bytes) {
         if offer.get_ack_for().unwrap() != handler.lock().await.name.as_str() {
             debug!("Received ACK for offer {} from {} - We didn't get it, freeing reserved energy again 😔", offer.get_id(), offer.get_ack_for().unwrap());
             handler.lock().await.remaining_power += offer.get_amount();
+            handler.lock().await.total_earned += offer.get_amount() as f64 * offer.get_price();
             task::spawn(async move {
                 commerce_tick(handler.clone()).await;
             });
