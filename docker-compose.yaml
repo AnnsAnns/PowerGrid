@@ -29,9 +29,7 @@ services:
       - mosquitto_broker
 
   tickgen:
-    build:
-      target: runtime
-      dockerfile: Dockerfile
+    image: local/powergrid:latest
     command: ./tickgen
     volumes:
       - ./.docker_data/logs:/app/logs
@@ -42,9 +40,7 @@ services:
 
   transformer:
     # Transformer Simulator
-    build:
-      target: runtime
-      dockerfile: Dockerfile
+    image: local/powergrid:latest
     command: ./transformer
     volumes:
       - ./.docker_data/logs:/app/logs
@@ -54,9 +50,7 @@ services:
       - mosquitto_broker
 
   fusion_reactor:
-    build:
-      target: runtime
-      dockerfile: Dockerfile
+    image: local/powergrid:latest
     command: ./fusion_reactor
     volumes:
       - ./.docker_data/logs:/app/logs
@@ -67,9 +61,7 @@ services:
 
   turbine:
     # Turbine Simulator
-    build:
-      target: runtime
-      dockerfile: Dockerfile
+    image: local/powergrid:latest
     command: ./turbine
     volumes:
       - ./.docker_data/Wind:/app/Wind
@@ -85,9 +77,7 @@ services:
 
   charger:
     # Charger Simulator
-    build:
-      target: runtime
-      dockerfile: Dockerfile
+    image: local/powergrid:latest
     command: ./charger
     volumes:
       - ./.docker_data/logs:/app/logs
@@ -101,9 +91,7 @@ services:
 
   vehicle:
     # Vehicle Simulator
-    build:
-      target: runtime
-      dockerfile: Dockerfile
+    image: local/powergrid:latest
     command: ./vehicle
     volumes:
       - ./.docker_data/logs:/app/logs
@@ -116,9 +104,7 @@ services:
       mode: replicated
 
   haushalt:
-    build:
-      target: runtime
-      dockerfile: Dockerfile
+    image: local/powergrid:latest
     command: ./consumer
     volumes:
       - ./.docker_data/logs:/app/logs
@@ -130,9 +116,7 @@ services:
       - CONSUMER_TYPE=H
 
   gewerbe:
-    build:
-      target: runtime
-      dockerfile: Dockerfile
+    image: local/powergrid:latest
     command: ./consumer
     volumes:
       - ./.docker_data/logs:/app/logs
@@ -144,9 +128,7 @@ services:
       - CONSUMER_TYPE=G
 
   bauernhof:
-    build:
-      target: runtime
-      dockerfile: Dockerfile
+    image: local/powergrid:latest
     command: ./consumer
     volumes:
       - ./.docker_data/logs:/app/logs
