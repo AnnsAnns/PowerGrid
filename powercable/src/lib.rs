@@ -21,6 +21,7 @@ pub const POWER_TRANSFORMER_CONSUMPTION_TOPIC: &str = "power/transformer/consump
 pub const POWER_TRANSFORMER_GENERATION_TOPIC: &str = "power/transformer/generation";
 pub const POWER_TRANSFORMER_STATS_TOPIC: &str = "power/transformer/stats";
 pub const POWER_TRANSFORMER_DIFF_TOPIC: &str = "power/transformer/diff";
+pub const POWER_TRANSFORMER_PRICE_TOPIC: &str = "power/transformer/stats/price";
 pub const POWER_TRANSFORMER_EARNED_TOPIC: &str = "power/transformer/stats/earnings";
 pub const POWER_CHARGER_TOPIC: &str = "power/charger";
 pub const POWER_CONSUMER_TOPIC: &str = "power/consumer";

@@ -12,6 +12,7 @@
 |`market/ack_accept_buy_offer/(ID)`| Ack acceptance | Uses Offer Structure, Becomes void after tick |
 |`power/transformer/stats`| Total Power Stats | Published for last tick on new tick, Becomes void after tick |
 |`power/transformer/stats/earnings`| Total Earnings | Published for last tick on new tick, Becomes void after tick |
+|`power/transformer/stats/price`| Price per kWh | Publish Price Related Infos |
 |`power/charger`| Current stored energy | |
 |`power/charger/available`| Advertises for open chargers | Published per charger per tick |
 |`power/charger/request_reserve/(ID)`| Reserves a charger |  |

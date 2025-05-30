@@ -68,7 +68,6 @@ async fn main() {
 
     // while loop over notifications
     while let Ok(notification) = eventloop.poll().await {
-        trace!("Received = {:?}", notification);
         if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = notification {
             match p.topic.as_str() {
                 TICK_TOPIC => {

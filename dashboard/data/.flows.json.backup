@@ -701,7 +701,7 @@
         "once": true,
         "onceDelay": 0.1,
         "topic": "power/consumer/scale",
-        "payload": "10",
+        "payload": "5",
         "payloadType": "num",
         "x": 230,
         "y": 400,

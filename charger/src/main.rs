@@ -28,7 +28,7 @@ async fn main() {
 
     let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
     let charger =
-        charger::Charger::new(latitude, longitude, 5000, 500, 5, charger_name.clone());
+        charger::Charger::new(latitude, longitude, 5000, 100, 5, charger_name.clone());
 
     let mut mqttoptions = MqttOptions::new(
         charger_name.clone(),
@@ -56,7 +56,6 @@ async fn main() {
     }));
 
     while let Ok(notification) = eventloop.poll().await {
-        debug!("Received = {:?}", notification);
         if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = notification {
             match p.topic.as_str() {
                 TICK_TOPIC => {
