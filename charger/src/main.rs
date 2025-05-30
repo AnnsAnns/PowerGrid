@@ -23,7 +23,7 @@ struct ChargerHandler {
 async fn main() {
     let charger_name: String = format!("Charger {}", generate_unique_name());
     let log_path = format!("logs/charger_{}.log", charger_name.clone().replace(" ", "_"));
-    let _log2 = log2::open(log_path.as_str()).level("info").start();
+    let _log2 = log2::open(log_path.as_str()).level("debug").start();
     info!("Starting charger simulation...");
 
     let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();

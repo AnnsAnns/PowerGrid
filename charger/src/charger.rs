@@ -91,6 +91,11 @@ impl Charger {
     pub fn amount_of_needed_packages(&self) -> usize {
         // Calculate the number of packages needed to fill the charger
         let remaining_capacity = self.capacity - self.current_charge;
+
+        if remaining_capacity == 0 {
+            return 0; // No packages needed if already full
+        }
+
         let packages_needed = (remaining_capacity as f64 / OFFER_PACKAGE_SIZE).ceil() as usize;
         packages_needed
     }
