@@ -1,11 +1,11 @@
 use log::{debug, info, warn};
 use powercable::{
-    tickgen::{Phase, TickPayload, INTERVAL_15_MINS},
-    ChartEntry, Offer, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, POWER_TRANSFORMER_GENERATION_TOPIC,
+    tickgen::{Phase, TickPayload, INTERVAL_15_MINS}, ChartEntry, Offer, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, MAP_UPDATE_SPEED_IN_SECS, POWER_LOCATION_TOPIC, POWER_TRANSFORMER_EARNED_TOPIC, POWER_TRANSFORMER_GENERATION_TOPIC
 };
 use rumqttc::{AsyncClient, MqttOptions, QoS};
+use serde_json::json;
 use std::{sync::Arc, time::Duration};
-use tokio::{sync::Mutex, task};
+use tokio::{sync::Mutex, task, time::sleep};
 
 const OWN_TOPIC: &str = "Fusion Reactor";
 const SELL_PRICE: f64 = 0.90;
@@ -16,6 +16,36 @@ struct FusionReactor {
     offer_handler: OfferHandler,
     client: AsyncClient,
     power_sold_this_tick: f64,
+}
+
+async fn map_update_task(handler: Arc<Mutex<FusionReactor>>) {
+    loop {
+        {
+            let handler = handler.lock().await;
+            let location_payload = json!({
+                "name" : "DESY Fusion Reactor",
+                // DESY Hamburg coordinates :P
+                "lat": 53.573016187617704,
+                "lon": 9.881024137175093,
+                "icon": ":repeat:",
+                "label": format!("{:.1}kW {:.1}€", handler.total_power_produced, handler.cash_earned),
+            })
+            .to_string();
+            handler
+                .client
+                .publish(
+                    POWER_LOCATION_TOPIC,
+                    rumqttc::QoS::ExactlyOnce,
+                    true,
+                    location_payload.clone(),
+                )
+                .await
+                .unwrap();
+            debug!("Published location: {:?}", location_payload);
+        }
+
+        sleep(Duration::from_secs(MAP_UPDATE_SPEED_IN_SECS)).await;
+    }
 }
 
 async fn process_offers(handler: Arc<Mutex<FusionReactor>>, tick_payload: TickPayload) {
@@ -122,6 +152,17 @@ async fn process_tick(handler: Arc<Mutex<FusionReactor>>, tick_payload: TickPayl
     let mut handler = handler.lock().await;
     handler.offer_handler.remove_all_offers();
 
+        handler.client.publish(
+        POWER_TRANSFORMER_EARNED_TOPIC,
+        QoS::ExactlyOnce,
+        false,
+        ChartEntry::new(
+            OWN_TOPIC.to_string(),
+            handler.cash_earned as isize,
+            tick_payload.timestamp - INTERVAL_15_MINS,
+        ).to_string(),
+    ).await.unwrap();
+
     handler
         .client
         .publish(
@@ -131,7 +172,7 @@ async fn process_tick(handler: Arc<Mutex<FusionReactor>>, tick_payload: TickPayl
             ChartEntry::new(
                 OWN_TOPIC.to_string(),
                 handler.power_sold_this_tick as isize,
-                tick_payload.timestamp,
+                tick_payload.timestamp - INTERVAL_15_MINS,
             )
             .to_string(),
         )
@@ -177,6 +218,8 @@ async fn main() {
         .await
         .unwrap();
     info!("Connected to MQTT broker");
+
+    task::spawn(map_update_task(fusion_reactor.clone()));
 
     while let Ok(notification) = eventloop.poll().await {
         if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = notification {
