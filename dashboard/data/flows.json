@@ -701,7 +701,7 @@
         "once": true,
         "onceDelay": 0.1,
         "topic": "power/consumer/scale",
-        "payload": "10",
+        "payload": "5",
         "payloadType": "num",
         "x": 230,
         "y": 400,
@@ -1028,5 +1028,175 @@
         "x": 710,
         "y": 820,
         "wires": []
+    },
+    {
+        "id": "da1519403606afb0",
+        "type": "mqtt in",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "topic": "power/transformer/stats/earnings",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "c1c49a80.e500e",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 210,
+        "y": 1160,
+        "wires": [
+            [
+                "a67defbe0b3efa1a"
+            ]
+        ]
+    },
+    {
+        "id": "a67defbe0b3efa1a",
+        "type": "function",
+        "z": "5992b366.f9457c",
+        "name": "ParsePayload",
+        "func": "return {payload: msg.payload[\"payload\"], topic: msg.payload[\"topic\"], timestamp: msg.payload[\"timestamp\"]}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 1160,
+        "wires": [
+            [
+                "d25779f2ecc65dd4"
+            ]
+        ]
+    },
+    {
+        "id": "d25779f2ecc65dd4",
+        "type": "ui_chart",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "group": "b716f2f0eaa43633",
+        "order": 5,
+        "width": "24",
+        "height": "6",
+        "label": "Money Earned",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "dd HH:mm",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "10000",
+        "removeOlderUnit": "604800",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 720,
+        "y": 1160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "59e8660628392a57",
+        "type": "mqtt in",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "topic": "power/transformer/stats/price",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "c1c49a80.e500e",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 220,
+        "y": 1220,
+        "wires": [
+            [
+                "5b10771c8f32388c"
+            ]
+        ]
+    },
+    {
+        "id": "5b10771c8f32388c",
+        "type": "function",
+        "z": "5992b366.f9457c",
+        "name": "ParsePayload",
+        "func": "return {payload: msg.payload[\"payload\"], topic: msg.payload[\"topic\"], timestamp: msg.payload[\"timestamp\"]}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 1220,
+        "wires": [
+            [
+                "fee38065243d2d51"
+            ]
+        ]
+    },
+    {
+        "id": "fee38065243d2d51",
+        "type": "ui_chart",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "group": "b716f2f0eaa43633",
+        "order": 5,
+        "width": "24",
+        "height": "6",
+        "label": "Sell Price Infos",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "dd HH:mm",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "10000",
+        "removeOlderUnit": "604800",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 740,
+        "y": 1220,
+        "wires": [
+            []
+        ]
     }
 ]

@@ -104,6 +104,13 @@ impl Charger {
     /// This is used to progressively reduce the price of buy offers sent
     /// I swear this makes sense :P
     pub fn get_price_if_had_charge(&self, amount: usize) -> f64 {
-        1.0 - ((self.current_charge + amount) as f64 / self.capacity as f64)
+        let mut price = 1.0 - ((self.current_charge + amount) as f64 / self.capacity as f64);
+        // At a certain point we run into float weirdness when transforming
+        if price < 0.1 {
+            price = 0.1;
+        }
+        debug!("Charger {} would have price {} if it had {} charge added", self.name, price, amount);
+
+        price
     }
 }

@@ -1,5 +1,5 @@
 use log::{debug, info, warn};
-use powercable::{tickgen::{Phase, TickPayload, INTERVAL_15_MINS}, ChartEntry};
+use powercable::{tickgen::{Phase, TickPayload, INTERVAL_15_MINS}, ChartEntry, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, POWER_TRANSFORMER_PRICE_TOPIC};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::time::Duration;
 use transformer::Transformer;
@@ -21,6 +21,9 @@ async fn main() {
         powercable::MQTT_BROKER,
         powercable::MQTT_BROKER_PORT,
     );
+    let mut lowest_sell_price_of_tick = 0.0;
+    let mut sells_total: f64 = 0.0;
+    let mut sell_amount: f64 = 0.0;
     mqttoptions.set_keep_alive(Duration::from_secs(5));
     let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
     client
@@ -35,10 +38,12 @@ async fn main() {
         .subscribe(powercable::POWER_TRANSFORMER_GENERATION_TOPIC, QoS::AtMostOnce)
         .await
         .unwrap();
+    client.subscribe(ACK_ACCEPT_BUY_OFFER_TOPIC, QoS::AtMostOnce)
+        .await
+        .unwrap();
     info!("Connected to MQTT broker");
 
     while let Ok(notification) = eventloop.poll().await {
-        debug!("Received = {:?}", notification);
         if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = notification {
             match p.topic.as_str() {
                 powercable::TICK_TOPIC => {
@@ -87,6 +92,38 @@ async fn main() {
                         )
                         .await
                         .unwrap();
+
+                    client.publish(
+                        POWER_TRANSFORMER_PRICE_TOPIC,
+                        QoS::ExactlyOnce,
+                        false,
+                        ChartEntry::new(
+                            "Lowest Sell Price".to_string(),
+                            (lowest_sell_price_of_tick * 100.0) as isize,
+                            tick_payload.timestamp - INTERVAL_15_MINS,
+                        ).to_string(),
+                    ).await.unwrap();
+
+                    let average_sell_price = ((sells_total / sell_amount) * 100.0) as isize;
+
+                    debug!("Average Sell Price: {}", average_sell_price);
+                    debug!("Total Sells: {}, Sell Amount: {}", sells_total, sell_amount);
+                    debug!("Lowest Sell Price of Tick: {}", lowest_sell_price_of_tick);
+
+                    client.publish(
+                        POWER_TRANSFORMER_PRICE_TOPIC,
+                        QoS::ExactlyOnce,
+                        false,
+                        ChartEntry::new(
+                            "Average Sell Price".to_string(),
+                            average_sell_price,
+                            tick_payload.timestamp - INTERVAL_15_MINS,
+                        ).to_string(),
+                    ).await.unwrap();
+
+                    lowest_sell_price_of_tick = 1.0;
+                    sells_total = 0.0;
+                    sell_amount = 0.0;
                     transformer.reset();
                 }
                 powercable::POWER_TRANSFORMER_GENERATION_TOPIC => {
@@ -106,6 +143,16 @@ async fn main() {
                     debug!("Received consumption data: {:?}", payload);
                     
                     transformer.add_consumption(payload.payload as f64);
+                }
+                ACK_ACCEPT_BUY_OFFER_TOPIC => {
+                    let offer = Offer::from_bytes(p.payload).unwrap();
+
+                    sells_total += offer.get_price();
+                    sell_amount += 1.0;
+
+                    if offer.get_price() < lowest_sell_price_of_tick {
+                        lowest_sell_price_of_tick = offer.get_price();
+                    }
                 }
                 _ => {
                     warn!("Unknown topic: {}", p.topic);

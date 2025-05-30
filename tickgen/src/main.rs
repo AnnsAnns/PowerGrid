@@ -85,7 +85,6 @@ async fn main() {
                 panic!("Error: {:?}", e);
             }
         };
-        debug!("Received = {:?}", notification);
         if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = notification {
             match p.topic.as_str() {
                 powercable::TICK_CONFIGURE_SPEED => {

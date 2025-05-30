@@ -29,10 +29,7 @@ services:
       - mosquitto_broker
 
   tickgen:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: tickgen
+    image: local/powergrid:latest
     command: ./tickgen
     volumes:
       - ./.docker_data/logs:/app/logs
@@ -43,10 +40,7 @@ services:
 
   transformer:
     # Transformer Simulator
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: transformer
+    image: local/powergrid:latest
     command: ./transformer
     volumes:
       - ./.docker_data/logs:/app/logs
@@ -56,10 +50,7 @@ services:
       - mosquitto_broker
 
   fusion_reactor:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: fusion_reactor
+    image: local/powergrid:latest
     command: ./fusion_reactor
     volumes:
       - ./.docker_data/logs:/app/logs
@@ -70,9 +61,7 @@ services:
 
   turbine:
     # Turbine Simulator
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: local/powergrid:latest
     command: ./turbine
     volumes:
       - ./.docker_data/Wind:/app/Wind
@@ -83,14 +72,12 @@ services:
     depends_on:
       - mosquitto_broker
     deploy:
-      replicas: 3
+      replicas: 6
       mode: replicated
 
   charger:
     # Charger Simulator
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: local/powergrid:latest
     command: ./charger
     volumes:
       - ./.docker_data/logs:/app/logs
@@ -99,14 +86,12 @@ services:
     depends_on:
       - mosquitto_broker
     deploy:
-      replicas: 3
+      replicas: 10
       mode: replicated
 
   vehicle:
     # Vehicle Simulator
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: local/powergrid:latest
     command: ./vehicle
     volumes:
       - ./.docker_data/logs:/app/logs
@@ -115,13 +100,11 @@ services:
     depends_on:
       - mosquitto_broker
     deploy:
-      replicas: 5
+      replicas: 15
       mode: replicated
 
   haushalt:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: local/powergrid:latest
     command: ./consumer
     volumes:
       - ./.docker_data/logs:/app/logs
@@ -133,9 +116,7 @@ services:
       - CONSUMER_TYPE=H
 
   gewerbe:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: local/powergrid:latest
     command: ./consumer
     volumes:
       - ./.docker_data/logs:/app/logs
@@ -147,9 +128,7 @@ services:
       - CONSUMER_TYPE=G
 
   bauernhof:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: local/powergrid:latest
     command: ./consumer
     volumes:
       - ./.docker_data/logs:/app/logs

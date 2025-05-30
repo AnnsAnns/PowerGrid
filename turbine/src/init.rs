@@ -43,6 +43,7 @@ pub async fn init() -> (SharedTurbine, EventLoop) {
             offer_handler,
             client,
             remaining_power: 0.0,
+            total_earned: 0.0,
         })),
         eventloop,
     )
@@ -57,13 +58,14 @@ pub async fn publish_location(
     let latitude = handler.turbine.get_latitude();
     let longitude = handler.turbine.get_longitude();
     let power = handler.turbine.get_power_output();
+    let earned = handler.total_earned;
     let client = &mut handler.client;
     let location_payload = json!({
         "name" : name,
         "lat": latitude,
         "lon": longitude,
         "icon": ":zap:",
-        "label": format!("{:.1}kW", power),
+        "label": format!("{:.1}kW ({:.1}€)", power, earned),
     })
     .to_string();
 
