@@ -30,9 +30,8 @@ services:
 
   tickgen:
     build:
-      context: .
+      target: runtime
       dockerfile: Dockerfile
-    container_name: tickgen
     command: ./tickgen
     volumes:
       - ./.docker_data/logs:/app/logs
@@ -44,9 +43,8 @@ services:
   transformer:
     # Transformer Simulator
     build:
-      context: .
+      target: runtime
       dockerfile: Dockerfile
-    container_name: transformer
     command: ./transformer
     volumes:
       - ./.docker_data/logs:/app/logs
@@ -57,9 +55,8 @@ services:
 
   fusion_reactor:
     build:
-      context: .
+      target: runtime
       dockerfile: Dockerfile
-    container_name: fusion_reactor
     command: ./fusion_reactor
     volumes:
       - ./.docker_data/logs:/app/logs
@@ -71,7 +68,7 @@ services:
   turbine:
     # Turbine Simulator
     build:
-      context: .
+      target: runtime
       dockerfile: Dockerfile
     command: ./turbine
     volumes:
@@ -83,13 +80,13 @@ services:
     depends_on:
       - mosquitto_broker
     deploy:
-      replicas: 3
+      replicas: 6
       mode: replicated
 
   charger:
     # Charger Simulator
     build:
-      context: .
+      target: runtime
       dockerfile: Dockerfile
     command: ./charger
     volumes:
@@ -99,13 +96,13 @@ services:
     depends_on:
       - mosquitto_broker
     deploy:
-      replicas: 3
+      replicas: 10
       mode: replicated
 
   vehicle:
     # Vehicle Simulator
     build:
-      context: .
+      target: runtime
       dockerfile: Dockerfile
     command: ./vehicle
     volumes:
@@ -115,12 +112,12 @@ services:
     depends_on:
       - mosquitto_broker
     deploy:
-      replicas: 5
+      replicas: 15
       mode: replicated
 
   haushalt:
     build:
-      context: .
+      target: runtime
       dockerfile: Dockerfile
     command: ./consumer
     volumes:
@@ -134,7 +131,7 @@ services:
 
   gewerbe:
     build:
-      context: .
+      target: runtime
       dockerfile: Dockerfile
     command: ./consumer
     volumes:
@@ -148,7 +145,7 @@ services:
 
   bauernhof:
     build:
-      context: .
+      target: runtime
       dockerfile: Dockerfile
     command: ./consumer
     volumes:
