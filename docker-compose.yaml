@@ -55,6 +55,19 @@ services:
     depends_on:
       - mosquitto_broker
 
+  fusion_reactor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fusion_reactor
+    command: ./fusion_reactor
+    volumes:
+      - ./.docker_data/logs:/app/logs
+    networks:
+      - mqtt_network
+    depends_on:
+      - mosquitto_broker
+
   turbine:
     # Turbine Simulator
     build:
