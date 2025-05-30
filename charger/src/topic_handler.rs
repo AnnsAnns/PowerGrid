@@ -125,6 +125,10 @@ pub async fn accept_offer_handler(handler: SharedCharger, payload: Bytes) {
 
     let mut handler = handler.lock().await;
 
+    if !handler.offer_handler.has_offer(&offer.get_id()) {
+        return;
+    }
+
     if !handler.offer_handler.has_sent_offer(&offer.get_id()) {
         offer.set_ack_for(offer.get_accepted_by().unwrap().clone());
 

@@ -28,21 +28,26 @@ pub async fn tick_handler(handler: SharedConsumer, payload: Bytes) {
 }
 
 pub async fn process_tick(handler: SharedConsumer, payload: Bytes) {
-    let packages_askable = {
+    let mut demand = {
         let mut handler = handler.lock().await;
         handler.consumer.tick();
         handler.offer_handler.remove_all_offers();
         handler.consumer.get_demand()
     };
 
-    trace!("Demand (without scale): {:?}", packages_askable);
+    let leftovers = demand % OFFER_PACKAGE_SIZE as usize;
+    demand -= leftovers; // remove leftovers, we can't sell them due to the package size
+
+    let packages_askable = demand / (OFFER_PACKAGE_SIZE as usize);
+
+    trace!("Demand (without scale): {:?}", demand);
 
     //aus dem charger kopiert
     handler
         .lock()
         .await
         .consumer
-        .set_current_consumption(packages_askable);
+        .set_current_consumption(demand);
     debug!("Packages askable: {:?}", packages_askable);
     if packages_askable == 0 {
         info!("No packages available for sale");
@@ -105,6 +110,10 @@ pub async fn accept_offer_handler(handler: SharedConsumer, payload: Bytes) {
     }
 
     let mut handler = handler.lock().await;
+
+    if !handler.offer_handler.has_offer(&offer.get_id()) {
+        return; // Not an offer we know about
+    }
 
     if !handler.offer_handler.has_sent_offer(&offer.get_id()) {
         offer.set_ack_for(offer.get_accepted_by().unwrap().clone());
