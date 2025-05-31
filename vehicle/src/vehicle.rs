@@ -29,6 +29,12 @@ impl Vehicle {
         return &self.name;
     }
 
+    pub fn distance_to(&self, latitude: f64, longitude: f64) -> f64 {
+        let lat_diff = self.location.0 - latitude;
+        let lon_diff = self.location.1 - longitude;
+        (lat_diff * lat_diff + lon_diff * lon_diff).sqrt()
+    }
+
     pub fn get_location(&self) -> (f64, f64) {
         self.location
     }
@@ -41,8 +47,20 @@ impl Vehicle {
         &mut self.battery
     }
 
+    pub fn battery_non_mut(&self) -> &Battery {
+        &self.battery
+    }
+
     pub fn set_destination(&mut self, latitude: f64, longitude: f64) {
         self.destination = (latitude, longitude);
+    }
+
+    pub fn get_longitude(&self) -> f64 {
+        self.location.1
+    }
+
+    pub fn get_latitude(&self) -> f64 {
+        self.location.0
     }
 
     pub fn drive(&mut self) {
