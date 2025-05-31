@@ -1,10 +1,15 @@
 use bytes::Bytes;
-use powercable::{tickgen::{Phase, TickPayload}, POWER_LOCATION_TOPIC};
+use log::info;
+use powercable::{
+    tickgen::{Phase, TickPayload},
+    POWER_LOCATION_TOPIC,
+};
 use rumqttc::QoS;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use tokio::task;
 
-use crate::SharedVehicle;
+use crate::{charger_handling::{accept_offer, create_charger_request}, SharedVehicle};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct LocationPayload {
@@ -16,10 +21,7 @@ pub struct LocationPayload {
     pub action: String,
 }
 
-pub async fn tick_handler(
-    handler: SharedVehicle,
-    payload: Bytes
-) {
+pub async fn tick_handler(handler: SharedVehicle, payload: Bytes) {
     let payload: TickPayload = serde_json::from_slice(&payload).unwrap();
     match payload.phase {
         Phase::Process => {
@@ -34,10 +36,7 @@ pub async fn tick_handler(
     }
 }
 
-pub async fn worldmap_event_handler(
-    handler: SharedVehicle,
-    payload: Bytes
-) {
+pub async fn worldmap_event_handler(handler: SharedVehicle, payload: Bytes) {
     let payload: LocationPayload = serde_json::from_slice(&payload).unwrap();
 
     if payload.icon == ":car:" {
@@ -45,31 +44,51 @@ pub async fn worldmap_event_handler(
     }
 }
 
-pub async fn process_tick(
-    handler: SharedVehicle,
-) {
+pub async fn process_tick(handler: SharedVehicle) {
     {
-        let vehicle = &mut handler.lock().await.vehicle;
+        let mut locked_handler = handler.lock().await;
 
-        if vehicle.get_location() == vehicle.get_destination() {
-            let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
-            vehicle.set_destination(latitude, longitude);
+        if locked_handler.target_charger.is_none() {
+            if locked_handler.vehicle.battery().state_of_charge() <= 0.3 {
+                info!(
+                    "{} has no charge left, searching for charging station",
+                    locked_handler.vehicle.get_name()
+                );
+                task::spawn(create_charger_request(handler.clone()));
+            }
+
+            if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination() {
+                let (latitude, longitude) =
+                    powercable::generate_latitude_longitude_within_germany();
+                locked_handler.vehicle.set_destination(latitude, longitude);
+            }
         }
-        vehicle.drive();
+
+        if locked_handler.target_charger.is_some()
+            && locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination()
+        {
+            info!(
+                "{} has arrived at the destination, requesting charge",
+                locked_handler.vehicle.get_name()
+            );
+
+            //@todo: charge
+        } else {
+            locked_handler.vehicle.drive();
+        }
     }
     publish_location(handler.clone()).await;
     publish_soc(handler.clone()).await;
 }
 
-pub async fn commerce_tick(
-    handler: SharedVehicle,
-) {
-    
+pub async fn commerce_tick(handler: SharedVehicle) {
+    let l_handler = handler.lock().await;
+    if l_handler.target_charger.is_none() && !l_handler.charge_offers.is_empty() {
+        accept_offer(handler.clone()).await;
+    }
 }
 
-pub async fn publish_location(
-    handler: SharedVehicle,
-) {
+pub async fn publish_location(handler: SharedVehicle) {
     let mut handler = handler.lock().await;
     // Extract all values before mutably borrowing client
     let name = handler.name.clone();
@@ -96,9 +115,7 @@ pub async fn publish_location(
         .unwrap();
 }
 
-pub async fn publish_soc(
-    handler: SharedVehicle,
-) {
+pub async fn publish_soc(handler: SharedVehicle) {
     let mut handler = handler.lock().await;
     // Extract all values before mutably borrowing client
     let name = handler.name.clone();
