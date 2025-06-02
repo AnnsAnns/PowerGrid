@@ -1,7 +1,7 @@
 use log::{debug, info};
 use powercable::{charger::{ChargeOffer, ChargeRequest}, CHARGER_OFFER};
 
-use crate::SharedCharger;
+use crate::{offer_handling::ReservedOffer, SharedCharger};
 
 async fn receive_request(charger: SharedCharger, payload: ChargeRequest) {
     let mut handler = charger.lock().await;
@@ -20,10 +20,14 @@ async fn receive_request(charger: SharedCharger, payload: ChargeRequest) {
         charge_amount
     };
 
-    handler.charger.reserve_charge(reserved_charge);
-    handler.charger.reserve_port();
+
     let price = handler.charger.get_current_price();
-    handler.currently_reserved_for.push(payload.own_id.clone());
+
+    let offer = ReservedOffer::new(
+        payload.own_id.clone(),
+     reserved_charge, price);
+
+    handler.reserve_offer(offer);
 
     let offer = ChargeOffer::new(
         handler.name.clone(),
@@ -42,21 +46,27 @@ async fn receive_request(charger: SharedCharger, payload: ChargeRequest) {
     ).await.unwrap();
 }
 
+/// This function handles incoming charge requests from cars
+/// 
+/// # Arguments
+/// * `charger` - A shared reference to the charger handler
+/// * `payload` - The charge request payload containing the car's ID and requested charge amount
 pub async fn check_accepted_offers(charger: SharedCharger, payload: ChargeOffer) {
     let mut handler = charger.lock().await;
     let target_id = payload.charge_target.clone();
 
     // This is not something we care about
-    if !handler.currently_reserved_for.contains(&target_id) {
+    if handler.get_reserved_offer(target_id.clone()).is_none() {
+        debug!("Received offer for {} but we are not interested in it", target_id);
         return;
     }
 
     // Somebody else was accepted
     if &payload.own_id != &handler.name {
-        debug!("We were not accepted by {}, removing from reserved list", payload.own_id);
-        handler.currently_reserved_for.retain(|id| id != &target_id);
-        handler.charger.release_reserved_charge(payload.charge_amount as usize);
-
-        // @TODO: Continue here and fix the currently reserved list because it needs charge_amount etc in the list
+        debug!("We were not accepted by {}, removing from reserved list", payload.charge_target);
+        handler.release_offer(target_id.clone());
+    } else {
+        debug!("We were accepted by {}", payload.charge_target);
+        handler.accept_reserve(target_id.clone());
     }
 }
