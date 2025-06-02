@@ -1,5 +1,5 @@
 use log::{debug};
-use powercable::offer::structure::OFFER_PACKAGE_SIZE;
+use powercable::{offer::structure::OFFER_PACKAGE_SIZE, Offer};
 
 pub struct Charger {
     latitude: f64,
@@ -7,6 +7,7 @@ pub struct Charger {
     name: String,
     rate: usize,
     capacity: usize,
+    reserved_charge: usize,
     current_charge: usize,
     charging_ports: usize,
     used_ports: usize,
@@ -26,10 +27,20 @@ impl Charger {
             longitude,
             capacity,
             rate,
+            reserved_charge: 0,
             current_charge: 0,
             charging_ports,
             used_ports: 0,
             name,
+        }
+    }
+
+    pub fn get_available_charge(&self) -> usize {
+        // Calculate the available charge based on current charge and reserved charge
+        if self.current_charge >= self.reserved_charge {
+            self.current_charge - self.reserved_charge
+        } else {
+            0 // No available charge if reserved exceeds current
         }
     }
 
@@ -112,5 +123,53 @@ impl Charger {
         debug!("Charger {} would have price {} if it had {} charge added", self.name, price, amount);
 
         price
+    }
+
+    pub fn reserve_charge(&mut self, charge: usize) -> isize {
+        // Reserve charge if available
+        if self.get_available_charge() >= charge {
+            self.reserved_charge += charge;
+            charge as isize
+        } else {
+            debug!("Charger {} does not have enough available charge to reserve {}. Available: {}", self.name, charge, self.get_available_charge());
+            0 // Not enough charge to reserve
+        }
+    }
+
+    pub fn release_reserved_charge(&mut self, charge: usize) -> isize {
+        // Release reserved charge
+        if self.reserved_charge >= charge {
+            self.reserved_charge -= charge;
+            charge as isize
+        } else {
+            debug!("Charger {} does not have enough reserved charge to release {}. Reserved: {}", self.name, charge, self.reserved_charge);
+            0 // Not enough reserved charge to release
+        }
+    }
+
+    pub fn reserve_port(&mut self) -> bool {
+        // Reserve a charging port if available
+        if self.used_ports < self.charging_ports {
+            self.used_ports += 1;
+            true
+        } else {
+            debug!("Charger {} has no free ports to reserve", self.name);
+            false // No free ports available
+        }
+    }
+
+    pub fn release_port(&mut self) -> bool {
+        // Release a charging port if used
+        if self.used_ports > 0 {
+            self.used_ports -= 1;
+            true
+        } else {
+            debug!("Charger {} has no ports to release", self.name);
+            false // No ports to release
+        }
+    }
+
+    pub fn get_free_ports(&self) -> usize {
+        self.charging_ports - self.used_ports
     }
 }

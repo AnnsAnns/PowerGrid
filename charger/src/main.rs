@@ -1,5 +1,6 @@
 use charger::Charger;
 use log::{debug, info};
+use offer_handling::ReservedOffer;
 use powercable::{generate_unique_name, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, TICK_TOPIC};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
@@ -8,6 +9,8 @@ use topic_handler::{accept_offer_handler, tick_handler};
 
 mod charger;
 mod topic_handler;
+mod car_handling;
+mod offer_handling;
 
 type SharedCharger = Arc<Mutex<ChargerHandler>>;
 
@@ -15,6 +18,7 @@ struct ChargerHandler {
     pub name: String,
     pub charger: Charger,
     pub client: AsyncClient,
+    pub currently_reserved_for: Vec<ReservedOffer>,
     pub offer_handler: OfferHandler,
     pub consumed_last_tick: f64,
 }
@@ -52,6 +56,7 @@ async fn main() {
         charger,
         client: client.clone(),
         offer_handler: OfferHandler::new(),
+        currently_reserved_for: Vec::new(),
         consumed_last_tick: 0.0,
     }));
 
