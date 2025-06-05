@@ -78,9 +78,9 @@ pub fn generate_unique_name() -> String {
         });
     }
 
-    let mut char = word.chars();
-    match char.next() {
+    let mut chars = word.chars();
+    match chars.next() {
         None => String::new(),
-        Some(first_char) => first_char.to_uppercase().collect::<String>() + char.as_str(),
+        Some(first_char) => first_char.to_uppercase().collect::<String>() + chars.as_str(),
     }
 }
