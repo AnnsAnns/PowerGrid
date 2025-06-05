@@ -1,6 +1,4 @@
-use fake::faker::lorem::de_de::Word;
-use fake::Fake;
-use rand::Rng;
+use rand::{seq::IteratorRandom, Rng};
 
 pub mod charger;
 pub mod chart_entry;
@@ -63,5 +61,26 @@ pub fn get_id_from_topic(topic: &str) -> String {
 }
 
 pub fn generate_unique_name() -> String {
-    Word().fake()
+    let mut rng = rand::rng();
+    let vowels = "aeiou";
+    let consonants = "bcdfghjklmnpqrstvwxyz";
+    let rand_vowel = |rng: &mut rand::rngs::ThreadRng| vowels.chars().choose(rng).unwrap();
+    let rand_consonant = |rng: &mut rand::rngs::ThreadRng| consonants.chars().choose(rng).unwrap();
+
+    let mut word: String = "".to_owned();
+    for _ in 2..5 {
+        word.push_str(&match rng.random_range(0..=3) {
+            0 => format!("{}", rand_vowel(&mut rng)),
+            1 => format!("{}{}", rand_vowel(&mut rng), rand_consonant(&mut rng)), 
+            2 => format!("{}{}", rand_consonant(&mut rng), rand_vowel(&mut rng)),
+            3 => format!("{}{}{}", rand_consonant(&mut rng), rand_vowel(&mut rng), rand_consonant(&mut rng)),
+            _ => String::new(),
+        });
+    }
+
+    let mut c = word.chars();
+    match c.next() {
+        None => String::new(),
+        Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
+    }
 }
