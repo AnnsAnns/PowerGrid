@@ -1,7 +1,10 @@
+use log::info;
+use powercable::tickgen::INTERVAL_15_MINS;
+
 #[derive(Debug)]
 pub struct Battery {
-    capacity: f64, // in kWh
-    level: f64, // in kWh
+    capacity: f64, // in Wh
+    level: f64, // in Wh
     temperature: f64, // in °C
     cooling_rate: f64,
     max_charge: f64, // in kW
@@ -37,13 +40,13 @@ impl Battery {
         self.level / self.capacity
     }
 
-    pub fn add_charge(&mut self, charge: f64, tick_time: f64, ambient_temperature: f64) -> f64 {
+    pub fn add_charge(&mut self, charge: f64, ambient_temperature: f64) -> f64 {
         // apply scaling
         let applied_charge = charge.min(self.max_charge);
         let charge_rate = applied_charge * self.charge_scaling() * self.temperature_factor();
         
         // consume energy
-        let energy_drawn = charge_rate * tick_time;
+        let energy_drawn = charge_rate * (INTERVAL_15_MINS as f64 / 3600.0);
         let charge_factor = self.temperature_factor();
         let charge_efficiency = self.charge_efficiency * charge_factor;
         let energy_added = energy_drawn * charge_efficiency;
@@ -56,13 +59,13 @@ impl Battery {
         energy_drawn
     }
     
-    pub fn remove_charge(&mut self, charge: f64, tick_time: f64, ambient_temperature: f64) -> f64 {
+    pub fn remove_charge(&mut self, charge: f64, ambient_temperature: f64) -> f64 {
         // apply temperature factor
-        let discharge_factor = self.temperature_factor();
+        let discharge_factor = 1.0;//self.temperature_factor();
         let applied_charge = (charge.min(self.max_discharge)) * discharge_factor;
     
         // energy demand
-        let desired_energy = applied_charge * tick_time;
+        let desired_energy = applied_charge * (INTERVAL_15_MINS as f64 / 3600.0);
         let energy_output = desired_energy * self.discharge_efficiency;
     
         // energy delivered

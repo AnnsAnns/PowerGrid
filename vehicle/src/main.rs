@@ -28,7 +28,7 @@ async fn main() {
     // init battery
     let mut rng = rand::rng();
     let battery = Battery::new(
-        rng.random_range(21.3..118.0),
+        rng.random_range(21300.0..118000.0),
         rng.random_range(0.5..1.0),
         25.0,
         rng.random_range(0.02..0.12),
@@ -41,7 +41,8 @@ async fn main() {
     // init vehicle
     let vehicle_name: String = powercable::generate_unique_name();
     let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
-    let vehicle = Vehicle::new(vehicle_name.clone(), latitude, longitude, battery);
+    let consumption = rng.random_range(137.0..295.0);
+    let vehicle = Vehicle::new(vehicle_name.clone(), latitude, longitude, consumption, battery);
 
     let log_path = format!(
         "logs/vehicle_{}.log",
