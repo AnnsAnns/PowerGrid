@@ -30,10 +30,7 @@ async fn main() {
     let battery = Battery::new(
         rng.random_range(21300.0..118000.0),
         rng.random_range(0.5..1.0),
-        25.0,
-        rng.random_range(0.02..0.12),
         rng.random_range(7.0..350.0),
-        rng.random_range(30.0..600.0),
         rng.random_range(0.90..0.98),
         rng.random_range(0.85..0.95),
     );

@@ -74,7 +74,7 @@ pub async fn process_tick(handler: SharedVehicle) {
 
             //@todo: charge
         } else {
-            locked_handler.vehicle.drive(50.0, 20.0);
+            locked_handler.vehicle.drive(50.0);
         }
     }
     publish_location(handler.clone()).await;

@@ -1,8 +1,6 @@
 use std::f64::consts::PI;
 
-use log::info;
 use powercable::tickgen::INTERVAL_15_MINS;
-use rand::Rng;
 
 use crate::battery::Battery;
 
@@ -78,29 +76,30 @@ impl Vehicle {
         self.location.0
     }
 
-    pub fn drive(&mut self, speed_kmh: f64, ambient_temperature: f64) {
+    pub fn drive(&mut self, speed_kmh: f64) {
         let soc = self.battery.state_of_charge();
         if soc <= 0.0 {
             return;
         }
 
         let distance_now = speed_kmh * (INTERVAL_15_MINS as f64 / 3600.0); // seconds to hours
-        let total_distance = self.distance_to(self.destination.0, self.destination.1);
+        let efficiency_factor = Vehicle::speed_efficiency_factor(speed_kmh);
+        let consumption_now = self.consumption * efficiency_factor;
+        let charge_requested = distance_now * consumption_now;
+        let charge_used = self.battery.remove_charge(charge_requested);
+        let charge_factor = charge_requested / charge_used;
+
+        let total_distance = self.distance_to(self.destination.0, self.destination.1) * charge_factor;
         if total_distance > 0.0 {
             let step_ratio = distance_now / total_distance;
             self.location.0 += step_ratio * (self.destination.0 - self.location.0);
             self.location.1 += step_ratio * (self.destination.1 - self.location.1);
-    
+
+            // do the rest for free :)
             if total_distance <= distance_now {
                 self.location = self.destination;
             }
         }
-        
-        let efficiency_factor = Vehicle::speed_efficiency_factor(speed_kmh);
-        let consumption_now = self.consumption * efficiency_factor;
-        let charge_used = distance_now * consumption_now;
-        self.battery.remove_charge(charge_used, ambient_temperature);
-        info!("{} new SoC: {}", self.name, self.battery.state_of_charge() * 100.0)
     }
 
     fn speed_efficiency_factor(speed_kmh: f64) -> f64 {
