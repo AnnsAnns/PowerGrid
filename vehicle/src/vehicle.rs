@@ -1,12 +1,14 @@
 use std::f64::consts::PI;
 
 use powercable::tickgen::INTERVAL_15_MINS;
+use rand::Rng;
 
-use crate::battery::Battery;
+use crate::{battery::Battery, database::random_ev};
 
 #[derive(Debug)]
 pub struct Vehicle {
     name: String,
+    model: String,
     location: (f64, f64), // (latitude, longitude)
     destination: (f64, f64), // (latitude, longitude)
     consumption: f64, // Wh/km
@@ -18,11 +20,13 @@ impl Vehicle {
         name: String,
         latitude: f64,
         longitude: f64,
-        consumption: f64,
-        battery: Battery,
     ) -> Self {
+        let mut rng = rand::rng();
+        let (model, consumption,capacity , max_charge) = random_ev();
+        let battery = Battery::new(capacity, rng.random_range(0.4..1.0), max_charge);
         Vehicle {
             name: name,
+            model: model.to_owned(),
             location: (latitude, longitude),
             destination: (latitude, longitude),
             consumption: consumption,

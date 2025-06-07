@@ -2,9 +2,7 @@
 pub struct Battery {
     capacity: f64, // in Wh
     level: f64, // in Wh
-    max_charge: f64, // in kW
-    charge_efficiency: f64,
-    discharge_efficiency: f64,
+    max_charge: f64, // in W
 }
 
 impl Battery {
@@ -12,15 +10,11 @@ impl Battery {
         capacity: f64,
         soc: f64, // State of Charge (0..1)
         max_charge: f64,
-        charge_efficiency: f64,
-        discharge_efficiency: f64,
     ) -> Self {
         Battery {
             capacity,
             level: capacity * soc,
             max_charge,
-            charge_efficiency,
-            discharge_efficiency,
         }
     }
 
@@ -34,20 +28,22 @@ impl Battery {
         let charge_rate = applied_charge * self.charge_scaling();
         
         // consume energy
+        let charge_efficiency = 0.9;
+        let charge_efficiency = charge_efficiency;
         let energy_drawn = charge_rate;
-        let charge_efficiency = self.charge_efficiency;
         let energy_added = energy_drawn * charge_efficiency;
         self.level = (self.level + energy_added).min(self.capacity);
         energy_drawn
     }
     
     pub fn remove_charge(&mut self, charge: f64) -> f64 {
-        let energy_demand = charge * self.discharge_efficiency;
+        let discharge_efficiency = 0.94;
+        let energy_demand = charge * discharge_efficiency;
         let energy_delivered = if self.level >= energy_demand {
             self.level -= energy_demand;
             energy_demand
         } else {
-            let actual_energy = self.level * self.discharge_efficiency;
+            let actual_energy = self.level * discharge_efficiency;
             self.level = 0.0;
             actual_energy
         };
