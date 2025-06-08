@@ -10,6 +10,7 @@ use vehicle::Vehicle;
 
 mod battery;
 mod charger_handling;
+mod database;
 mod topic_handler;
 mod vehicle;
 
@@ -25,23 +26,10 @@ struct VehicleHandler {
 
 #[tokio::main]
 async fn main() {
-    // init battery
-    let mut rng = rand::rng();
-    let battery = Battery::new(
-        rng.random_range(21.3..118.0),
-        rng.random_range(0.5..1.0),
-        25.0,
-        rng.random_range(0.02..0.12),
-        rng.random_range(7.0..350.0),
-        rng.random_range(30.0..600.0),
-        rng.random_range(0.90..0.98),
-        rng.random_range(0.85..0.95),
-    );
-
     // init vehicle
     let vehicle_name: String = powercable::generate_unique_name();
     let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
-    let vehicle = Vehicle::new(vehicle_name.clone(), latitude, longitude, battery);
+    let vehicle = Vehicle::new(vehicle_name.clone(), latitude, longitude);
 
     let log_path = format!(
         "logs/vehicle_{}.log",
