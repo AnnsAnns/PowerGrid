@@ -27,3 +27,17 @@ remove_docker_data:
 .PHONY: rebuild
 rebuild:
 	@docker build . -t base
+
+.PHONY: windows_build
+windows_build:
+	@echo "Building inside a Docker container for Windows ..." 
+	@docker build . -t local/powergrid:latest
+	if not exist docker_data mkdir docker_data
+	@docker-compose up --build
+
+.PHONY: windows_clean
+windows_clean:
+	@echo "Cleaning up Windows build artifacts ..."
+	@docker compose down
+	@docker rmi local/powergrid:latest
+	@del /q /f .docker_data\logs\*.*
