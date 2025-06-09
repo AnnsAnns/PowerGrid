@@ -5,7 +5,7 @@ use rumqttc::QoS;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tokio::task;
-use crate::{charger_handling::{accept_offer, create_charger_request}, SharedVehicle};
+use crate::{charger_handling::{accept_offer, create_charger_request}, SharedVehicle, vehicle::VehicleStatus};
 
 #[derive(Serialize, Deserialize, Debug)]
 /**
@@ -68,8 +68,8 @@ pub async fn process_tick(handler: SharedVehicle) {
                 "{} has arrived at the destination, requesting charge",
                 locked_handler.vehicle.get_name()
             );
+            locked_handler.vehicle.set_status(VehicleStatus::Charging);
 
-            //@todo: charge
         } else {
             locked_handler.vehicle.drive(50.0);
         }
@@ -79,28 +79,17 @@ pub async fn process_tick(handler: SharedVehicle) {
 }
 
 pub async fn commerce_tick(handler: SharedVehicle) {
-    let l_handler = handler.lock().await;
-    info!(
-        "{} is in commerce phase, checking for charge offers",
-        l_handler.vehicle.get_name()
-    );
-    info!(
-        "{} has {} charge offers",
-        l_handler.vehicle.get_name(),
-        l_handler.charge_offers.len()
-    );
-    info!(
-        "{} has target charger: {:?}",
-        l_handler.vehicle.get_name(),
-        l_handler.target_charger
-    );
-    if l_handler.target_charger.is_none() && !l_handler.charge_offers.is_empty() {
-        info!(
-            "{} has received charge offers, accepting the best one",
-            l_handler.vehicle.get_name()
-        );
-        accept_offer(handler.clone()).await;
+    {
+        let l_handler = handler.lock().await;
+        if l_handler.target_charger.is_some() || l_handler.charge_offers.is_empty() {
+            return;
+        }
     }
+    info!(
+        "{} has received charge offers, accepting the best one",
+        handler.lock().await.vehicle.get_name()
+    );
+    accept_offer(handler.clone()).await;
 }
 
 pub async fn publish_vehicle(handler: SharedVehicle) {

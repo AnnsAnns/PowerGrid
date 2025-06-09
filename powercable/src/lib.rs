@@ -27,9 +27,10 @@ pub const POWER_CONSUMER_TOPIC: &str = "power/consumer";
 pub const POWER_LOCATION_TOPIC: &str = "power/location";
 pub const POWER_CONSUMER_SCALE: &str = "power/consumer/scale";
 pub const WORLDMAP_EVENT_TOPIC: &str = "worldmap/event";
-pub const CHARGER_REQUEST: &str = "charger/request"; // vehicle send request to all chargers
-pub const CHARGER_OFFER: &str = "charger/offer"; // charger sends offer to vehicle
+pub const CHARGER_REQUEST: &str = "charger/request";// vehicle send request to all chargers
+pub const CHARGER_OFFER: &str = "charger/offer";// charger sends offer to vehicle
 pub const CHARGER_ACCEPT: &str = "charger/accept";
+// charger/{charger_id}/{port_id}/charge for charging a vehicle at a specific port
 pub const MQTT_BROKER: &str = "mosquitto_broker";
 pub const MQTT_BROKER_PORT: u16 = 1883;
 pub const MAP_UPDATE_SPEED_IN_SECS: u64 = 1;
@@ -47,7 +48,7 @@ const WEST_LIMIT: (f64, f64) = (51.00929968161735, 6.282484743251983);
  * Position represents a geographical position with latitude and longitude.
  * It is used to represent the position of vehicles, chargers, and other entities in the system.
  */
-#[derive(Debug, Clone, Copy, PartialEq, serde::Deserialize, serde::Serialize, Encode, Decode)]
+#[derive(Debug, Clone, Copy, PartialEq, Encode, Decode)]
 pub struct Position {
     pub latitude: f64,
     pub longitude: f64,

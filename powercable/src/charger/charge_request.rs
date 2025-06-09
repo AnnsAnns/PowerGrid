@@ -2,7 +2,7 @@ use bitcode::{Decode, Encode};
 use bytes::Bytes;
 use crate::Position;
 
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, Encode, Decode)]
+#[derive(Debug, Clone, Encode, Decode)]
 /**
  * ChargeRequest represents a request from a vehicle to find a suitable charger.
  * It includes the vehicle's name, the amount of charge requested, and the vehicle's position (latitude, longitude).

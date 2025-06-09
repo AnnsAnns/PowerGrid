@@ -20,8 +20,8 @@ struct ConsumerHandler {
 
 #[tokio::main]
 async fn main() {
-    let consumer_type_str= env::var("CONSUMER_TYPE").unwrap_or(ConsumerType::H.to_string()); // TODO: simplify
-    let consumer_type = ConsumerType::from_str(&consumer_type_str); // TODO: simplify
+    let consumer_type_str= env::var("CONSUMER_TYPE").unwrap_or(ConsumerType::H.to_string());
+    let consumer_type = ConsumerType::from_str(&consumer_type_str);
     let mut consumer =
         Consumer::new(powercable::generate_rnd_pos(), consumer_type);
 

@@ -11,3 +11,4 @@ There are two ways to build the docker image:
 `make build_docker` - Builds inside a Docker container
 
 The standard is build_native since it drastically reduces build time, but if you want to build on a different platform, use build_docker.
+

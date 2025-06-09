@@ -76,6 +76,7 @@ async fn main() {
                 CHARGER_REQUEST => {
                     let _ = task::spawn(receive_request(shared_charger.clone(), p.payload));
                 }
+                // wenn seine offer nicht accepted wurde muss er die offer releasen check_accepted_offers
                 _ => {
                     let _ = task::spawn(async move {
                         debug!("Unknown topic: {}", p.topic);

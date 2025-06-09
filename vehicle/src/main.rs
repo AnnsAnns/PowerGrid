@@ -70,7 +70,7 @@ async fn main() {
                     let _ = task::spawn(worldmap_event_handler(shared_vehicle.clone(), p.payload));
                 }
                 CHARGER_OFFER => {
-                    let payload = match serde_json::from_slice::<ChargeOffer>(&p.payload) {
+                    let payload = match ChargeOffer::from_bytes(p.payload) {
                         Ok(offer) => offer,
                         Err(e) => {
                             warn!("Failed to deserialize ChargeOffer: {}", e);

@@ -78,6 +78,7 @@ pub async fn accept_offer(vehicle: SharedVehicle) {
 
     // Has to be something by now
     let offer = best_offer.0.unwrap();
+    info!("Driving to charger: {}", offer.charger_name);
 
     // drive to the charger
     handler.vehicle.set_status(VehicleStatus::Driving);
