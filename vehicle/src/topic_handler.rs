@@ -36,7 +36,7 @@ pub async fn tick_handler(handler: SharedVehicle, payload: Bytes) {
     }
 
     // do these actions on all ticks (every 5 minutes)
-    handler.lock().await.vehicle.drive(50.0);
+    handler.lock().await.vehicle.drive();
     publish_vehicle(handler.clone()).await;
     publish_soc(handler.clone()).await;// TODO: whyyy?
 }
@@ -98,13 +98,24 @@ pub async fn publish_vehicle(handler: SharedVehicle) {
     // Extract all values before mutably borrowing client
     let name = handler.name.clone();
     let (latitude, longitude) = handler.vehicle.get_location();
+    let (destination_lat, destination_lon) = handler.vehicle.get_destination();
+    let speed = handler.vehicle.get_speed_ms();
     let percentage = handler.vehicle.battery().state_of_charge() * 100.0;
     let client = &mut handler.client;
     let location_payload = json!({
         "name" : name,
         "lat": latitude,
         "lon": longitude,
+        "destination": {
+            "lat": destination_lat,
+            "lon": destination_lon,
+            "icon": ":flag:",
+            "label": "Destination"
+        },
+        "line": [[latitude, longitude], [destination_lat, destination_lon]],
+        "color": "blue",
         "icon": ":car:",
+        "speed": format!("{} kph", speed),
         "label": format!("{:.1}%", percentage),
     })
     .to_string();

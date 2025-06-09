@@ -23,6 +23,7 @@ pub struct Vehicle {
     location: (f64, f64), // (latitude, longitude)
     destination: (f64, f64), // (latitude, longitude)
     consumption: f64, // Wh/km
+    speed: f64, // km/h
     battery: Battery,
 }
 
@@ -42,16 +43,17 @@ impl Vehicle {
             location: (latitude, longitude),
             destination: (latitude, longitude),
             consumption: consumption,
+            speed: 50.0,
             battery: battery,
         }
     }
 
     pub fn get_name(&self) -> &String {
-        return &self.name;
+        &self.name
     }
 
     pub fn get_model(&self) -> &String {
-        return &self.model;
+        &self.model
     }
 
     pub fn get_status(&self) -> &VehicleStatus {
@@ -84,6 +86,18 @@ impl Vehicle {
         self.destination
     }
 
+    pub fn get_consumption(&self) -> f64 {
+        self.consumption
+    }
+
+    pub fn get_speed_ms(&self) -> f64 {
+        self.speed
+    }
+
+    pub fn get_speed_kmh(&self) -> f64 {
+        self.speed * 3.6
+    }
+
     pub fn battery(&mut self) -> &mut Battery {
         &mut self.battery
     }
@@ -104,15 +118,14 @@ impl Vehicle {
         self.location.0
     }
 
-    pub fn drive(&mut self, speed_kmh: f64) {
+    pub fn drive(&mut self) {
         let soc = self.battery.state_of_charge();
         if soc <= 0.0 {
             return;
         }
 
-        let distance_now = speed_kmh * (INTERVAL_5_MINS as f64 / 3600.0); // seconds to hours
-        let efficiency_factor = Vehicle::speed_efficiency_factor(speed_kmh);
-        let consumption_now = self.consumption * efficiency_factor;
+        let distance_now = self.speed * INTERVAL_5_MINS as f64 / 1000.0; // m to km
+        let consumption_now = self.consumption * self.speed_efficiency_factor();
         let charge_requested = distance_now * consumption_now;
         let charge_used = self.battery.remove_charge(charge_requested);
         let charge_factor = charge_requested / charge_used;
@@ -130,16 +143,16 @@ impl Vehicle {
         }
     }
 
-    fn speed_efficiency_factor(speed_kmh: f64) -> f64 {
-        let rolling_resistance = 0.0005; // approximate coefficient
-        let aerodynamic_drag = 0.00003; // approximate drag factor
-        1.0 + rolling_resistance * speed_kmh + aerodynamic_drag * speed_kmh.powi(2)
-    }
-
     pub fn charge(&mut self, amount: usize) {
         if self.status != VehicleStatus::Charging {
             self.battery.add_charge(amount as f64);
         }
+    }
+
+    fn speed_efficiency_factor(&self) -> f64 {
+        let rolling_resistance = 0.0005; // approximate coefficient
+        let aerodynamic_drag = 0.00003; // approximate drag factor
+        1.0 + rolling_resistance * self.speed + aerodynamic_drag * self.speed.powi(2)
     }
 
     fn to_radians(deg: f64) -> f64 {
