@@ -1,9 +1,6 @@
 use log::{debug, info};
-use powercable::{
-    charger::{ChargeOffer, ChargeRequest, PRICE_DISTANCE_FACTOR}, Position, CHARGER_ACCEPT, CHARGER_REQUEST
-};
+use powercable::{charger::{ChargeOffer, ChargeRequest, PRICE_DISTANCE_FACTOR}, Position, CHARGER_ACCEPT, CHARGER_REQUEST};
 use rumqttc::QoS;
-
 use crate::SharedVehicle;
 use crate::vehicle::VehicleStatus;
 
@@ -21,7 +18,7 @@ pub async fn create_charger_request(vehicle: SharedVehicle) {
     let request = ChargeRequest {
         vehicle_name: handler.vehicle.get_name().clone(),
         charge_amount: handler.vehicle.battery_non_mut().get_free_capacity(),
-        position: Position {
+        vehicle_position: Position {
             latitude: handler.vehicle.get_latitude(),
             longitude: handler.vehicle.get_longitude(),
         },
@@ -41,13 +38,16 @@ pub async fn create_charger_request(vehicle: SharedVehicle) {
 pub async fn receive_offer(vehicle: SharedVehicle, payload: ChargeOffer) {
     let mut handler = vehicle.lock().await;
 
-    handler.charge_offers.push(payload.clone());
     info!(
         "Received charge offer from {}: {} kWh at {}€",
         payload.charger_name, payload.charge_amount, payload.charge_price
     );
+    handler.charge_offers.push(payload.clone());
 }
 
+/**
+ * Accepts the best charge offer based on the distance to the charger and the charge price.
+ */
 pub async fn accept_offer(vehicle: SharedVehicle) {
     let mut handler = vehicle.lock().await;
 
@@ -79,11 +79,12 @@ pub async fn accept_offer(vehicle: SharedVehicle) {
     // Has to be something by now
     let offer = best_offer.0.unwrap();
 
+    // drive to the charger
     handler.vehicle.set_status(VehicleStatus::Driving);
-    handler.vehicle.set_destination(
-        offer.charger_position.latitude,
-        offer.charger_position.longitude,
-    );
+    handler.vehicle.set_destination(Position {
+        latitude: offer.charger_position.latitude,
+        longitude: offer.charger_position.longitude,
+    });
 
     info!(
         "Accepting best offer from {}: {} kWh at {}€",

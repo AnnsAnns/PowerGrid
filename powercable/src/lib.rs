@@ -70,13 +70,6 @@ impl Position {
     }
 }
 
-pub fn generate_latitude_longitude_within_germany() -> (f64, f64) {
-    let mut rng = rand::rng();
-    let latitude = rng.random_range(SOUTH_LIMIT.0..NORTH_LIMIT.0);
-    let longitude = rng.random_range(WEST_LIMIT.1..EAST_LIMIT.1);
-    (latitude, longitude)
-}
-
 /**
  * Generates a random position within the defined limits of Germany.
  */

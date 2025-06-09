@@ -1,17 +1,16 @@
 use bytes::Bytes;
 use log::info;
-use powercable::{
-    tickgen::{Phase, TickPayload},
-    POWER_LOCATION_TOPIC,
-};
+use powercable::{generate_rnd_pos, tickgen::{Phase, TickPayload}, POWER_LOCATION_TOPIC};
 use rumqttc::QoS;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tokio::task;
-
 use crate::{charger_handling::{accept_offer, create_charger_request}, SharedVehicle};
 
 #[derive(Serialize, Deserialize, Debug)]
+/**
+ * LocationPayload represents the payload for the worldmap event.
+ */
 pub struct LocationPayload {
     pub name: String,
     pub lat: f64,
@@ -58,9 +57,7 @@ pub async fn process_tick(handler: SharedVehicle) {
             }
 
             if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination() {
-                let (latitude, longitude) =
-                    powercable::generate_latitude_longitude_within_germany();
-                locked_handler.vehicle.set_destination(latitude, longitude);
+                locked_handler.vehicle.set_destination(generate_rnd_pos());
             }
         }
 
@@ -83,6 +80,20 @@ pub async fn process_tick(handler: SharedVehicle) {
 
 pub async fn commerce_tick(handler: SharedVehicle) {
     let l_handler = handler.lock().await;
+    info!(
+        "{} is in commerce phase, checking for charge offers",
+        l_handler.vehicle.get_name()
+    );
+    info!(
+        "{} has {} charge offers",
+        l_handler.vehicle.get_name(),
+        l_handler.charge_offers.len()
+    );
+    info!(
+        "{} has target charger: {:?}",
+        l_handler.vehicle.get_name(),
+        l_handler.target_charger
+    );
     if l_handler.target_charger.is_none() && !l_handler.charge_offers.is_empty() {
         info!(
             "{} has received charge offers, accepting the best one",
@@ -95,14 +106,14 @@ pub async fn commerce_tick(handler: SharedVehicle) {
 pub async fn publish_vehicle(handler: SharedVehicle) {
     let mut handler = handler.lock().await;
     // Extract all values before mutably borrowing client
-    let name = handler.name.clone();
-    let (latitude, longitude) = handler.vehicle.get_location();
+    let name = handler.vehicle.get_name().clone();
+    let position = handler.vehicle.get_location();
     let percentage = handler.vehicle.battery().state_of_charge() * 100.0;
     let client = &mut handler.client;
     let location_payload = json!({
         "name" : name,
-        "lat": latitude,
-        "lon": longitude,
+        "lat": position.latitude,
+        "lon": position.longitude,
         "icon": ":car:",
         "label": format!("{:.1}%", percentage),
     })
@@ -122,7 +133,7 @@ pub async fn publish_vehicle(handler: SharedVehicle) {
 pub async fn publish_soc(handler: SharedVehicle) {
     let mut handler = handler.lock().await;
     // Extract all values before mutably borrowing client
-    let name = handler.name.clone();
+    let name = handler.vehicle.get_name().clone();
     let soc = handler.vehicle.battery().state_of_charge() * 100.0;
     let client = &mut handler.client;
 

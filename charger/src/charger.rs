@@ -1,5 +1,5 @@
 use log::{debug};
-use powercable::{offer::structure::OFFER_PACKAGE_SIZE, Offer, Position};
+use powercable::{offer::structure::OFFER_PACKAGE_SIZE, Position};
 
 pub struct Charger {
     name: String,

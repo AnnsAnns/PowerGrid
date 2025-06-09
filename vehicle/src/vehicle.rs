@@ -1,11 +1,8 @@
-use std::{char, f64::consts::PI};
-use log::info;
-use powercable::tickgen::INTERVAL_15_MINS;
+use std::f64::consts::PI;
+use powercable::{tickgen::INTERVAL_15_MINS, Position};
 use rand::Rng;
 
 use crate::{battery::Battery, database::random_ev};
-
-const TRAVELED: f64 = 12.5; // equals 50 km/h cause one tick is 15 minutes
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VehicleStatus {
@@ -20,8 +17,8 @@ pub struct Vehicle {
     name: String,
     model: String,
     status: VehicleStatus,
-    location: (f64, f64), // (latitude, longitude)
-    destination: (f64, f64), // (latitude, longitude)
+    location: Position,
+    destination: Position,
     consumption: f64, // Wh/km
     battery: Battery,
 }
@@ -29,20 +26,19 @@ pub struct Vehicle {
 impl Vehicle {
     pub fn new(
         name: String,
-        latitude: f64,
-        longitude: f64,
+        location: Position,
     ) -> Self {
         let mut rng = rand::rng();
         let (model, consumption,capacity , max_charge) = random_ev();
         let battery = Battery::new(capacity, rng.random_range(0.4..1.0), max_charge);
         Vehicle {
-            name: name,
+            name,
             model: model.to_owned(),
             status: VehicleStatus::RANDOM,
-            location: (latitude, longitude),
-            destination: (latitude, longitude),
-            consumption: consumption,
-            battery: battery,
+            location,
+            destination: location, // Initially, the destination is the same as the location
+            consumption,
+            battery,
         }
     }
 
@@ -63,7 +59,7 @@ impl Vehicle {
     }
 
     pub fn distance_to(&self, latitude: f64, longitude: f64) -> f64 { // TODO: simplify
-        let this_rad = (Vehicle::to_radians(self.location.0), Vehicle::to_radians(self.location.1));
+        let this_rad = (Vehicle::to_radians(self.location.latitude), Vehicle::to_radians(self.location.longitude));
         let other_rad = (Vehicle::to_radians(latitude), Vehicle::to_radians(longitude));
 
         let lat_diff = other_rad.0 - this_rad.0;
@@ -76,11 +72,11 @@ impl Vehicle {
         earth_radius_km * angular_distance
     }
 
-    pub fn get_location(&self) -> (f64, f64) {
+    pub fn get_location(&self) -> Position {
         self.location
     }
 
-    pub fn get_destination(&self) -> (f64, f64) {
+    pub fn get_destination(&self) -> Position {
         self.destination
     }
 
@@ -92,16 +88,16 @@ impl Vehicle {
         &self.battery
     }
 
-    pub fn set_destination(&mut self, latitude: f64, longitude: f64) {
-        self.destination = (latitude, longitude);
+    pub fn set_destination(&mut self, destination: Position) {
+        self.destination = destination;
     }
 
     pub fn get_longitude(&self) -> f64 {
-        self.location.1
+        self.location.longitude
     }
 
     pub fn get_latitude(&self) -> f64 {
-        self.location.0
+        self.location.latitude
     }
 
     pub fn drive(&mut self, speed_kmh: f64) {
@@ -117,11 +113,11 @@ impl Vehicle {
         let charge_used = self.battery.remove_charge(charge_requested);
         let charge_factor = charge_requested / charge_used;
 
-        let total_distance = self.distance_to(self.destination.0, self.destination.1) * charge_factor;
+        let total_distance = self.distance_to(self.destination.latitude, self.destination.longitude) * charge_factor;
         if total_distance > 0.0 {
             let step_ratio = distance_now / total_distance;
-            self.location.0 += step_ratio * (self.destination.0 - self.location.0);
-            self.location.1 += step_ratio * (self.destination.1 - self.location.1);
+            self.location.latitude += step_ratio * (self.destination.latitude - self.location.latitude);
+            self.location.longitude += step_ratio * (self.destination.longitude - self.location.longitude);
 
             // do the rest for free :)
             if total_distance <= distance_now {

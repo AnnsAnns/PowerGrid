@@ -2,7 +2,6 @@ use log::{debug, info, trace, warn};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration, env};
 use tokio::{sync::Mutex, task};
-
 use powercable::*;
 use consumer::{Consumer, ConsumerType};
 use topic_handler::{accept_offer_handler, tick_handler, scale_handler};
@@ -21,11 +20,10 @@ struct ConsumerHandler {
 
 #[tokio::main]
 async fn main() {
-    let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
     let consumer_type_str= env::var("CONSUMER_TYPE").unwrap_or(ConsumerType::H.to_string()); // TODO: simplify
     let consumer_type = ConsumerType::from_str(&consumer_type_str); // TODO: simplify
     let mut consumer =
-        Consumer::new(latitude, longitude, consumer_type);
+        Consumer::new(powercable::generate_rnd_pos(), consumer_type);
 
     let log_path = format!("logs/consumer_{}.log", consumer_type_str.replace(" ", "_"));
     let _log2 = log2::open(log_path.as_str()).level("info").start();
@@ -41,17 +39,17 @@ async fn main() {
     debug!("Connected to MQTT broker as {}", consumer_type.to_string());
 
     client
-        .subscribe(powercable::TICK_TOPIC, QoS::AtMostOnce)
+        .subscribe(powercable::TICK_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     trace!("Subscribed to {} topic", TICK_TOPIC);
     client
-        .subscribe(ACCEPT_BUY_OFFER_TOPIC, QoS::AtMostOnce)
+        .subscribe(ACCEPT_BUY_OFFER_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     trace!("Subscribed to {} topic", ACCEPT_BUY_OFFER_TOPIC);
     client
-        .subscribe(powercable::POWER_CONSUMER_SCALE, QoS::AtMostOnce)
+        .subscribe(powercable::POWER_CONSUMER_SCALE, QoS::ExactlyOnce)
         .await
         .unwrap();
     trace!("Subscribed to {} topic", POWER_CONSUMER_SCALE);

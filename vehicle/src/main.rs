@@ -1,7 +1,5 @@
-use battery::Battery;
-use log::{debug, info};
+use log::{debug, info, warn};
 use powercable::{charger::ChargeOffer, CHARGER_OFFER, TICK_TOPIC, WORLDMAP_EVENT_TOPIC};
-use rand::Rng;
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task};
@@ -17,7 +15,6 @@ mod vehicle;
 type SharedVehicle = Arc<Mutex<VehicleHandler>>;
 
 struct VehicleHandler {
-    pub name: String,
     pub vehicle: Vehicle,
     pub charge_offers: Vec<ChargeOffer>,
     pub target_charger: Option<ChargeOffer>,
@@ -28,8 +25,7 @@ struct VehicleHandler {
 async fn main() {
     // init vehicle
     let vehicle_name: String = powercable::generate_unique_name();
-    let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
-    let vehicle = Vehicle::new(vehicle_name.clone(), latitude, longitude);
+    let vehicle = Vehicle::new(vehicle_name.clone(), powercable::generate_rnd_pos());
 
     let log_path = format!(
         "logs/vehicle_{}.log",
@@ -47,18 +43,17 @@ async fn main() {
     mqttoptions.set_keep_alive(Duration::from_secs(5));
     let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
     client
-        .subscribe(powercable::TICK_TOPIC, QoS::AtMostOnce)
+        .subscribe(powercable::TICK_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     client
-        .subscribe(powercable::WORLDMAP_EVENT_TOPIC, QoS::AtMostOnce)
+        .subscribe(powercable::WORLDMAP_EVENT_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
-    client.subscribe(CHARGER_OFFER, QoS::AtMostOnce).await.unwrap();
+    client.subscribe(CHARGER_OFFER, QoS::ExactlyOnce).await.unwrap();
     info!("Connected to MQTT broker");
 
     let shared_vehicle = Arc::new(Mutex::new(VehicleHandler {
-        name: vehicle_name.clone(),
         vehicle,
         target_charger: None,
         charge_offers: Vec::new(),
@@ -78,7 +73,7 @@ async fn main() {
                     let payload = match serde_json::from_slice::<ChargeOffer>(&p.payload) {
                         Ok(offer) => offer,
                         Err(e) => {
-                            debug!("Failed to deserialize ChargeOffer: {}", e);
+                            warn!("Failed to deserialize ChargeOffer: {}", e);
                             continue;
                         }
                     };

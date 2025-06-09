@@ -48,8 +48,7 @@ async fn map_update_task(handler: Arc<Mutex<FusionReactor>>) {
     }
 }
 
-async fn process_offers(handler: Arc<Mutex<FusionReactor>>, tick_payload: TickPayload) {
-    let mut power_this_tick = 0.0;
+async fn process_offers(handler: Arc<Mutex<FusionReactor>>) {
     while handler.lock().await.offer_handler.has_offers() {
         let mut offer = handler
             .lock()
@@ -73,7 +72,7 @@ async fn process_offers(handler: Arc<Mutex<FusionReactor>>, tick_payload: TickPa
             .client
             .publish(
                 ACCEPT_BUY_OFFER_TOPIC,
-                QoS::AtMostOnce,
+                QoS::ExactlyOnce,
                 true,
                 offer.to_bytes(),
             )
@@ -167,7 +166,7 @@ async fn process_tick(handler: Arc<Mutex<FusionReactor>>, tick_payload: TickPayl
         .client
         .publish(
             POWER_TRANSFORMER_GENERATION_TOPIC,
-            QoS::AtMostOnce,
+            QoS::ExactlyOnce,
             true,
             ChartEntry::new(
                 OWN_TOPIC.to_string(),
@@ -197,7 +196,7 @@ async fn main() {
     mqttoptions.set_keep_alive(Duration::from_secs(5));
     let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
 
-    let mut fusion_reactor = Arc::new(Mutex::new(FusionReactor {
+    let fusion_reactor = Arc::new(Mutex::new(FusionReactor {
         total_power_produced: 0.0,
         cash_earned: 0.0,
         offer_handler: OfferHandler::new(),
@@ -206,15 +205,15 @@ async fn main() {
     }));
 
     client
-        .subscribe(powercable::TICK_TOPIC, QoS::AtMostOnce)
+        .subscribe(powercable::TICK_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     client
-        .subscribe(powercable::BUY_OFFER_TOPIC, QoS::AtMostOnce)
+        .subscribe(powercable::BUY_OFFER_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     client
-        .subscribe(powercable::ACK_ACCEPT_BUY_OFFER_TOPIC, QoS::AtMostOnce)
+        .subscribe(powercable::ACK_ACCEPT_BUY_OFFER_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     info!("Connected to MQTT broker");
@@ -235,7 +234,7 @@ async fn main() {
                             debug!("Commerce phase");
                         }
                         Phase::PowerImport => {
-                            task::spawn(process_offers(fusion_reactor.clone(), tick_payload));
+                            task::spawn(process_offers(fusion_reactor.clone()));
                         }
                     }
                 }

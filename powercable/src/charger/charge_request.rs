@@ -1,6 +1,5 @@
 use bitcode::{Decode, Encode};
 use bytes::Bytes;
-
 use crate::Position;
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, Encode, Decode)]
@@ -11,15 +10,15 @@ use crate::Position;
 pub struct ChargeRequest {
     pub vehicle_name: String,
     pub charge_amount: usize, // in kWh
-    pub position: Position,
+    pub vehicle_position: Position,
 }
 
 impl ChargeRequest {
-    pub fn new(vehicle_name: String, charge_amount: usize, latitude: f64, longitude: f64) -> Self {
+    pub fn new(vehicle_name: String, charge_amount: usize, vehicle_position: Position) -> Self {
         ChargeRequest {
             vehicle_name,
             charge_amount,
-            position: Position::new(latitude, longitude),
+            vehicle_position,
         }
     }
 

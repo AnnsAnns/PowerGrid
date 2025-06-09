@@ -9,7 +9,7 @@ pub async fn receive_request(charger: SharedCharger, payload: Bytes) {
 
     let request: ChargeRequest = ChargeRequest::from_bytes(payload).unwrap();
     info!("Received charge request from {}: {} kWh at ({}, {})", 
-           request.vehicle_name, request.charge_amount, request.position.latitude, request.position.longitude);
+           request.vehicle_name, request.charge_amount, request.vehicle_position.latitude, request.vehicle_position.longitude);
     
     if handler.charger.get_free_ports() == 0 {
         info!("Charger {} has no free ports, rejecting request from {}", handler.name, request.vehicle_name);
@@ -45,7 +45,7 @@ pub async fn receive_request(charger: SharedCharger, payload: Bytes) {
     info!("Sending charge offer to {}: {} kWh at {}€", offer.vehicle_name, offer.charge_amount, offer.charge_price);
     handler.client.publish(
         CHARGER_OFFER,
-        rumqttc::QoS::AtMostOnce,
+        rumqttc::QoS::ExactlyOnce,
         false,
         offer.to_bytes(),
     ).await.unwrap();
