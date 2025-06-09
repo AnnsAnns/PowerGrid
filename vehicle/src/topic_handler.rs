@@ -25,15 +25,20 @@ pub async fn tick_handler(handler: SharedVehicle, payload: Bytes) {
     let payload: TickPayload = serde_json::from_slice(&payload).unwrap();
     match payload.phase {
         Phase::Process => {
-            process_tick(handler).await;
+            process_tick(handler.clone()).await;
         }
         Phase::Commerce => {
-            commerce_tick(handler).await;
+            commerce_tick(handler.clone()).await;
         }
         Phase::PowerImport => {
             // No action needed
         }
     }
+
+    // do these actions on all ticks (every 5 minutes)
+    handler.lock().await.vehicle.drive(50.0);
+    publish_vehicle(handler.clone()).await;
+    publish_soc(handler.clone()).await;// TODO: whyyy?
 }
 
 pub async fn worldmap_event_handler(handler: SharedVehicle, payload: Bytes) {
@@ -45,40 +50,36 @@ pub async fn worldmap_event_handler(handler: SharedVehicle, payload: Bytes) {
 }
 
 pub async fn process_tick(handler: SharedVehicle) {
-    {
-        let mut locked_handler = handler.lock().await;
+    let mut locked_handler = handler.lock().await;
 
-        if locked_handler.target_charger.is_none() {
-            if locked_handler.vehicle.battery().state_of_charge() <= 0.3 {
-                info!(
-                    "{} has no charge left, searching for charging station",
-                    locked_handler.vehicle.get_name()
-                );
-                task::spawn(create_charger_request(handler.clone()));
-            }
-
-            if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination() {
-                let (latitude, longitude) =
-                    powercable::generate_latitude_longitude_within_germany();
-                locked_handler.vehicle.set_destination(latitude, longitude);
-            }
-        }
-
-        if locked_handler.target_charger.is_some()
-            && locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination()
-        {
+    if locked_handler.target_charger.is_none() {
+        if locked_handler.vehicle.battery().state_of_charge() <= 0.3 {
             info!(
-                "{} has arrived at the destination, requesting charge",
+                "{} has no charge left, searching for charging station",
                 locked_handler.vehicle.get_name()
             );
+            task::spawn(create_charger_request(handler.clone()));
+        }
 
-            //@todo: charge
-        } else {
-            locked_handler.vehicle.drive(50.0);
+        if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination() {
+            let (latitude, longitude) =
+                powercable::generate_latitude_longitude_within_germany();
+            locked_handler.vehicle.set_destination(latitude, longitude);
         }
     }
-    publish_vehicle(handler.clone()).await;
-    publish_soc(handler.clone()).await;// TODO: whyyy?
+
+    if locked_handler.target_charger.is_some()
+        && locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination()
+    {
+        info!(
+            "{} has arrived at the destination, requesting charge",
+            locked_handler.vehicle.get_name()
+        );
+
+        //@todo: charge
+    } else {
+        // locked_handler.vehicle.drive(50.0);
+    }
 }
 
 pub async fn commerce_tick(handler: SharedVehicle) {

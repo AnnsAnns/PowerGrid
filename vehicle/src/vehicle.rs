@@ -5,7 +5,7 @@ use rand::Rng;
 
 use crate::{battery::Battery, database::random_ev};
 
-const TRAVELED: f64 = 12.5; // equals 50 km/h cause one tick is 15 minutes
+const INTERVAL_5_MINS: usize = INTERVAL_15_MINS / 3;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VehicleStatus {
@@ -110,7 +110,7 @@ impl Vehicle {
             return;
         }
 
-        let distance_now = speed_kmh * (INTERVAL_15_MINS as f64 / 3600.0); // seconds to hours
+        let distance_now = speed_kmh * (INTERVAL_5_MINS as f64 / 3600.0); // seconds to hours
         let efficiency_factor = Vehicle::speed_efficiency_factor(speed_kmh);
         let consumption_now = self.consumption * efficiency_factor;
         let charge_requested = distance_now * consumption_now;
