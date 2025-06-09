@@ -34,14 +34,14 @@ pub const MQTT_BROKER: &str = "mosquitto_broker";
 pub const MQTT_BROKER_PORT: u16 = 1883;
 pub const MAP_UPDATE_SPEED_IN_SECS: u64 = 1;
 
-// Around Neumünster
-const NORTH_LIMIT: (f64, f64) = (54.08200660036042, 9.916791893513686);
-// Around A24 between Trittau & Schwarzenbek
-const EAST_LIMIT: (f64, f64) = (53.5519537146248, 10.67829930807445);
-// Around Brackel
-const SOUTH_LIMIT: (f64, f64) = (53.29354767455468, 10.043061643463892);
-// Around Stade
-const WEST_LIMIT: (f64, f64) = (53.59095432811228, 9.430617993044924);
+// Kiel
+const NORTH_LIMIT: (f64, f64) = (54.236555997661384, 9.828710882743488);
+// Leipzig
+const EAST_LIMIT: (f64, f64) = (51.57629017432522, 12.427933450893512);
+// Stuttgart
+const SOUTH_LIMIT: (f64, f64) = (49.11158947259421, 10.206213793834436);
+// Essen
+const WEST_LIMIT: (f64, f64) = (51.00929968161735, 6.282484743251983);
 
 /**
  * Position represents a geographical position with latitude and longitude.
