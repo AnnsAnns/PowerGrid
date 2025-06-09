@@ -7,10 +7,14 @@ use serde_json::json;
 use log2::*;
 use tokio::sync::Mutex;
 
-use crate::{locations, meta_data, precalculated_turbine::{self, PrecalculatedTurbine}, turbine, SharedTurbine, TurbineHandler};
+use crate::{meta_data, precalculated_turbine::{self, PrecalculatedTurbine}, turbine, SharedTurbine, TurbineHandler};
 
 pub async fn init() -> (SharedTurbine, EventLoop) {
-    let (latitude, longitude, name) = locations::return_random_location();
+    let (latitude, longitude, name) = {
+        let rand_pos = generate_rnd_pos();
+        let name = format!("Turbine {}", generate_unique_name());
+        (rand_pos.latitude, rand_pos.longitude, name)
+    };
     let name = format!("{} {}", name, generate_unique_name()); // In cases where we have multiple turbines at the same location, we generate a unique name.
 
     let mut turbine = turbine::Turbine::new(

@@ -13,7 +13,6 @@ mod meta_data;
 mod parsing;
 mod turbine;
 mod precalculated_turbine;
-mod locations;
 
 pub(crate) type SharedTurbine = Arc<Mutex<TurbineHandler>>;
 
