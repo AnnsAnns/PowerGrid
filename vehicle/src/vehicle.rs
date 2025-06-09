@@ -1,14 +1,25 @@
-use std::f64::consts::PI;
-
+use std::{char, f64::consts::PI};
+use log::info;
 use powercable::tickgen::INTERVAL_15_MINS;
 use rand::Rng;
 
 use crate::{battery::Battery, database::random_ev};
 
+const TRAVELED: f64 = 12.5; // equals 50 km/h cause one tick is 15 minutes
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum VehicleStatus {
+    RANDOM, // Vehicle is driving randomly
+    Driving, // Vehicle is currently driving to a destination
+    Charging, // Vehicle is currently charging
+    Broken, // Vehicle is broken and cannot be used
+}
+
 #[derive(Debug)]
 pub struct Vehicle {
     name: String,
     model: String,
+    status: VehicleStatus,
     location: (f64, f64), // (latitude, longitude)
     destination: (f64, f64), // (latitude, longitude)
     consumption: f64, // Wh/km
@@ -27,6 +38,7 @@ impl Vehicle {
         Vehicle {
             name: name,
             model: model.to_owned(),
+            status: VehicleStatus::RANDOM,
             location: (latitude, longitude),
             destination: (latitude, longitude),
             consumption: consumption,
@@ -38,7 +50,19 @@ impl Vehicle {
         return &self.name;
     }
 
-    pub fn distance_to(&self, latitude: f64, longitude: f64) -> f64 {
+    pub fn get_model(&self) -> &String {
+        return &self.model;
+    }
+
+    pub fn get_status(&self) -> &VehicleStatus {
+        &self.status
+    }
+
+    pub fn set_status(&mut self, status: VehicleStatus) {
+        self.status = status;
+    }
+
+    pub fn distance_to(&self, latitude: f64, longitude: f64) -> f64 { // TODO: simplify
         let this_rad = (Vehicle::to_radians(self.location.0), Vehicle::to_radians(self.location.1));
         let other_rad = (Vehicle::to_radians(latitude), Vehicle::to_radians(longitude));
 
@@ -110,6 +134,12 @@ impl Vehicle {
         let rolling_resistance = 0.0005; // approximate coefficient
         let aerodynamic_drag = 0.00003; // approximate drag factor
         1.0 + rolling_resistance * speed_kmh + aerodynamic_drag * speed_kmh.powi(2)
+    }
+
+    pub fn charge(&mut self, amount: usize) {
+        if self.status != VehicleStatus::Charging {
+            self.battery.add_charge(amount as f64);
+        }
     }
 
     fn to_radians(deg: f64) -> f64 {

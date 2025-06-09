@@ -1,11 +1,12 @@
 use charger::Charger;
 use log::{debug, info};
 use offer_handling::ReservedOffer;
-use powercable::{generate_unique_name, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, TICK_TOPIC};
+use powercable::{generate_unique_name, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, TICK_TOPIC, CHARGER_REQUEST, generate_rnd_pos};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task};
 use topic_handler::{accept_offer_handler, tick_handler};
+use car_handling::receive_request;
 
 mod charger;
 mod topic_handler;
@@ -27,12 +28,11 @@ struct ChargerHandler {
 async fn main() {
     let charger_name: String = format!("Charger {}", generate_unique_name());
     let log_path = format!("logs/charger_{}.log", charger_name.clone().replace(" ", "_"));
-    let _log2 = log2::open(log_path.as_str()).level("debug").start();
+    let _log2 = log2::open(log_path.as_str()).level("info").start();
     info!("Starting charger simulation...");
 
-    let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
     let charger =
-        charger::Charger::new(latitude, longitude, 5000, 100, 5, charger_name.clone());
+        charger::Charger::new(generate_rnd_pos(), 5000, 100, 5, charger_name.clone());
 
     let mut mqttoptions = MqttOptions::new(
         charger_name.clone(),
@@ -47,6 +47,10 @@ async fn main() {
         .unwrap();
     client
         .subscribe(powercable::ACCEPT_BUY_OFFER_TOPIC, QoS::AtMostOnce)
+        .await
+        .unwrap();
+    client
+        .subscribe(powercable::CHARGER_REQUEST, QoS::AtMostOnce)
         .await
         .unwrap();
     info!("Connected to MQTT broker");
@@ -68,6 +72,9 @@ async fn main() {
                 }
                 ACCEPT_BUY_OFFER_TOPIC => {
                     let _ = task::spawn(accept_offer_handler(shared_charger.clone(), p.payload));
+                }
+                CHARGER_REQUEST => {
+                    let _ = task::spawn(receive_request(shared_charger.clone(), p.payload));
                 }
                 _ => {
                     let _ = task::spawn(async move {

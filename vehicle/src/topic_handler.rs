@@ -77,18 +77,22 @@ pub async fn process_tick(handler: SharedVehicle) {
             locked_handler.vehicle.drive(50.0);
         }
     }
-    publish_location(handler.clone()).await;
-    publish_soc(handler.clone()).await;
+    publish_vehicle(handler.clone()).await;
+    publish_soc(handler.clone()).await;// TODO: whyyy?
 }
 
 pub async fn commerce_tick(handler: SharedVehicle) {
     let l_handler = handler.lock().await;
     if l_handler.target_charger.is_none() && !l_handler.charge_offers.is_empty() {
+        info!(
+            "{} has received charge offers, accepting the best one",
+            l_handler.vehicle.get_name()
+        );
         accept_offer(handler.clone()).await;
     }
 }
 
-pub async fn publish_location(handler: SharedVehicle) {
+pub async fn publish_vehicle(handler: SharedVehicle) {
     let mut handler = handler.lock().await;
     // Extract all values before mutably borrowing client
     let name = handler.name.clone();

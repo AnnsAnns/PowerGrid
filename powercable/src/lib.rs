@@ -1,3 +1,4 @@
+use bitcode::{Decode, Encode};
 use rand::{seq::IteratorRandom, Rng};
 
 pub mod charger;
@@ -26,8 +27,8 @@ pub const POWER_CONSUMER_TOPIC: &str = "power/consumer";
 pub const POWER_LOCATION_TOPIC: &str = "power/location";
 pub const POWER_CONSUMER_SCALE: &str = "power/consumer/scale";
 pub const WORLDMAP_EVENT_TOPIC: &str = "worldmap/event";
-pub const CHARGER_REQUEST: &str = "charger/request";
-pub const CHARGER_OFFER: &str = "charger/offer";
+pub const CHARGER_REQUEST: &str = "charger/request"; // vehicle send request to all chargers
+pub const CHARGER_OFFER: &str = "charger/offer"; // charger sends offer to vehicle
 pub const CHARGER_ACCEPT: &str = "charger/accept";
 pub const MQTT_BROKER: &str = "mosquitto_broker";
 pub const MQTT_BROKER_PORT: u16 = 1883;
@@ -42,11 +43,48 @@ const SOUTH_LIMIT: (f64, f64) = (53.29354767455468, 10.043061643463892);
 // Around Stade
 const WEST_LIMIT: (f64, f64) = (53.59095432811228, 9.430617993044924);
 
+/**
+ * Position represents a geographical position with latitude and longitude.
+ * It is used to represent the position of vehicles, chargers, and other entities in the system.
+ */
+#[derive(Debug, Clone, Copy, PartialEq, serde::Deserialize, serde::Serialize, Encode, Decode)]
+pub struct Position {
+    pub latitude: f64,
+    pub longitude: f64,
+}
+
+impl Position {
+    pub fn new(latitude: f64, longitude: f64) -> Self {
+        Position { latitude, longitude }
+    }
+
+    pub fn from_tuple(position: (f64, f64)) -> Self {
+        Position {
+            latitude: position.0,
+            longitude: position.1,
+        }
+    }
+
+    pub fn to_tuple(&self) -> (f64, f64) {
+        (self.latitude, self.longitude)
+    }
+}
+
 pub fn generate_latitude_longitude_within_germany() -> (f64, f64) {
     let mut rng = rand::rng();
     let latitude = rng.random_range(SOUTH_LIMIT.0..NORTH_LIMIT.0);
     let longitude = rng.random_range(WEST_LIMIT.1..EAST_LIMIT.1);
     (latitude, longitude)
+}
+
+/**
+ * Generates a random position within the defined limits of Germany.
+ */
+pub fn generate_rnd_pos() -> Position {
+    let mut rng = rand::rng();
+    let latitude = rng.random_range(SOUTH_LIMIT.0..NORTH_LIMIT.0);
+    let longitude = rng.random_range(WEST_LIMIT.1..EAST_LIMIT.1);
+    Position::new(latitude, longitude)
 }
 
 pub fn get_id_from_topic(topic: &str) -> String {

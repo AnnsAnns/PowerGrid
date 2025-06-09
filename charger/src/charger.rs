@@ -1,12 +1,11 @@
 use log::{debug};
-use powercable::{offer::structure::OFFER_PACKAGE_SIZE, Offer};
+use powercable::{offer::structure::OFFER_PACKAGE_SIZE, Offer, Position};
 
 pub struct Charger {
-    latitude: f64,
-    longitude: f64,
     name: String,
     rate: usize,
     capacity: usize,
+    position: Position,
     reserved_charge: usize,
     current_charge: usize,
     charging_ports: usize,
@@ -15,16 +14,14 @@ pub struct Charger {
 
 impl Charger {
     pub fn new(
-        latitude: f64,
-        longitude: f64,
+        position: Position,
         capacity: usize,
         rate: usize,
         charging_ports: usize,
         name: String,
     ) -> Self {
         Charger {
-            latitude,
-            longitude,
+            position,
             capacity,
             rate,
             reserved_charge: 0,
@@ -74,12 +71,16 @@ impl Charger {
         }
     }
 
+    pub fn get_position(&self) -> &Position {
+        &self.position
+    }
+
     pub fn get_latitude(&self) -> f64 {
-        self.latitude
+        self.position.latitude
     }
 
     pub fn get_longitude(&self) -> f64 {
-        self.longitude
+        self.position.longitude
     }
 
     pub fn get_capacity(&self) -> usize {
