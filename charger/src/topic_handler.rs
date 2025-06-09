@@ -4,13 +4,19 @@ use powercable::{
     offer::structure::OFFER_PACKAGE_SIZE,
     tickgen::{Phase, TickPayload, INTERVAL_15_MINS},
     ChartEntry, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, BUY_OFFER_TOPIC, POWER_CHARGER_TOPIC,
-    POWER_LOCATION_TOPIC, POWER_TRANSFORMER_CONSUMPTION_TOPIC,
+    POWER_LOCATION_TOPIC, POWER_TRANSFORMER_CONSUMPTION_TOPIC, CHARGER_REQUEST,
 };
 use rumqttc::QoS;
 use serde_json::json;
 
 use crate::SharedCharger;
+use crate::car_handling;
 
+/**
+ * This function delegates the tick event handling based on the phase of the tick.
+ * It processes the tick if the phase is `Process`, handles commerce if the phase is `Commerce`,
+ * and does nothing for `PowerImport`.
+ */
 pub async fn tick_handler(handler: SharedCharger, payload: Bytes) {
     let payload: TickPayload = serde_json::from_slice(&payload).unwrap();
     match payload.phase {
@@ -26,7 +32,10 @@ pub async fn tick_handler(handler: SharedCharger, payload: Bytes) {
     }
 }
 
-pub async fn process_tick(handler: SharedCharger, payload: TickPayload) {
+/**
+ * This function handles the tick event for the process phase.
+ */
+async fn process_tick(handler: SharedCharger, payload: TickPayload) {
     // Publish the amount of power we consumed in the last tick
     {
         let mut handler = handler.lock().await;
@@ -97,7 +106,10 @@ pub async fn process_tick(handler: SharedCharger, payload: TickPayload) {
     publish_location(handler.clone()).await;
 }
 
-pub async fn commerce_tick(handler: SharedCharger) {
+/**
+ * This function handles the tick event for commerce phase.
+ */
+async fn commerce_tick(handler: SharedCharger) {
     let handler = handler.lock().await;
     let current_power = handler.charger.get_current_charge();
 
@@ -113,6 +125,10 @@ pub async fn commerce_tick(handler: SharedCharger) {
         .unwrap();
 }
 
+/**
+ * This function handles the acceptance of an offer in the MQTT topic `ACCEPT_BUY_OFFER_TOPIC`.
+ * Its only relevant for the charger/turbine market.
+ */
 pub async fn accept_offer_handler(handler: SharedCharger, payload: Bytes) {
     let mut offer: Offer = Offer::from_bytes(payload).unwrap();
     if offer.get_accepted_by().is_none() {
@@ -150,7 +166,10 @@ pub async fn accept_offer_handler(handler: SharedCharger, payload: Bytes) {
     }
 }
 
-pub async fn publish_location(handler: SharedCharger) {
+/**
+ * This function publishes the current location of the charger to the MQTT topic `POWER_LOCATION_TOPIC`.
+ */
+async fn publish_location(handler: SharedCharger) {
     let mut handler = handler.lock().await;
     // Extract all values before mutably borrowing client
     let name = handler.name.clone();

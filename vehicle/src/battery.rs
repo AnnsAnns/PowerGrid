@@ -22,6 +22,10 @@ impl Battery {
         self.level / self.capacity
     }
 
+    pub fn get_free_capacity(&self) -> usize {
+        self.capacity as usize - self.level as usize
+    }
+
     pub fn add_charge(&mut self, charge: f64) -> f64 {
         // apply scaling
         let applied_charge = charge.min(self.max_charge);
