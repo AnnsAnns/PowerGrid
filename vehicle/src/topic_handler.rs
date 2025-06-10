@@ -99,21 +99,15 @@ pub async fn publish_vehicle(handler: SharedVehicle) {
     let name = handler.name.clone();
     let (latitude, longitude) = handler.vehicle.get_location();
     let (destination_lat, destination_lon) = handler.vehicle.get_destination();
-    let speed = handler.vehicle.get_speed_ms();
+    let speed = handler.vehicle.get_speed_kmh();
     let percentage = handler.vehicle.battery().state_of_charge() * 100.0;
     let client = &mut handler.client;
     let location_payload = json!({
         "name" : name,
         "lat": latitude,
         "lon": longitude,
-        "destination": {
-            "lat": destination_lat,
-            "lon": destination_lon,
-            "icon": ":flag:",
-            "label": "Destination"
-        },
         "line": [[latitude, longitude], [destination_lat, destination_lon]],
-        "color": "blue",
+        "color": "grey",
         "icon": ":car:",
         "speed": format!("{} kph", speed),
         "label": format!("{:.1}%", percentage),

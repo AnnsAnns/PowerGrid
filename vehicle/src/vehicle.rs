@@ -23,7 +23,7 @@ pub struct Vehicle {
     location: (f64, f64), // (latitude, longitude)
     destination: (f64, f64), // (latitude, longitude)
     consumption: f64, // Wh/km
-    speed: f64, // km/h
+    speed: f64, // m/s
     battery: Battery,
 }
 
@@ -43,7 +43,7 @@ impl Vehicle {
             location: (latitude, longitude),
             destination: (latitude, longitude),
             consumption: consumption,
-            speed: 50.0,
+            speed: 50.0 / 3.6,
             battery: battery,
         }
     }
