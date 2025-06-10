@@ -2,12 +2,13 @@ use std::{char, f64::consts::PI};
 use log::info;
 use powercable::tickgen::INTERVAL_15_MINS;
 use rand::Rng;
+use serde::Serialize;
 
 use crate::{battery::Battery, database::random_ev};
 
 const INTERVAL_5_MINS: usize = INTERVAL_15_MINS / 3;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub enum VehicleStatus {
     RANDOM, // Vehicle is driving randomly
     Driving, // Vehicle is currently driving to a destination
@@ -15,7 +16,7 @@ pub enum VehicleStatus {
     Broken, // Vehicle is broken and cannot be used
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Vehicle {
     name: String,
     model: String,
@@ -23,7 +24,7 @@ pub struct Vehicle {
     location: (f64, f64), // (latitude, longitude)
     destination: (f64, f64), // (latitude, longitude)
     consumption: f64, // Wh/km
-    speed: f64, // m/s
+    speed: f64, // mps
     battery: Battery,
 }
 
@@ -90,11 +91,11 @@ impl Vehicle {
         self.consumption
     }
 
-    pub fn get_speed_ms(&self) -> f64 {
+    pub fn get_speed_mps(&self) -> f64 {
         self.speed
     }
 
-    pub fn get_speed_kmh(&self) -> f64 {
+    pub fn get_speed_kph(&self) -> f64 {
         self.speed * 3.6
     }
 

@@ -30,6 +30,7 @@ pub const WORLDMAP_EVENT_TOPIC: &str = "worldmap/event";
 pub const CHARGER_REQUEST: &str = "charger/request"; // vehicle send request to all chargers
 pub const CHARGER_OFFER: &str = "charger/offer"; // charger sends offer to vehicle
 pub const CHARGER_ACCEPT: &str = "charger/accept";
+pub const VEHICLE_TOPIC: &str = "vehicle";
 pub const MQTT_BROKER: &str = "mosquitto_broker";
 pub const MQTT_BROKER_PORT: u16 = 1883;
 pub const MAP_UPDATE_SPEED_IN_SECS: u64 = 1;

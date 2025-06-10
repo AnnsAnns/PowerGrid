@@ -1,4 +1,6 @@
-#[derive(Debug)]
+use serde::Serialize;
+
+#[derive(Debug, Serialize)]
 pub struct Battery {
     capacity: f64, // in Wh
     level: f64, // in Wh

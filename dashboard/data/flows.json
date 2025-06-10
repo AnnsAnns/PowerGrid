@@ -18,7 +18,7 @@
         "id": "3bad7c7d.5054c4",
         "type": "ui_base",
         "theme": {
-            "name": "theme-light",
+            "name": "theme-dark",
             "lightTheme": {
                 "default": "#0094CE",
                 "baseColor": "#0094CE",
@@ -30,54 +30,56 @@
                 "default": "#097479",
                 "baseColor": "#097479",
                 "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
-                "edited": false
+                "edited": true,
+                "reset": false
             },
             "customTheme": {
                 "name": "Untitled Theme 1",
                 "default": "#4B7930",
                 "baseColor": "#4B7930",
-                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "reset": false
             },
             "themeState": {
                 "base-color": {
-                    "default": "#0094CE",
-                    "value": "#0094CE",
+                    "default": "#097479",
+                    "value": "#097479",
                     "edited": false
                 },
                 "page-titlebar-backgroundColor": {
-                    "value": "#0094CE",
+                    "value": "#097479",
                     "edited": false
                 },
                 "page-backgroundColor": {
-                    "value": "#fafafa",
-                    "edited": false
-                },
-                "page-sidebar-backgroundColor": {
-                    "value": "#ffffff",
-                    "edited": false
-                },
-                "group-textColor": {
-                    "value": "#1bbfff",
-                    "edited": false
-                },
-                "group-borderColor": {
-                    "value": "#ffffff",
-                    "edited": false
-                },
-                "group-backgroundColor": {
-                    "value": "#ffffff",
-                    "edited": false
-                },
-                "widget-textColor": {
                     "value": "#111111",
                     "edited": false
                 },
+                "page-sidebar-backgroundColor": {
+                    "value": "#333333",
+                    "edited": false
+                },
+                "group-textColor": {
+                    "value": "#0eb8c0",
+                    "edited": false
+                },
+                "group-borderColor": {
+                    "value": "#555555",
+                    "edited": false
+                },
+                "group-backgroundColor": {
+                    "value": "#333333",
+                    "edited": false
+                },
+                "widget-textColor": {
+                    "value": "#eeeeee",
+                    "edited": false
+                },
                 "widget-backgroundColor": {
-                    "value": "#0094ce",
+                    "value": "#097479",
                     "edited": false
                 },
                 "widget-borderColor": {
-                    "value": "#ffffff",
+                    "value": "#333333",
                     "edited": false
                 },
                 "base-font": {
@@ -189,6 +191,17 @@
         "name": "Vehicle",
         "tab": "8d5b248b.b32978",
         "order": 5,
+        "disp": true,
+        "width": "24",
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "83cd261e79d613c8",
+        "type": "ui_group",
+        "name": "Charger",
+        "tab": "8d5b248b.b32978",
+        "order": 6,
         "disp": true,
         "width": "24",
         "collapse": true,
@@ -538,9 +551,9 @@
         "type": "ui_chart",
         "z": "5992b366.f9457c",
         "name": "",
-        "group": "d54d87a82fb70f0c",
+        "group": "83cd261e79d613c8",
         "order": 5,
-        "width": "12",
+        "width": "8",
         "height": "4",
         "label": "Current Total Charger Battery",
         "chartType": "line",
@@ -749,7 +762,7 @@
         "type": "function",
         "z": "5992b366.f9457c",
         "name": "on_vehicle",
-        "func": "if (msg.payload.icon === \":car:\") {\n    var vehicle_name = msg.payload.name;\n    msg.topic = \"vehicle/\" + vehicle_name + \"/battery/soc\";\n    flow.set(\"vehicle_topic\", msg.topic);\n    return msg;\n} else {\n    return null;\n}",
+        "func": "if (msg.payload.icon === \":car:\") {\n    var vehicle_name = msg.payload.name;\n    msg.topic = \"vehicle/\" + vehicle_name;\n    flow.set(\"vehicle_topic\", msg.topic);\n    return msg;\n} else {\n    return null;\n}",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -780,80 +793,6 @@
         "broker": "c1c49a80.e500e",
         "x": 740,
         "y": 1660,
-        "wires": []
-    },
-    {
-        "id": "983ae8bc71a11597",
-        "type": "mqtt in",
-        "z": "5992b366.f9457c",
-        "name": "",
-        "topic": "vehicle/+/battery/soc",
-        "qos": "2",
-        "datatype": "utf8",
-        "broker": "c1c49a80.e500e",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 310,
-        "y": 1740,
-        "wires": [
-            [
-                "2f14843ed293cfa9"
-            ]
-        ]
-    },
-    {
-        "id": "2f14843ed293cfa9",
-        "type": "switch",
-        "z": "5992b366.f9457c",
-        "name": "",
-        "property": "topic",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "eq",
-                "v": "vehicle_topic",
-                "vt": "flow"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 1,
-        "x": 530,
-        "y": 1740,
-        "wires": [
-            [
-                "32a015bfa0d992b7"
-            ]
-        ]
-    },
-    {
-        "id": "32a015bfa0d992b7",
-        "type": "ui_gauge",
-        "z": "5992b366.f9457c",
-        "name": "",
-        "group": "d54d87a82fb70f0c",
-        "order": 0,
-        "width": "6",
-        "height": "4",
-        "gtype": "gage",
-        "title": "State of Charge",
-        "label": "units",
-        "format": "{{value}}",
-        "min": 0,
-        "max": "100",
-        "colors": [
-            "#00b500",
-            "#e6e600",
-            "#ca3838"
-        ],
-        "seg1": "",
-        "seg2": "",
-        "diff": false,
-        "className": "",
-        "x": 740,
-        "y": 1740,
         "wires": []
     },
     {
@@ -1197,6 +1136,284 @@
         "y": 1220,
         "wires": [
             []
+        ]
+    },
+    {
+        "id": "a3c6901dc00da920",
+        "type": "mqtt in",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "topic": "vehicle/+",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "c1c49a80.e500e",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 280,
+        "y": 1760,
+        "wires": [
+            [
+                "562cc384048cde12"
+            ]
+        ]
+    },
+    {
+        "id": "2d3de53ff98b4a6e",
+        "type": "ui_text",
+        "z": "5992b366.f9457c",
+        "group": "d54d87a82fb70f0c",
+        "order": 1,
+        "width": "3",
+        "height": "1",
+        "name": "",
+        "label": "Name",
+        "format": "{{msg.payload.name}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 730,
+        "y": 1760,
+        "wires": []
+    },
+    {
+        "id": "562cc384048cde12",
+        "type": "switch",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "property": "topic",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "vehicle_topic",
+                "vt": "flow"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 500,
+        "y": 1760,
+        "wires": [
+            [
+                "2d3de53ff98b4a6e",
+                "6dc43dfefd2b3521",
+                "da9231675ae82081",
+                "6dae97f9687e019f",
+                "c787251c75aa8351",
+                "4abfa670718f7685",
+                "c45c5252e7dca425",
+                "9f0a84086bcf7ec0"
+            ]
+        ]
+    },
+    {
+        "id": "c787251c75aa8351",
+        "type": "ui_text",
+        "z": "5992b366.f9457c",
+        "group": "d54d87a82fb70f0c",
+        "order": 5,
+        "width": "3",
+        "height": "1",
+        "name": "",
+        "label": "Consumption",
+        "format": "{{msg.payload.consumption}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 760,
+        "y": 1920,
+        "wires": []
+    },
+    {
+        "id": "6dc43dfefd2b3521",
+        "type": "ui_text",
+        "z": "5992b366.f9457c",
+        "group": "d54d87a82fb70f0c",
+        "order": 4,
+        "width": "3",
+        "height": "1",
+        "name": "",
+        "label": "Capacity",
+        "format": "{{msg.payload.battery.capacity}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 740,
+        "y": 1880,
+        "wires": []
+    },
+    {
+        "id": "da9231675ae82081",
+        "type": "ui_text",
+        "z": "5992b366.f9457c",
+        "group": "d54d87a82fb70f0c",
+        "order": 2,
+        "width": "8",
+        "height": "1",
+        "name": "",
+        "label": "Model",
+        "format": "{{msg.payload.model}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 730,
+        "y": 1800,
+        "wires": []
+    },
+    {
+        "id": "6dae97f9687e019f",
+        "type": "ui_text",
+        "z": "5992b366.f9457c",
+        "group": "d54d87a82fb70f0c",
+        "order": 3,
+        "width": "3",
+        "height": "1",
+        "name": "",
+        "label": "Status",
+        "format": "{{msg.payload.status}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 740,
+        "y": 1840,
+        "wires": []
+    },
+    {
+        "id": "c45c5252e7dca425",
+        "type": "ui_gauge",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "group": "d54d87a82fb70f0c",
+        "order": 8,
+        "width": "4",
+        "height": "4",
+        "gtype": "wave",
+        "title": "SoC",
+        "label": "%",
+        "format": "{{msg.payload.soc}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 730,
+        "y": 2000,
+        "wires": []
+    },
+    {
+        "id": "4abfa670718f7685",
+        "type": "ui_gauge",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "group": "d54d87a82fb70f0c",
+        "order": 6,
+        "width": "6",
+        "height": "4",
+        "gtype": "gage",
+        "title": "Speed",
+        "label": "kph",
+        "format": "{{msg.payload.speed_kph}}",
+        "min": 0,
+        "max": "150",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 740,
+        "y": 1960,
+        "wires": []
+    },
+    {
+        "id": "066f6cc453b66c2a",
+        "type": "ui_chart",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "group": "d54d87a82fb70f0c",
+        "order": 7,
+        "width": "14",
+        "height": "4",
+        "label": "State of Charge",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "100",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 950,
+        "y": 2040,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "9f0a84086bcf7ec0",
+        "type": "function",
+        "z": "5992b366.f9457c",
+        "name": "soc",
+        "func": "msg.payload = msg.payload.soc;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 730,
+        "y": 2040,
+        "wires": [
+            [
+                "066f6cc453b66c2a"
+            ]
         ]
     }
 ]

@@ -2,14 +2,14 @@ use bytes::Bytes;
 use log::info;
 use powercable::{
     tickgen::{Phase, TickPayload},
-    POWER_LOCATION_TOPIC,
+    POWER_LOCATION_TOPIC, VEHICLE_TOPIC,
 };
 use rumqttc::QoS;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tokio::task;
 
-use crate::{charger_handling::{accept_offer, create_charger_request}, SharedVehicle};
+use crate::{charger_handling::{accept_offer, create_charger_request}, vehicle, SharedVehicle};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct LocationPayload {
@@ -38,14 +38,14 @@ pub async fn tick_handler(handler: SharedVehicle, payload: Bytes) {
     // do these actions on all ticks (every 5 minutes)
     handler.lock().await.vehicle.drive();
     publish_vehicle(handler.clone()).await;
-    publish_soc(handler.clone()).await;// TODO: whyyy?
+    publish_location(handler.clone()).await;
 }
 
 pub async fn worldmap_event_handler(handler: SharedVehicle, payload: Bytes) {
     let payload: LocationPayload = serde_json::from_slice(&payload).unwrap();
 
     if payload.icon == ":car:" {
-        publish_soc(handler.clone()).await;
+        publish_vehicle(handler.clone()).await;
     }
 }
 
@@ -97,9 +97,29 @@ pub async fn publish_vehicle(handler: SharedVehicle) {
     let mut handler = handler.lock().await;
     // Extract all values before mutably borrowing client
     let name = handler.name.clone();
+    let mut vehicle_payload = json!(handler.vehicle);
+    vehicle_payload["speed_kph"] = json!(handler.vehicle.get_speed_kph());
+    vehicle_payload["soc"] = json!(handler.vehicle.battery().state_of_charge() * 100.0);
+
+    let client = &mut handler.client;
+    client
+        .publish(
+            format!("{}/{}", VEHICLE_TOPIC, name),
+            QoS::ExactlyOnce,
+            true,
+            serde_json::to_string(&vehicle_payload).unwrap(),
+        )
+        .await
+        .unwrap();
+}
+
+pub async fn publish_location(handler: SharedVehicle) {
+    let mut handler = handler.lock().await;
+    // Extract all values before mutably borrowing client
+    let name = handler.name.clone();
     let (latitude, longitude) = handler.vehicle.get_location();
     let (destination_lat, destination_lon) = handler.vehicle.get_destination();
-    let speed = handler.vehicle.get_speed_kmh();
+    let speed = handler.vehicle.get_speed_kph();
     let percentage = handler.vehicle.battery().state_of_charge() * 100.0;
     let client = &mut handler.client;
     let location_payload = json!({
@@ -109,7 +129,6 @@ pub async fn publish_vehicle(handler: SharedVehicle) {
         "line": [[latitude, longitude], [destination_lat, destination_lon]],
         "color": "grey",
         "icon": ":car:",
-        "speed": format!("{} kph", speed),
         "label": format!("{:.1}%", percentage),
     })
     .to_string();
@@ -120,24 +139,6 @@ pub async fn publish_vehicle(handler: SharedVehicle) {
             QoS::ExactlyOnce,
             true,
             location_payload,
-        )
-        .await
-        .unwrap();
-}
-
-pub async fn publish_soc(handler: SharedVehicle) {
-    let mut handler = handler.lock().await;
-    // Extract all values before mutably borrowing client
-    let name = handler.name.clone();
-    let soc = handler.vehicle.battery().state_of_charge() * 100.0;
-    let client = &mut handler.client;
-
-    client
-        .publish(
-            format!("vehicle/{}/battery/soc", name),
-            QoS::ExactlyOnce,
-            true,
-            format!("{}", soc),
         )
         .await
         .unwrap();
