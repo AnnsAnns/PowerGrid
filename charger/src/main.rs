@@ -1,12 +1,12 @@
 use charger::Charger;
 use log::{debug, info};
 use offer_handling::ReservedOffer;
-use powercable::{generate_rnd_pos, generate_unique_name, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CHARGER_ACCEPT, CHARGER_CHARGING, CHARGER_PORT, CHARGER_REQUEST, TICK_TOPIC};
+use powercable::{generate_rnd_pos, generate_unique_name, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CHARGER_ACCEPT, CHARGER_ARRIVAL, CHARGER_CHARGING, CHARGER_REQUEST, TICK_TOPIC};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task};
 use topic_handler::{accept_offer_handler, tick_handler};
-use car_handling::{receive_request, accept_handler};
+use car_handling::{receive_request, accept_handler, answer_arrival_with_port};
 
 mod charger;
 mod topic_handler;
@@ -16,7 +16,6 @@ mod offer_handling;
 type SharedCharger = Arc<Mutex<ChargerHandler>>;
 
 struct ChargerHandler {
-    pub name: String,
     pub charger: Charger,
     pub client: AsyncClient,
     pub currently_reserved_for: Vec<ReservedOffer>,
@@ -32,8 +31,9 @@ async fn main() {
     info!("Starting charger simulation...");
 
     let charger =
-        charger::Charger::new(generate_rnd_pos(), 5000, 100, 5, charger_name.clone());
-
+        charger::Charger::new(charger_name.clone(), generate_rnd_pos(), 5000, 100, 5);
+    info!("{:#?}", charger);
+    
     let mut mqttoptions = MqttOptions::new(
         charger_name.clone(),
         powercable::MQTT_BROKER,
@@ -58,7 +58,7 @@ async fn main() {
         .await
         .unwrap();
     client
-        .subscribe(CHARGER_PORT, QoS::ExactlyOnce)
+        .subscribe(CHARGER_ARRIVAL, QoS::ExactlyOnce)
         .await
         .unwrap();
     client
@@ -68,7 +68,6 @@ async fn main() {
     info!("Connected to MQTT broker");
 
     let shared_charger = Arc::new(Mutex::new(ChargerHandler {
-        name: charger_name.clone(),
         charger,
         client: client.clone(),
         offer_handler: OfferHandler::new(),
@@ -91,8 +90,8 @@ async fn main() {
                 CHARGER_ACCEPT => {
                     let _ = task::spawn(accept_handler(shared_charger.clone(), p.payload));
                 }
-                CHARGER_PORT => {
-                    info!("Received CHARGER_CHARGING_PORT message");
+                CHARGER_ARRIVAL => {
+                    let _ = task::spawn(answer_arrival_with_port(shared_charger.clone(), p.payload));
                 }
                 CHARGER_CHARGING => {
                     info!("Received CHARGER_CHARGING message");

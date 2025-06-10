@@ -18,13 +18,10 @@ bg=blue</panel_attributes><additional_attributes></additional_attributes></eleme
 bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>333</x><y>360</y><w>198</w><h>27</h></coordinates><panel_attributes>broadcast on charger/accept
 
 bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>693</x><y>405</y><w>153</w><h>36</h></coordinates><panel_attributes>check for own charger id
-reserve real energy
+reserve energy and port
 
 bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>675</x><y>405</y><w>18</w><h>36</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>324</x><y>846</y><w>369</w><h>36</h></coordinates><panel_attributes>lt=&lt;-
 GET{amount}</panel_attributes><additional_attributes>390;20;10;20</additional_attributes></element><element><id>UMLNote</id><coordinates><x>324</x><y>423</y><w>135</w><h>27</h></coordinates><panel_attributes>car drives to location
-
-bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>693</x><y>171</y><w>180</w><h>27</h></coordinates><panel_attributes>reserve energy and port
-
 
 bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>333</x><y>819</y><w>198</w><h>27</h></coordinates><panel_attributes>on charger/{charger_id}/{port_id}
 
@@ -33,11 +30,7 @@ ACK{amount}</panel_attributes><additional_attributes>10;20;390;20</additional_at
 
 bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>333</x><y>738</y><w>198</w><h>27</h></coordinates><panel_attributes>calculate charge on SoC
 
-bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>873</x><y>153</y><w>126</w><h>45</h></coordinates><panel_attributes>is that good to
-reserve so early??
-bg=orange</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>963</x><y>396</y><w>108</w><h>45</h></coordinates><panel_attributes>would reserve only here
-port and energy
-bg=green</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>324</x><y>540</y><w>369</w><h>36</h></coordinates><panel_attributes>lt=&lt;-
+bg=blue</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>324</x><y>540</y><w>369</w><h>36</h></coordinates><panel_attributes>lt=&lt;-
 ARRIVAL</panel_attributes><additional_attributes>390;20;10;20</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>675</x><y>558</y><w>18</w><h>63</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>315</x><y>513</y><w>18</w><h>153</h></coordinates><panel_attributes></panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>675</x><y>432</y><w>27</w><h>144</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>10;10;10;140</additional_attributes></element><element><id>Relation</id><coordinates><x>315</x><y>657</y><w>27</w><h>99</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>10;10;10;90</additional_attributes></element><element><id>Relation</id><coordinates><x>324</x><y>603</y><w>369</w><h>36</h></coordinates><panel_attributes>lt=&lt;-
 PORT</panel_attributes><additional_attributes>10;20;390;20</additional_attributes></element><element><id>UMLNote</id><coordinates><x>333</x><y>513</y><w>162</w><h>27</h></coordinates><panel_attributes>on charger/charging/port
 

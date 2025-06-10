@@ -47,7 +47,7 @@ async fn process_tick(handler: SharedCharger, payload: TickPayload) {
                 QoS::ExactlyOnce,
                 false,
                 ChartEntry::new(
-                    handler.name.clone(),
+                    handler.charger.get_name().clone(),
                     handler.consumed_last_tick as isize,
                     last_timestamp,
                 )
@@ -77,7 +77,7 @@ async fn process_tick(handler: SharedCharger, payload: TickPayload) {
 
     for i in 0..packages_askable {
         let mut handler = handler.lock().await;
-        let offer_id = format!("{}-{}", handler.name, i);
+        let offer_id = format!("{}-{}", handler.charger.get_name().clone(), i);
         let offer = Offer::new(
             offer_id,
             handler
@@ -171,7 +171,7 @@ pub async fn accept_offer_handler(handler: SharedCharger, payload: Bytes) {
 async fn publish_location(handler: SharedCharger) {
     let mut handler = handler.lock().await;
     // Extract all values before mutably borrowing client
-    let name = handler.name.clone();
+    let name = handler.charger.get_name().clone();
     let latitude = handler.charger.get_latitude();
     let longitude = handler.charger.get_longitude();
     let percentage = handler.charger.get_charge_percentage() * 100.0;

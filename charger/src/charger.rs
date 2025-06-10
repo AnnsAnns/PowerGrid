@@ -1,35 +1,42 @@
-use log::{debug};
+use log::{debug, warn};
 use powercable::{offer::structure::OFFER_PACKAGE_SIZE, Position};
 
+#[derive(Debug, Clone)]
 pub struct Charger {
     name: String,
+    position: Position,
     rate: usize,
     capacity: usize,
-    position: Position,
     reserved_charge: usize,
     current_charge: usize,
     charging_ports: usize,
+    reserved_ports: usize,
     used_ports: usize,
 }
 
 impl Charger {
     pub fn new(
-        position: Position,
-        capacity: usize,
-        rate: usize,
-        charging_ports: usize,
         name: String,
+        position: Position,
+        rate: usize,
+        capacity: usize,
+        charging_ports: usize,
     ) -> Self {
         Charger {
+            name,
             position,
-            capacity,
             rate,
+            capacity,
             reserved_charge: 0,
             current_charge: 0,
             charging_ports,
+            reserved_ports: 0,
             used_ports: 0,
-            name,
         }
+    }
+
+    pub fn get_name(&self) -> &String {
+        &self.name
     }
 
     pub fn get_available_charge(&self) -> usize {
@@ -85,6 +92,10 @@ impl Charger {
 
     pub fn get_ports(&self) -> usize {
         self.charging_ports
+    }
+
+    pub fn get_used_ports(&self) -> usize {
+        self.used_ports
     }
 
     pub fn get_free_ports(&self) -> usize {
@@ -158,8 +169,8 @@ impl Charger {
 
     pub fn reserve_port(&mut self) -> bool {
         // Reserve a charging port if available
-        if self.used_ports < self.charging_ports {
-            self.used_ports += 1;
+        if self.reserved_ports < self.charging_ports {
+            self.reserved_ports += 1;
             true
         } else {
             debug!("Charger {} has no free ports to reserve", self.name);
@@ -169,12 +180,31 @@ impl Charger {
 
     pub fn release_port(&mut self) -> bool {
         // Release a charging port if used
-        if self.used_ports > 0 {
-            self.used_ports -= 1;
+        if self.reserved_ports > 0 {
+            self.reserved_ports -= 1;
             true
         } else {
             debug!("Charger {} has no ports to release", self.name);
             false // No ports to release
+        }
+    }
+
+    pub fn use_port(&mut self) -> Option<usize> {
+        if self.used_ports < self.charging_ports {
+            self.used_ports += 1;
+            Some(self.used_ports)
+        }
+        else {
+            warn!("Car wants to use port, but no free ports");
+            None
+        }
+    }
+
+    pub fn free_port(&mut self) {
+        if self.used_ports > 0 {
+            self.used_ports -= 1;
+        } else {
+            warn!("Car wants to free port, but no ports are used");
         }
     }
 }

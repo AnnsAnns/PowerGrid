@@ -30,7 +30,8 @@ pub const WORLDMAP_EVENT_TOPIC: &str = "worldmap/event";
 pub const CHARGER_REQUEST: &str = "charger/request";// vehicle send request to all chargers
 pub const CHARGER_OFFER: &str = "charger/offer";// charger sends offer to vehicle
 pub const CHARGER_ACCEPT: &str = "charger/accept";// vehicle accepts offer from charger
-pub const CHARGER_PORT: &str = "charger/port";// vehicle requests a port from the charger
+pub const CHARGER_ARRIVAL: &str = "charger/arrival";// vehicle sends arrival to charger
+pub const CHARGER_PORT: &str = "charger/port";// charger sends port to charge at to vehicle
 pub const CHARGER_CHARGING: &str = "charger/charging";// vehicle requests energy from the charger
 pub const MQTT_BROKER: &str = "mosquitto_broker";
 pub const MQTT_BROKER_PORT: u16 = 1883;
@@ -58,6 +59,30 @@ pub struct Position {
 impl Position {
     pub fn new(latitude: f64, longitude: f64) -> Self {
         Position { latitude, longitude }
+    }
+
+    /**
+     * Calculates the distance to another position using the Haversine formula.
+     * 
+     * @param other_position The position to calculate the distance to.
+     * @return The distance in kilometers to the other position.
+     */
+    pub fn distance_to(&self, other_position: Position) -> f64 {
+        let earth_radius_km = 6371.0; // Radius of the Earth in kilometers
+
+        let lat1_rad = self.latitude.to_radians();
+        let lon1_rad = self.longitude.to_radians();
+        let lat2_rad = other_position.latitude.to_radians();
+        let lon2_rad = other_position.longitude.to_radians();
+
+        let delta_lat = lat2_rad - lat1_rad;
+        let delta_lon = lon2_rad - lon1_rad;
+
+        let a = (delta_lat / 2.0).sin().powi(2)
+            + lat1_rad.cos() * lat2_rad.cos() * (delta_lon / 2.0).sin().powi(2);
+        let c = 2.0 * a.sqrt().atan2((1.0 - a).sqrt());
+
+        earth_radius_km * c
     }
 
     pub fn from_tuple(position: (f64, f64)) -> Self {

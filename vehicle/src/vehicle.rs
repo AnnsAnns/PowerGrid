@@ -5,22 +5,36 @@ use rand::Rng;
 use crate::{battery::Battery, database::random_ev};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/**
+ * VehicleStatus represents the current status of a vehicle.
+ * It can be one of the following:
+ * - Randp,: Vehicle is driving randomly
+ * - SearchingForCharger: Vehicle is searching for a charging station
+ * - Charging: Vehicle is currently charging
+ * - Broken: Vehicle is broken and cannot be used
+ */
 pub enum VehicleStatus {
-    RANDOM, // Vehicle is driving randomly
-    Driving, // Vehicle is currently driving to a destination
-    Charging, // Vehicle is currently charging
-    Broken, // Vehicle is broken and cannot be used
+    RANDOM,
+    SearchingForCharger,
+    Charging,
+    Broken,
 }
 
 #[derive(Debug)]
+/**
+ * Vehicle represents an electric vehicle in the simulation.
+ * It contains information about the vehicle's name, model, status, location, destination,
+ * consumption, battery, and port number if charging.
+ */
 pub struct Vehicle {
     name: String,
     model: String,
     status: VehicleStatus,
     location: Position,
     destination: Position,
-    consumption: f64, // Wh/km
+    consumption: f64,// Wh/km
     battery: Battery,
+    port: Option<usize>,// Port number for charging, if applicable
 }
 
 impl Vehicle {
@@ -36,9 +50,10 @@ impl Vehicle {
             model: model.to_owned(),
             status: VehicleStatus::RANDOM,
             location,
-            destination: location, // Initially, the destination is the same as the location
+            destination: location,// Initially, the destination is the same as the location
             consumption,
             battery,
+            port: None,// Initially, the vehicle is not connected to any charging port
         }
     }
 
@@ -60,6 +75,14 @@ impl Vehicle {
 
     pub fn get_consumption(&self) -> f64 {
         self.consumption
+    }
+
+    pub fn set_port(&mut self, port: Option<usize>) {
+        self.port = port;
+    }
+
+    pub fn get_port(&self) -> Option<usize> {
+        self.port
     }
 
     pub fn distance_to(&self, latitude: f64, longitude: f64) -> f64 { // TODO: simplify
@@ -134,12 +157,6 @@ impl Vehicle {
         let rolling_resistance = 0.0005; // approximate coefficient
         let aerodynamic_drag = 0.00003; // approximate drag factor
         1.0 + rolling_resistance * speed_kmh + aerodynamic_drag * speed_kmh.powi(2)
-    }
-
-    pub fn charge(&mut self, amount: usize) {
-        if self.status != VehicleStatus::Charging {
-            self.battery.add_charge(amount as f64);
-        }
     }
 
     fn to_radians(deg: f64) -> f64 {
