@@ -1,6 +1,6 @@
 use bytes::Bytes;
 use log::{debug, info};
-use powercable::{charger::{ChargeOffer, ChargeRequest}, CHARGER_OFFER};
+use powercable::{charger::{ChargeOffer, ChargeRequest, ChargeAccept}, CHARGER_OFFER};
 
 use crate::{offer_handling::ReservedOffer, SharedCharger};
 
@@ -51,27 +51,31 @@ pub async fn receive_request(charger: SharedCharger, payload: Bytes) {
     ).await.unwrap();
 }
 
-/// This function handles incoming charge requests from cars
-/// 
-/// # Arguments
-/// * `charger` - A shared reference to the charger handler
-/// * `payload` - The charge request payload containing the car's ID and requested charge amount
-pub async fn check_accepted_offers(charger: SharedCharger, payload: ChargeOffer) {
+
+/**
+ * Checks if the charger was accepted by a vehicle.
+ * Ignores accepts that are not for this charger.
+ */
+pub async fn accept_handler(charger: SharedCharger, payload: Bytes) {
     let mut handler = charger.lock().await;
-    let target_id = payload.vehicle_name.clone();
+
+    // Deserialize the payload into a ChargeAccept object
+    debug!("Received charge accept payload: {:?}", payload);
+    let acceptance: ChargeAccept = ChargeAccept::from_bytes(payload).unwrap();
+
+    let target_id = acceptance.vehicle_name.clone();
 
     // This is not something we care about
-    if handler.get_reserved_offer(target_id.clone()).is_none() {
+    if handler.get_reserved_offer(acceptance.vehicle_name.clone()).is_none() {
         debug!("Received offer for {} but we are not interested in it", target_id);
         return;
     }
-
-    // Somebody else was accepted
-    if &payload.charger_name != &handler.name {
-        debug!("We were not accepted by {}, removing from reserved list", payload.vehicle_name);
-        handler.release_offer(target_id.clone());
-    } else {
-        debug!("We were accepted by {}", payload.vehicle_name);
-        handler.accept_reserve(target_id.clone());
+    else if &acceptance.charger_name != &handler.name {
+        debug!("We were not accepted by {}, removing from reserved list", acceptance.vehicle_name);
+        handler.release_offer(acceptance.vehicle_name.clone());
+    }
+    else {
+        info!("We were accepted by {}", acceptance.vehicle_name);
+        handler.accept_reserve(acceptance.vehicle_name.clone());
     }
 }

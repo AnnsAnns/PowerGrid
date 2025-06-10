@@ -83,6 +83,14 @@ impl Charger {
         self.position.longitude
     }
 
+    pub fn get_ports(&self) -> usize {
+        self.charging_ports
+    }
+
+    pub fn get_free_ports(&self) -> usize {
+        self.charging_ports - self.used_ports
+    }
+
     pub fn get_capacity(&self) -> usize {
         self.capacity
     }
@@ -168,9 +176,5 @@ impl Charger {
             debug!("Charger {} has no ports to release", self.name);
             false // No ports to release
         }
-    }
-
-    pub fn get_free_ports(&self) -> usize {
-        self.charging_ports - self.used_ports
     }
 }

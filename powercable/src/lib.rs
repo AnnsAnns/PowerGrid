@@ -29,8 +29,9 @@ pub const POWER_CONSUMER_SCALE: &str = "power/consumer/scale";
 pub const WORLDMAP_EVENT_TOPIC: &str = "worldmap/event";
 pub const CHARGER_REQUEST: &str = "charger/request";// vehicle send request to all chargers
 pub const CHARGER_OFFER: &str = "charger/offer";// charger sends offer to vehicle
-pub const CHARGER_ACCEPT: &str = "charger/accept";
-// charger/{charger_id}/{port_id}/charge for charging a vehicle at a specific port
+pub const CHARGER_ACCEPT: &str = "charger/accept";// vehicle accepts offer from charger
+pub const CHARGER_PORT: &str = "charger/port";// vehicle requests a port from the charger
+pub const CHARGER_CHARGING: &str = "charger/charging";// vehicle requests energy from the charger
 pub const MQTT_BROKER: &str = "mosquitto_broker";
 pub const MQTT_BROKER_PORT: u16 = 1883;
 pub const MAP_UPDATE_SPEED_IN_SECS: u64 = 1;

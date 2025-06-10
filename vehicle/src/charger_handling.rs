@@ -1,5 +1,6 @@
-use log::{debug, info};
-use powercable::{charger::{ChargeOffer, ChargeRequest, PRICE_DISTANCE_FACTOR}, Position, CHARGER_ACCEPT, CHARGER_REQUEST};
+use bytes::Bytes;
+use log::{debug, info, warn};
+use powercable::{charger::{ChargeAccept, ChargeOffer, ChargeRequest, PRICE_DISTANCE_FACTOR}, Position, CHARGER_ACCEPT, CHARGER_REQUEST};
 use rumqttc::QoS;
 use crate::SharedVehicle;
 use crate::vehicle::VehicleStatus;
@@ -33,16 +34,30 @@ pub async fn create_charger_request(vehicle: SharedVehicle) {
 }
 
 /**
- * Handles incoming charge requests from chargers. 
+ * Handles incoming charge offers from chargers. 
  */
-pub async fn receive_offer(vehicle: SharedVehicle, payload: ChargeOffer) {
+pub async fn receive_offer(vehicle: SharedVehicle, payload: Bytes) {
     let mut handler = vehicle.lock().await;
-
-    info!(
-        "Received charge offer from {}: {} kWh at {}€",
-        payload.charger_name, payload.charge_amount, payload.charge_price
-    );
-    handler.charge_offers.push(payload.clone());
+    let charge_offer = match ChargeOffer::from_bytes(payload) {
+        Ok(offer) => offer,
+        Err(e) => {
+            warn!("Failed to deserialize ChargeOffer: {}", e);
+            return;
+        }
+    };
+    if charge_offer.vehicle_name.eq(handler.vehicle.get_name()) {
+        warn!(
+            "Received charge offer from {}: {} kWh at {}€",
+            charge_offer.charger_name, charge_offer.charge_amount, charge_offer.charge_price
+        );
+        handler.charge_offers.push(charge_offer.clone());
+    }
+    else {
+        warn!(
+            "Received charge offer for {} but this vehicle is {}. Ignoring offer.",
+            charge_offer.vehicle_name, handler.vehicle.get_name()
+        );
+    }
 }
 
 /**
@@ -97,10 +112,31 @@ pub async fn accept_offer(vehicle: SharedVehicle) {
     handler.charge_offers.clear();
     handler.target_charger = Some(offer.clone());
 
+    // Create a ChargeAccept message to send to the charger
+    let energy_for_way = handler.vehicle.distance_to(
+        offer.charger_position.latitude,
+        offer.charger_position.longitude,
+    ) * handler.vehicle.get_consumption();
+
+    let acceptance = ChargeAccept {
+        charger_name: offer.charger_name.clone(),
+        vehicle_name: handler.vehicle.get_name().clone(),
+        real_amount: offer.charge_amount as usize + energy_for_way as usize,// real amount is the charge amount + energy for the way to the charger
+    };
+    info!(
+        "Sending charge acceptance to charger: {} with real amount: {} kWh",
+        acceptance.charger_name, acceptance.real_amount
+    );
+
     handler.client.publish(
         CHARGER_ACCEPT,
         QoS::ExactlyOnce,
         false,
-        offer.to_bytes(),
+        acceptance.to_bytes(),
     ).await.unwrap()
 }
+
+pub async fn receive_charging_port(vehicle: SharedVehicle, payload: Bytes) {
+    let mut handler = vehicle.lock().await;
+}
+

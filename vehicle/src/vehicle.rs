@@ -58,6 +58,10 @@ impl Vehicle {
         self.status = status;
     }
 
+    pub fn get_consumption(&self) -> f64 {
+        self.consumption
+    }
+
     pub fn distance_to(&self, latitude: f64, longitude: f64) -> f64 { // TODO: simplify
         let this_rad = (Vehicle::to_radians(self.location.latitude), Vehicle::to_radians(self.location.longitude));
         let other_rad = (Vehicle::to_radians(latitude), Vehicle::to_radians(longitude));

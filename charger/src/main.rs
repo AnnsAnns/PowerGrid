@@ -1,12 +1,12 @@
 use charger::Charger;
 use log::{debug, info};
 use offer_handling::ReservedOffer;
-use powercable::{generate_unique_name, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, TICK_TOPIC, CHARGER_REQUEST, generate_rnd_pos};
+use powercable::{generate_rnd_pos, generate_unique_name, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CHARGER_ACCEPT, CHARGER_CHARGING, CHARGER_PORT, CHARGER_REQUEST, TICK_TOPIC};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task};
 use topic_handler::{accept_offer_handler, tick_handler};
-use car_handling::receive_request;
+use car_handling::{receive_request, accept_handler};
 
 mod charger;
 mod topic_handler;
@@ -42,15 +42,27 @@ async fn main() {
     mqttoptions.set_keep_alive(Duration::from_secs(5));
     let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
     client
-        .subscribe(powercable::TICK_TOPIC, QoS::ExactlyOnce)
+        .subscribe(TICK_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     client
-        .subscribe(powercable::ACCEPT_BUY_OFFER_TOPIC, QoS::ExactlyOnce)
+        .subscribe(ACCEPT_BUY_OFFER_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     client
-        .subscribe(powercable::CHARGER_REQUEST, QoS::ExactlyOnce)
+        .subscribe(CHARGER_REQUEST, QoS::ExactlyOnce)
+        .await
+        .unwrap();
+    client
+        .subscribe(CHARGER_ACCEPT, QoS::ExactlyOnce)
+        .await
+        .unwrap();
+    client
+        .subscribe(CHARGER_PORT, QoS::ExactlyOnce)
+        .await
+        .unwrap();
+    client
+        .subscribe(CHARGER_CHARGING, QoS::ExactlyOnce)
         .await
         .unwrap();
     info!("Connected to MQTT broker");
@@ -76,7 +88,15 @@ async fn main() {
                 CHARGER_REQUEST => {
                     let _ = task::spawn(receive_request(shared_charger.clone(), p.payload));
                 }
-                // wenn seine offer nicht accepted wurde muss er die offer releasen check_accepted_offers
+                CHARGER_ACCEPT => {
+                    let _ = task::spawn(accept_handler(shared_charger.clone(), p.payload));
+                }
+                CHARGER_PORT => {
+                    info!("Received CHARGER_CHARGING_PORT message");
+                }
+                CHARGER_CHARGING => {
+                    info!("Received CHARGER_CHARGING message");
+                }
                 _ => {
                     let _ = task::spawn(async move {
                         debug!("Unknown topic: {}", p.topic);
