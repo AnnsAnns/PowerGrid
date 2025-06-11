@@ -1,6 +1,6 @@
 use bytes::Bytes;
-use log::{debug, info, warn};
-use powercable::{charger::{Arrival, ChargeAccept, ChargeOffer, ChargeRequest, Port}, offer, CHARGER_OFFER, CHARGER_PORT};
+use log::{debug, info};
+use powercable::{charger::{Arrival, ChargeAccept, ChargeOffer, ChargeRequest, Port}, CHARGER_OFFER, CHARGER_PORT};
 use rumqttc::QoS;
 
 use crate::{offer_handling::ReservedOffer, SharedCharger};
@@ -20,7 +20,7 @@ pub async fn receive_request(charger: SharedCharger, payload: Bytes) {
     let charge_amount = request.charge_amount;
     let reserable_charge = handler.charger.get_available_charge();
     info!("Charger {} has {} kWh available for reservation", handler.charger.get_name(), reserable_charge);
-    
+
     let reserved_charge = if charge_amount > reserable_charge {
         reserable_charge
     } else {
@@ -99,7 +99,7 @@ pub async fn answer_arrival_with_port(charger: SharedCharger, payload: Bytes) {
     info!("Received arrival from {}", arrival.vehicle_name);
 
     // get free port
-    let port: Port = Port::new(handler.charger.get_name().clone(), arrival.vehicle_name, handler.charger.use_port().unwrap());
+    let port: Port = Port::new(handler.charger.get_name().clone(), arrival.vehicle_name, 0);
 
     handler.client.publish(
         CHARGER_PORT,

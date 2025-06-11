@@ -57,15 +57,30 @@ pub struct Position {
 }
 
 impl Position {
+    /**
+     * # Description
+     * Creates a new Position instance with the given latitude and longitude.
+     * 
+     * # Parameters
+     * - `latitude`: The latitude of the position.
+     * - `longitude`: The longitude of the position.
+     * 
+     * # Returns
+     * - A new Position instance.
+     */
     pub fn new(latitude: f64, longitude: f64) -> Self {
         Position { latitude, longitude }
     }
 
     /**
+     * # Decscription
      * Calculates the distance to another position using the Haversine formula.
      * 
-     * @param other_position The position to calculate the distance to.
-     * @return The distance in kilometers to the other position.
+     * # Parameters
+     * - `other_position`: The position to which the distance is calculated.
+     * 
+     * # Returns
+     * - The distance in kilometers between the two positions.
      */
     pub fn distance_to(&self, other_position: Position) -> f64 {
         let earth_radius_km = 6371.0; // Radius of the Earth in kilometers
@@ -85,6 +100,16 @@ impl Position {
         earth_radius_km * c
     }
 
+    /**
+     * # Description
+     * Creates a new Position instance from a tuple containing latitude and longitude.
+     * 
+     * # Parameters
+     * - `position`: A tuple containing the latitude and longitude.
+     * 
+     * # Returns
+     * - A new Position instance.
+     */
     pub fn from_tuple(position: (f64, f64)) -> Self {
         Position {
             latitude: position.0,
@@ -92,13 +117,24 @@ impl Position {
         }
     }
 
+    /**
+     * # Description
+     * Converts the Position instance into a tuple containing latitude and longitude.
+     * 
+     * # Returns
+     * - A tuple containing the latitude and longitude of the position.
+     */
     pub fn to_tuple(&self) -> (f64, f64) {
         (self.latitude, self.longitude)
     }
 }
 
 /**
- * Generates a random position within the defined limits of Germany.
+ * # Description
+ * Generates a random position within the defined geographical limits.
+ * 
+ * # Returns
+ * - A Position instance with random latitude and longitude values.
  */
 pub fn generate_rnd_pos() -> Position {
     let mut rng = rand::rng();

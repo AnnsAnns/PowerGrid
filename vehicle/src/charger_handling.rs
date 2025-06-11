@@ -1,16 +1,18 @@
 use bytes::Bytes;
-use log::{debug, info, warn};
+use log::{debug, info};
 use powercable::{charger::{Arrival, ChargeAccept, ChargeOffer, ChargeRequest, Port, PRICE_DISTANCE_FACTOR}, Position, CHARGER_ACCEPT, CHARGER_ARRIVAL, CHARGER_REQUEST};
 use rumqttc::QoS;
 use crate::SharedVehicle;
 use crate::vehicle::VehicleStatus;
 
 /**
+ * # Description
  * Sends a charge request to all chargers.
  * This function creates a ChargeRequest message containing the vehicle's name, the amount of charge needed,
  * and the vehicle's current position. Important is that the amount doesn´t contains the amount of energy needed to drive to the charger
  * 
- * @param handler: The shared vehicle handler containing the vehicle and its state.
+ * # Parameters
+ * - `handler`: The shared vehicle handler containing the vehicle and its state.
  */
 pub async fn create_charger_request(handler: SharedVehicle) {
     let handler = handler.lock().await;
@@ -37,10 +39,12 @@ pub async fn create_charger_request(handler: SharedVehicle) {
 }
 
 /**
- * Handles incoming charge offers from chargers.
+ * # Description
+ * Receives a charge offer from a charger and stores it in the vehicle's state.
  * 
- * @param handler: The shared vehicle handler containing the vehicle and its state.
- * @param payload: The payload of the message received on the CHARGER_OFFER topic, containing the charge offer.
+ * # Parameters
+ * - `handler`: The shared vehicle handler containing the vehicle and its state.
+ * - `payload`: The payload of the message received on the CHARGER_OFFER topic, containing the charge offer information.
  */
 pub async fn receive_offer(handler: SharedVehicle, payload: Bytes) {
     let mut handler = handler.lock().await;
@@ -58,9 +62,12 @@ pub async fn receive_offer(handler: SharedVehicle, payload: Bytes) {
 }
 
 /**
+ * # Description
  * Accepts the best charge offer based on the distance to the charger and the charge price.
+ * The best offer is determined by calculating a price that combines the charge price and the distance to the charger.
  * 
- * @param handler: The shared vehicle handler containing the vehicle and its state.
+ * # Parameters
+ * - `handler`: The shared vehicle handler containing the vehicle and its state.
  */
 pub async fn accept_offer(handler: SharedVehicle) {
     let mut handler = handler.lock().await;
@@ -111,17 +118,10 @@ pub async fn accept_offer(handler: SharedVehicle) {
     handler.target_charger = Some(offer.clone());
 
     // Create a ChargeAccept message to send to the charger
-    debug!("{} has to drive {}km to the charger(lib.rs)",
-        handler.vehicle.get_name(),
-        handler.vehicle.get_location().distance_to(Position {
-            latitude: offer.charger_position.latitude,
-            longitude: offer.charger_position.longitude,
-        })
-    );
-    let energy_for_way = handler.vehicle.distance_to(
+    let energy_for_way = (handler.vehicle.distance_to(
         offer.charger_position.latitude,
         offer.charger_position.longitude,
-    ) * handler.vehicle.get_consumption();
+    ) * handler.vehicle.get_consumption()) as usize;
 
     let acceptance = ChargeAccept {
         charger_name: offer.charger_name.clone(),
@@ -129,10 +129,16 @@ pub async fn accept_offer(handler: SharedVehicle) {
         real_amount: offer.charge_amount as usize + energy_for_way as usize,// real amount is the charge amount + energy for the way to the charger
     };
     info!(
-        "Vehicle {} accepts charge offer from {}: {} kWh (including {} kWh for the way to the charger)",
+        "Vehicle {} accepts charge offer from {}:\n Instead of {}kWh {} needs {}kwh cause its {}km away and consumes {}kWh on the way",
         handler.vehicle.get_name(),
         acceptance.charger_name,
+        offer.charge_amount,
+        handler.vehicle.get_name(),
         acceptance.real_amount,
+        handler.vehicle.get_location().distance_to(Position {
+            latitude: offer.charger_position.latitude,
+            longitude: offer.charger_position.longitude,
+        }) as usize,
         energy_for_way
     );
 
@@ -145,10 +151,12 @@ pub async fn accept_offer(handler: SharedVehicle) {
 }
 
 /**
- * Sends an arrival message to the charger when the vehicle arrives at the charger.
- * The arrival message contains the charger's name, the vehicle's name, and the amount of energy needed to charge.
+ * # Description
+ * Creates an arrival message to send to the charger when the vehicle arrives at the charger.
+ * The arrival message contains the charger's name, the vehicle's name, and the amount of charge needed.
  * 
- * @param handler: The shared vehicle handler containing the vehicle and its state.
+ * # Parameters
+ * - `handler`: The shared vehicle handler containing the vehicle and its state.
  */
 pub async fn create_arrival(handler: SharedVehicle) {
     let handler = handler.lock().await;
@@ -167,11 +175,12 @@ pub async fn create_arrival(handler: SharedVehicle) {
 }
 
 /**
- * If handler receives a message on the CHARGER_PORT topic, it means that a port is available for the vehicle to charge.
- * This function checks if the port is for this vehicle and sets the port number in the vehicle.
+ * # Description
+ * Receives a port message from a charger and updates the vehicle's port information if the port is for this vehicle.
  * 
- * @param handler: The shared vehicle handler containing the vehicle and its state.
- * @param payload: The payload of the message received on the CHARGER_PORT topic, containing the port information.
+ * # Parameters
+ * - `handler`: The shared vehicle handler containing the vehicle and its state.
+ * - `payload`: The payload of the message received, containing the port information.
  */
 pub async fn receive_port(handler: SharedVehicle, payload: Bytes) {
     let mut handler = handler.lock().await;

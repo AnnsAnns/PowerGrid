@@ -5,16 +5,25 @@ use powercable::{offer::structure::OFFER_PACKAGE_SIZE, Position};
 pub struct Charger {
     name: String,
     position: Position,
-    rate: usize,
-    capacity: usize,
-    reserved_charge: usize,
-    current_charge: usize,
+    rate: usize,// in kw/s
+    capacity: usize,// in kWh
+    reserved_charge: usize,// in kWh
+    current_charge: usize,// in kWh
     charging_ports: usize,
     reserved_ports: usize,
-    used_ports: usize,
 }
 
 impl Charger {
+    /**
+     * Creates a new Charger instance.
+     * 
+     * # Arguments
+     * `name`: The name of the charger.
+     * `position`: The geographical position of the charger.
+     * `rate`: The charging rate of the charger in kW/s.
+     * `capacity`: The total capacity of the charger in kWh.
+     * `charging_ports`: The number of charging ports available on the charger.
+     */
     pub fn new(
         name: String,
         position: Position,
@@ -31,7 +40,6 @@ impl Charger {
             current_charge: 0,
             charging_ports,
             reserved_ports: 0,
-            used_ports: 0,
         }
     }
 
@@ -94,12 +102,8 @@ impl Charger {
         self.charging_ports
     }
 
-    pub fn get_used_ports(&self) -> usize {
-        self.used_ports
-    }
-
     pub fn get_free_ports(&self) -> usize {
-        self.charging_ports - self.used_ports
+        self.charging_ports - self.reserved_ports
     }
 
     pub fn get_capacity(&self) -> usize {
@@ -186,25 +190,6 @@ impl Charger {
         } else {
             debug!("Charger {} has no ports to release", self.name);
             false // No ports to release
-        }
-    }
-
-    pub fn use_port(&mut self) -> Option<usize> {
-        if self.used_ports < self.charging_ports {
-            self.used_ports += 1;
-            Some(self.used_ports)
-        }
-        else {
-            warn!("Car wants to use port, but no free ports");
-            None
-        }
-    }
-
-    pub fn free_port(&mut self) {
-        if self.used_ports > 0 {
-            self.used_ports -= 1;
-        } else {
-            warn!("Car wants to free port, but no ports are used");
         }
     }
 }
