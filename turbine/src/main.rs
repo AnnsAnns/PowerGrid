@@ -28,7 +28,7 @@ struct TurbineHandler {
 #[tokio::main]
 async fn main() {
     // Print working directory
-    println!("Current working directory: {:?}", std::env::current_dir());
+    //println!("Current working directory: {:?}", std::env::current_dir());
 
     let (handler, mut eventloop) = init::init().await;
 

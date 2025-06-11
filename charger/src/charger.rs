@@ -1,35 +1,50 @@
-use log::{debug};
-use powercable::{offer::structure::OFFER_PACKAGE_SIZE, Offer, Position};
+use log::{debug, warn};
+use powercable::{offer::structure::OFFER_PACKAGE_SIZE, Position};
 
+#[derive(Debug, Clone)]
 pub struct Charger {
     name: String,
-    rate: usize,
-    capacity: usize,
     position: Position,
-    reserved_charge: usize,
-    current_charge: usize,
+    rate: usize,// in kw/s
+    capacity: usize,// in kWh
+    reserved_charge: usize,// in kWh
+    current_charge: usize,// in kWh
     charging_ports: usize,
-    used_ports: usize,
+    reserved_ports: usize,
 }
 
 impl Charger {
+    /**
+     * Creates a new Charger instance.
+     * 
+     * # Arguments
+     * `name`: The name of the charger.
+     * `position`: The geographical position of the charger.
+     * `rate`: The charging rate of the charger in kW/s.
+     * `capacity`: The total capacity of the charger in kWh.
+     * `charging_ports`: The number of charging ports available on the charger.
+     */
     pub fn new(
-        position: Position,
-        capacity: usize,
-        rate: usize,
-        charging_ports: usize,
         name: String,
+        position: Position,
+        rate: usize,
+        capacity: usize,
+        charging_ports: usize,
     ) -> Self {
         Charger {
+            name,
             position,
-            capacity,
             rate,
+            capacity,
             reserved_charge: 0,
             current_charge: 0,
             charging_ports,
-            used_ports: 0,
-            name,
+            reserved_ports: 0,
         }
+    }
+
+    pub fn get_name(&self) -> &String {
+        &self.name
     }
 
     pub fn get_available_charge(&self) -> usize {
@@ -81,6 +96,14 @@ impl Charger {
 
     pub fn get_longitude(&self) -> f64 {
         self.position.longitude
+    }
+
+    pub fn get_ports(&self) -> usize {
+        self.charging_ports
+    }
+
+    pub fn get_free_ports(&self) -> usize {
+        self.charging_ports - self.reserved_ports
     }
 
     pub fn get_capacity(&self) -> usize {
@@ -150,8 +173,8 @@ impl Charger {
 
     pub fn reserve_port(&mut self) -> bool {
         // Reserve a charging port if available
-        if self.used_ports < self.charging_ports {
-            self.used_ports += 1;
+        if self.reserved_ports < self.charging_ports {
+            self.reserved_ports += 1;
             true
         } else {
             debug!("Charger {} has no free ports to reserve", self.name);
@@ -161,16 +184,12 @@ impl Charger {
 
     pub fn release_port(&mut self) -> bool {
         // Release a charging port if used
-        if self.used_ports > 0 {
-            self.used_ports -= 1;
+        if self.reserved_ports > 0 {
+            self.reserved_ports -= 1;
             true
         } else {
             debug!("Charger {} has no ports to release", self.name);
             false // No ports to release
         }
-    }
-
-    pub fn get_free_ports(&self) -> usize {
-        self.charging_ports - self.used_ports
     }
 }

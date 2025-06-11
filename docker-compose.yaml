@@ -72,7 +72,7 @@ services:
     depends_on:
       - mosquitto_broker
     deploy:
-      replicas: 6
+      replicas: 8
       mode: replicated
 
   charger:

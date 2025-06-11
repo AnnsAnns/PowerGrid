@@ -1,6 +1,7 @@
 use bytes::Bytes;
 use log::{debug, info};
-use powercable::{charger::{ChargeOffer, ChargeRequest}, CHARGER_OFFER};
+use powercable::{charger::{Arrival, ChargeAccept, ChargeOffer, ChargeRequest, Port}, CHARGER_OFFER, CHARGER_PORT};
+use rumqttc::QoS;
 
 use crate::{offer_handling::ReservedOffer, SharedCharger};
 
@@ -9,15 +10,16 @@ pub async fn receive_request(charger: SharedCharger, payload: Bytes) {
 
     let request: ChargeRequest = ChargeRequest::from_bytes(payload).unwrap();
     info!("Received charge request from {}: {} kWh at ({}, {})", 
-           request.vehicle_name, request.charge_amount, request.position.latitude, request.position.longitude);
+           request.vehicle_name, request.charge_amount, request.vehicle_position.latitude, request.vehicle_position.longitude);
     
     if handler.charger.get_free_ports() == 0 {
-        info!("Charger {} has no free ports, rejecting request from {}", handler.name, request.vehicle_name);
+        info!("Charger {} has no free ports, rejecting request from {}", handler.charger.get_name(), request.vehicle_name);
         return;
     }
 
-    let charge_amount = request.charge_amount as usize;
+    let charge_amount = request.charge_amount;
     let reserable_charge = handler.charger.get_available_charge();
+    info!("Charger {} has {} kWh available for reservation", handler.charger.get_name(), reserable_charge);
 
     let reserved_charge = if charge_amount > reserable_charge {
         reserable_charge
@@ -35,7 +37,7 @@ pub async fn receive_request(charger: SharedCharger, payload: Bytes) {
     handler.reserve_offer(offer);
 
     let offer = ChargeOffer::new(
-        handler.name.clone(),
+        handler.charger.get_name().clone(),
         request.vehicle_name,
         price,
         reserved_charge as f64,
@@ -45,33 +47,64 @@ pub async fn receive_request(charger: SharedCharger, payload: Bytes) {
     info!("Sending charge offer to {}: {} kWh at {}€", offer.vehicle_name, offer.charge_amount, offer.charge_price);
     handler.client.publish(
         CHARGER_OFFER,
-        rumqttc::QoS::AtMostOnce,
+        rumqttc::QoS::ExactlyOnce,
         false,
         offer.to_bytes(),
     ).await.unwrap();
 }
 
-/// This function handles incoming charge requests from cars
-/// 
-/// # Arguments
-/// * `charger` - A shared reference to the charger handler
-/// * `payload` - The charge request payload containing the car's ID and requested charge amount
-pub async fn check_accepted_offers(charger: SharedCharger, payload: ChargeOffer) {
+
+/**
+ * Checks if the charger was accepted by a vehicle.
+ * Ignores accepts that are not for this charger.
+ */
+pub async fn accept_handler(charger: SharedCharger, payload: Bytes) {
     let mut handler = charger.lock().await;
-    let target_id = payload.vehicle_name.clone();
+
+    // Deserialize the payload into a ChargeAccept object
+    debug!("Received charge accept payload: {:?}", payload);
+    let acceptance: ChargeAccept = ChargeAccept::from_bytes(payload).unwrap();
+
+    let target_id = acceptance.vehicle_name.clone();
 
     // This is not something we care about
-    if handler.get_reserved_offer(target_id.clone()).is_none() {
+    if handler.get_reserved_offer(acceptance.vehicle_name.clone()).is_none() {
         debug!("Received offer for {} but we are not interested in it", target_id);
+        return;
+    } else if &acceptance.charger_name != handler.charger.get_name() {
+        debug!("We were not accepted by {}, removing from reserved list", acceptance.vehicle_name);
+        handler.release_offer(acceptance.vehicle_name.clone());
+    } else {
+        info!("We were accepted by {}", acceptance.vehicle_name);
+        handler.accept_reserve(acceptance.vehicle_name.clone());
+    }
+}
+
+pub async fn answer_arrival_with_port(charger: SharedCharger, payload: Bytes) {
+    let mut handler = charger.lock().await;
+
+    // Deserialize the payload into an Arrival object
+    let arrival = Arrival::from_bytes(payload).unwrap();
+
+    if &arrival.vehicle_name != handler.charger.get_name() {
+        debug!("Arrival from vehicle {} is not for this charger {}", arrival.vehicle_name, handler.charger.get_name());
         return;
     }
 
-    // Somebody else was accepted
-    if &payload.charger_name != &handler.name {
-        debug!("We were not accepted by {}, removing from reserved list", payload.vehicle_name);
-        handler.release_offer(target_id.clone());
-    } else {
-        debug!("We were accepted by {}", payload.vehicle_name);
-        handler.accept_reserve(target_id.clone());
+    // Check if the arrival is for this charger
+    if &arrival.charger_name != handler.charger.get_name() {
+        debug!("Arrival from vehicle {} is not for this charger {}", arrival.vehicle_name, handler.charger.get_name());
+        return;
     }
+    info!("Received arrival from {}", arrival.vehicle_name);
+
+    // get free port
+    let port: Port = Port::new(handler.charger.get_name().clone(), arrival.vehicle_name, 0);
+
+    handler.client.publish(
+        CHARGER_PORT,
+        QoS::ExactlyOnce,
+        false,
+        port.to_bytes(),
+    ).await.unwrap()
 }

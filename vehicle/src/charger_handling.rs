@@ -1,31 +1,34 @@
+use bytes::Bytes;
 use log::{debug, info};
-use powercable::{
-    charger::{ChargeOffer, ChargeRequest, PRICE_DISTANCE_FACTOR}, Position, CHARGER_ACCEPT, CHARGER_REQUEST
-};
+use powercable::{charger::{Arrival, ChargeAccept, ChargeOffer, ChargeRequest, Port, PRICE_DISTANCE_FACTOR}, Position, CHARGER_ACCEPT, CHARGER_ARRIVAL, CHARGER_REQUEST};
 use rumqttc::QoS;
-
 use crate::SharedVehicle;
 use crate::vehicle::VehicleStatus;
 
 /**
- * Sends a request to all chargers in the network to find a suitable charger for the vehicle.
- * Sends request on the CHARGER_REQUEST topic with the vehicle's current state of charge, latitude, and longitude.
- * // TODO: Keep that below in mind:
- * !! Every charger has to calculate the SoC based on vehicles SoC and distance to the charger !!
- * !! If charger is too far away, it should not respond to the request !!
+ * # Description
+ * Sends a charge request to all chargers.
+ * This function creates a ChargeRequest message containing the vehicle's name, the amount of charge needed,
+ * and the vehicle's current position. Important is that the amount doesn´t contains the amount of energy needed to drive to the charger
+ * 
+ * # Parameters
+ * - `handler`: The shared vehicle handler containing the vehicle and its state.
  */
-pub async fn create_charger_request(vehicle: SharedVehicle) {
-    let handler = vehicle.lock().await;
-    info!("Creating charger request for vehicle: {}", handler.vehicle.get_name());
+pub async fn create_charger_request(handler: SharedVehicle) {
+    let handler = handler.lock().await;
 
     let request = ChargeRequest {
         vehicle_name: handler.vehicle.get_name().clone(),
         charge_amount: handler.vehicle.battery_non_mut().get_free_capacity(),
-        position: Position {
+        vehicle_position: Position {
             latitude: handler.vehicle.get_latitude(),
             longitude: handler.vehicle.get_longitude(),
         },
     };
+    info!(
+        "Sending charge request for {} kWh from vehicle {} at position ({}, {})",
+        request.charge_amount, request.vehicle_name, request.vehicle_position.latitude, request.vehicle_position.longitude
+    );
 
     // publish charging request to all chargers
     handler
@@ -36,20 +39,38 @@ pub async fn create_charger_request(vehicle: SharedVehicle) {
 }
 
 /**
- * Handles incoming charge requests from chargers. 
+ * # Description
+ * Receives a charge offer from a charger and stores it in the vehicle's state.
+ * 
+ * # Parameters
+ * - `handler`: The shared vehicle handler containing the vehicle and its state.
+ * - `payload`: The payload of the message received on the CHARGER_OFFER topic, containing the charge offer information.
  */
-pub async fn receive_offer(vehicle: SharedVehicle, payload: ChargeOffer) {
-    let mut handler = vehicle.lock().await;
+pub async fn receive_offer(handler: SharedVehicle, payload: Bytes) {
+    let mut handler = handler.lock().await;
 
-    handler.charge_offers.push(payload.clone());
-    info!(
-        "Received charge offer from {}: {} kWh at {}€",
-        payload.charger_name, payload.charge_amount, payload.charge_price
-    );
+    // Deserialize the ChargeOffer message
+    let charge_offer = ChargeOffer::from_bytes(payload).unwrap();
+
+    if charge_offer.vehicle_name.eq(handler.vehicle.get_name()) {
+        info!(
+            "Received charge offer from {}: {} kWh at {}€",
+            charge_offer.charger_name, charge_offer.charge_amount, charge_offer.charge_price
+        );
+        handler.charge_offers.push(charge_offer.clone());
+    }
 }
 
-pub async fn accept_offer(vehicle: SharedVehicle) {
-    let mut handler = vehicle.lock().await;
+/**
+ * # Description
+ * Accepts the best charge offer based on the distance to the charger and the charge price.
+ * The best offer is determined by calculating a price that combines the charge price and the distance to the charger.
+ * 
+ * # Parameters
+ * - `handler`: The shared vehicle handler containing the vehicle and its state.
+ */
+pub async fn accept_offer(handler: SharedVehicle) {
+    let mut handler = handler.lock().await;
 
     if handler.charge_offers.is_empty() {
         info!("No charge offers available to accept.");
@@ -78,13 +99,14 @@ pub async fn accept_offer(vehicle: SharedVehicle) {
 
     // Has to be something by now
     let offer = best_offer.0.unwrap();
-
-    handler.vehicle.set_status(VehicleStatus::Driving);
-    handler.vehicle.set_destination(
-        offer.charger_position.latitude,
-        offer.charger_position.longitude,
-    );
-
+    
+    // drive to the charger
+    handler.vehicle.set_status(VehicleStatus::SearchingForCharger);
+    handler.vehicle.set_destination(Position {
+        latitude: offer.charger_position.latitude,
+        longitude: offer.charger_position.longitude,
+    });
+    
     info!(
         "Accepting best offer from {}: {} kWh at {}€",
         offer.charger_name,
@@ -95,10 +117,84 @@ pub async fn accept_offer(vehicle: SharedVehicle) {
     handler.charge_offers.clear();
     handler.target_charger = Some(offer.clone());
 
+    // Create a ChargeAccept message to send to the charger
+    let energy_for_way = (handler.vehicle.distance_to(
+        offer.charger_position.latitude,
+        offer.charger_position.longitude,
+    ) * handler.vehicle.get_consumption()) as usize;
+
+    let acceptance = ChargeAccept {
+        charger_name: offer.charger_name.clone(),
+        vehicle_name: handler.vehicle.get_name().clone(),
+        real_amount: offer.charge_amount as usize + energy_for_way as usize,// real amount is the charge amount + energy for the way to the charger
+    };
+    info!(
+        "Vehicle {} accepts charge offer from {}:\n Instead of {}kWh {} needs {}kwh cause its {}km away and consumes {}kWh on the way",
+        handler.vehicle.get_name(),
+        acceptance.charger_name,
+        offer.charge_amount,
+        handler.vehicle.get_name(),
+        acceptance.real_amount,
+        handler.vehicle.get_location().distance_to(Position {
+            latitude: offer.charger_position.latitude,
+            longitude: offer.charger_position.longitude,
+        }) as usize,
+        energy_for_way
+    );
+
     handler.client.publish(
         CHARGER_ACCEPT,
         QoS::ExactlyOnce,
         false,
-        offer.to_bytes(),
+        acceptance.to_bytes(),
     ).await.unwrap()
 }
+
+/**
+ * # Description
+ * Creates an arrival message to send to the charger when the vehicle arrives at the charger.
+ * The arrival message contains the charger's name, the vehicle's name, and the amount of charge needed.
+ * 
+ * # Parameters
+ * - `handler`: The shared vehicle handler containing the vehicle and its state.
+ */
+pub async fn create_arrival(handler: SharedVehicle) {
+    let handler = handler.lock().await;
+    let arrival: Arrival = Arrival {
+        charger_name: handler.target_charger.as_ref().unwrap().charger_name.clone(),
+        vehicle_name: handler.vehicle.get_name().clone(),
+        needed_amount: handler.vehicle.battery_non_mut().get_free_capacity(),
+    };
+    info!("Send arrival: {:?} to charger: {}", arrival, arrival.charger_name);
+    handler.client.publish(
+        CHARGER_ARRIVAL,
+        QoS::ExactlyOnce,
+        false,
+        arrival.to_bytes(),
+    ).await.unwrap()
+}
+
+/**
+ * # Description
+ * Receives a port message from a charger and updates the vehicle's port information if the port is for this vehicle.
+ * 
+ * # Parameters
+ * - `handler`: The shared vehicle handler containing the vehicle and its state.
+ * - `payload`: The payload of the message received, containing the port information.
+ */
+pub async fn receive_port(handler: SharedVehicle, payload: Bytes) {
+    let mut handler = handler.lock().await;
+
+    // Deserialize the Port message
+    let port: Port = Port::from_bytes(payload).unwrap();
+
+    // Check if the port is for this vehicle
+    if port.vehicle_name.eq(handler.vehicle.get_name()) {
+        info!(
+            "Received port information from charger {}: Port {} is now available for vehicle {}",
+            port.charger_name, port.port, port.vehicle_name
+        );
+        handler.vehicle.set_port(Some(port.port));
+    }
+}
+

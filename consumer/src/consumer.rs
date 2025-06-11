@@ -1,11 +1,15 @@
-use chrono::NaiveTime;
 use log::{debug, trace};
+use powercable::Position;
 use tokio::{
     fs::File,
     io::{AsyncBufReadExt, BufReader},
 };
 
 #[derive(Debug, Clone, Copy)]
+/**
+ * ConsumerType represents the type of consumer.
+ * It can be Household (H), Business (G), or Farmer (L).
+ */
 pub enum ConsumerType {
     H,
     G,
@@ -47,9 +51,13 @@ impl ConsumerType {
     }
 }
 
+/**
+ * Consumer represents a consumer in the system.
+ * It has a position, type, current consumption, and a timeline of demand.
+ * The timeline is loaded from a CSV file and contains the demand for each time step.
+ */
 pub struct Consumer {
-    latitude: f64,
-    longitude: f64,
+    position: Position,
     consumer_type: ConsumerType,
     current_consumption: usize,
     current_scale: usize,
@@ -58,10 +66,9 @@ pub struct Consumer {
 }
 
 impl Consumer {
-    pub fn new(latitude: f64, longitude: f64, consumer_type: ConsumerType) -> Self {
+    pub fn new(position: Position, consumer_type: ConsumerType) -> Self {
         Consumer {
-            latitude,
-            longitude,
+            position,
             consumer_type,
             current_consumption: 0,
             current_scale: 1,
@@ -71,15 +78,19 @@ impl Consumer {
     }
 
     pub fn get_latitude(&self) -> f64 {
-        self.latitude
+        self.position.latitude
     }
 
     pub fn get_longitude(&self) -> f64 {
-        self.longitude
+        self.position.longitude
     }
 
-    pub fn get_consumer_type(&self) -> ConsumerType {
-        self.consumer_type.clone()
+    pub fn get_position(&self) -> &Position {
+        &self.position
+    }
+
+    pub fn get_consumer_type(&self) -> &ConsumerType {
+        &self.consumer_type
     }
 
     pub fn set_current_consumption(&mut self, consumption: usize) {
@@ -93,6 +104,7 @@ impl Consumer {
     pub fn tick(&mut self) {
         self.current_pointer = (self.current_pointer + 1) % self.timeline.len();
     }
+    
     /**
      * Parse the CSV file and load the demand timeline into memory.
      * This should be called at initialization.

@@ -27,18 +27,18 @@ async fn main() {
     mqttoptions.set_keep_alive(Duration::from_secs(5));
     let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
     client
-        .subscribe(powercable::TICK_TOPIC, QoS::AtMostOnce)
+        .subscribe(powercable::TICK_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     client
-        .subscribe(powercable::POWER_TRANSFORMER_CONSUMPTION_TOPIC, QoS::AtMostOnce)
+        .subscribe(powercable::POWER_TRANSFORMER_CONSUMPTION_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     client
-        .subscribe(powercable::POWER_TRANSFORMER_GENERATION_TOPIC, QoS::AtMostOnce)
+        .subscribe(powercable::POWER_TRANSFORMER_GENERATION_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
-    client.subscribe(ACK_ACCEPT_BUY_OFFER_TOPIC, QoS::AtMostOnce)
+    client.subscribe(ACK_ACCEPT_BUY_OFFER_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     info!("Connected to MQTT broker");

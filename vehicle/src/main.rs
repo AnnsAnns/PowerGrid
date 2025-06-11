@@ -1,11 +1,10 @@
-use battery::Battery;
 use log::{debug, info};
-use powercable::{charger::ChargeOffer, CHARGER_OFFER, TICK_TOPIC, WORLDMAP_EVENT_TOPIC};
-use rand::Rng;
+use powercable::{charger::ChargeOffer, CHARGER_PORT, CHARGER_CHARGING, CHARGER_OFFER, MQTT_BROKER, MQTT_BROKER_PORT, TICK_TOPIC, WORLDMAP_EVENT_TOPIC};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task};
 use topic_handler::{tick_handler, worldmap_event_handler};
+use charger_handling::{receive_offer, receive_port};
 use vehicle::Vehicle;
 
 mod battery;
@@ -17,7 +16,6 @@ mod vehicle;
 type SharedVehicle = Arc<Mutex<VehicleHandler>>;
 
 struct VehicleHandler {
-    pub name: String,
     pub vehicle: Vehicle,
     pub charge_offers: Vec<ChargeOffer>,
     pub target_charger: Option<ChargeOffer>,
@@ -28,8 +26,7 @@ struct VehicleHandler {
 async fn main() {
     // init vehicle
     let vehicle_name: String = powercable::generate_unique_name();
-    let (latitude, longitude) = powercable::generate_latitude_longitude_within_germany();
-    let vehicle = Vehicle::new(vehicle_name.clone(), latitude, longitude);
+    let vehicle = Vehicle::new(vehicle_name.clone(), powercable::generate_rnd_pos());
 
     let log_path = format!(
         "logs/vehicle_{}.log",
@@ -41,24 +38,29 @@ async fn main() {
 
     let mut mqttoptions = MqttOptions::new(
         vehicle_name.clone(),
-        powercable::MQTT_BROKER,
-        powercable::MQTT_BROKER_PORT,
+        MQTT_BROKER,
+        MQTT_BROKER_PORT,
     );
     mqttoptions.set_keep_alive(Duration::from_secs(5));
     let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
     client
-        .subscribe(powercable::TICK_TOPIC, QoS::AtMostOnce)
+        .subscribe(TICK_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     client
-        .subscribe(powercable::WORLDMAP_EVENT_TOPIC, QoS::AtMostOnce)
+        .subscribe(WORLDMAP_EVENT_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
-    client.subscribe(CHARGER_OFFER, QoS::AtMostOnce).await.unwrap();
+    client.subscribe(CHARGER_OFFER, QoS::ExactlyOnce)
+        .await
+        .unwrap();
+    client
+        .subscribe(CHARGER_CHARGING, QoS::ExactlyOnce)
+        .await
+        .unwrap();
     info!("Connected to MQTT broker");
 
     let shared_vehicle = Arc::new(Mutex::new(VehicleHandler {
-        name: vehicle_name.clone(),
         vehicle,
         target_charger: None,
         charge_offers: Vec::new(),
@@ -75,14 +77,13 @@ async fn main() {
                     let _ = task::spawn(worldmap_event_handler(shared_vehicle.clone(), p.payload));
                 }
                 CHARGER_OFFER => {
-                    let payload = match serde_json::from_slice::<ChargeOffer>(&p.payload) {
-                        Ok(offer) => offer,
-                        Err(e) => {
-                            debug!("Failed to deserialize ChargeOffer: {}", e);
-                            continue;
-                        }
-                    };
-                    let _ = task::spawn(charger_handling::receive_offer(shared_vehicle.clone(), payload));
+                    let _ = task::spawn(receive_offer(shared_vehicle.clone(), p.payload));
+                }
+                CHARGER_PORT => {
+                    let _ = task::spawn(receive_port(shared_vehicle.clone(), p.payload));
+                }
+                CHARGER_CHARGING => {
+                    info!("Received CHARGER_CHARGING message");
                 }
                 _ => {
                     let _ = task::spawn(async move {

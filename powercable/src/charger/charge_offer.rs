@@ -6,7 +6,7 @@ use crate ::Position;
  * ChargeOffer represents an offer from a charger to a vehicle.
  * It includes the charger's name, the vehicle's name, the charge price, the amount of charge offered, and the charger's position.
  */
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, Encode, Decode)]
+#[derive(Debug, Clone, Encode, Decode)]
 pub struct ChargeOffer {
     pub charger_name: String,
     pub vehicle_name: String,
