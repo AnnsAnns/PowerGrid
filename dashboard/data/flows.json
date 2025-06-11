@@ -669,7 +669,7 @@
         "crontab": "",
         "once": true,
         "onceDelay": 0.1,
-        "topic": "power/consumer/scale",
+        "topic": "config/scale/consumer",
         "payload": "5",
         "payloadType": "num",
         "x": 230,
@@ -685,7 +685,7 @@
         "type": "mqtt out",
         "z": "5992b366.f9457c",
         "name": "",
-        "topic": "power/consumer/scale",
+        "topic": "config/scale/consumer",
         "qos": "2",
         "retain": "true",
         "respTopic": "",
@@ -1435,5 +1435,79 @@
         "wires": [
             []
         ]
+    },
+    {
+        "id": "1fc8a8c732576ba3",
+        "type": "ui_slider",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "label": "Vehicle Scale",
+        "tooltip": "",
+        "group": "a02ac196.2c23f",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "outs": "end",
+        "topic": "topic",
+        "topicType": "msg",
+        "min": "0",
+        "max": "2",
+        "step": "0.25",
+        "className": "",
+        "x": 480,
+        "y": 480,
+        "wires": [
+            [
+                "41ae3c5a34de2018"
+            ]
+        ]
+    },
+    {
+        "id": "db6d69f93567f3d6",
+        "type": "inject",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "config/scale/vehicle",
+        "payload": "1",
+        "payloadType": "num",
+        "x": 220,
+        "y": 480,
+        "wires": [
+            [
+                "1fc8a8c732576ba3"
+            ]
+        ]
+    },
+    {
+        "id": "41ae3c5a34de2018",
+        "type": "mqtt out",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "topic": "config/scale/vehicle",
+        "qos": "2",
+        "retain": "true",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "c1c49a80.e500e",
+        "x": 790,
+        "y": 480,
+        "wires": []
     }
 ]

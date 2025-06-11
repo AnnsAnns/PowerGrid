@@ -137,3 +137,11 @@ pub async fn publish_location(handler: SharedVehicle) {
         .await
         .unwrap();
 }
+
+pub async fn scale_handler(handler: SharedVehicle, payload: Bytes) {
+    let mut handler = handler.lock().await;
+    trace!("Received scale: {:?}", payload);
+    let scale = serde_json::from_slice(&payload).unwrap();
+    handler.vehicle.set_scale(scale);
+    debug!("Consumption Scale set to: {}", scale);
+}
