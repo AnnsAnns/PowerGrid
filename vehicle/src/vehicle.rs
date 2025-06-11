@@ -38,7 +38,6 @@ pub struct Vehicle {
     consumption: f64, // kWh/100 km
     speed: f64, // mps
     battery: Battery,
-    port: Option<usize>,// Port number for charging, if applicable
 }
 
 impl Vehicle {
@@ -66,7 +65,6 @@ impl Vehicle {
             consumption,
             speed: 50.0 / 3.6,
             battery,
-            port: None, // Initially, the vehicle is not connected to any charging port
         }
     }
 
@@ -86,6 +84,10 @@ impl Vehicle {
         self.status = status;
     }
 
+    pub fn get_consumption(&self) -> f64 {
+        self.consumption
+    }
+  
     pub fn distance_to(&self, latitude: f64, longitude: f64) -> f64 { // TODO: simplify
         let this_rad = (Vehicle::to_radians(self.location.latitude), Vehicle::to_radians(self.location.longitude));
         let other_rad = (Vehicle::to_radians(latitude), Vehicle::to_radians(longitude));
@@ -112,10 +114,6 @@ impl Vehicle {
         self.destination = destination;
     }
 
-    pub fn get_consumption(&self) -> f64 {
-        self.consumption
-    }
-
     pub fn get_speed_mps(&self) -> f64 {
         self.speed
     }
@@ -134,14 +132,6 @@ impl Vehicle {
 
     pub fn battery_non_mut(&self) -> &Battery {
         &self.battery
-    }
-
-    pub fn get_port(&self) -> Option<usize> {
-        self.port
-    }
-
-    pub fn set_port(&mut self, port: Option<usize>) {
-        self.port = port;
     }
 
     pub fn get_longitude(&self) -> f64 {

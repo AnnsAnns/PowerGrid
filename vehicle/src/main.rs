@@ -1,10 +1,10 @@
 use log::{debug, info};
-use powercable::{charger::ChargeOffer, CHARGER_PORT, CHARGER_CHARGING, CHARGER_OFFER, MQTT_BROKER, MQTT_BROKER_PORT, TICK_TOPIC, WORLDMAP_EVENT_TOPIC};
+use powercable::{charger::ChargeOffer, CHARGER_CHARGING_ACK, CHARGER_OFFER, MQTT_BROKER, MQTT_BROKER_PORT, TICK_TOPIC, WORLDMAP_EVENT_TOPIC};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task};
 use topic_handler::{tick_handler, worldmap_event_handler};
-use charger_handling::{receive_offer, receive_port};
+use charger_handling::{receive_offer};
 use vehicle::Vehicle;
 
 mod battery;
@@ -55,7 +55,7 @@ async fn main() {
         .await
         .unwrap();
     client
-        .subscribe(CHARGER_CHARGING, QoS::ExactlyOnce)
+        .subscribe(CHARGER_CHARGING_ACK, QoS::ExactlyOnce)
         .await
         .unwrap();
     info!("Connected to MQTT broker");
@@ -79,11 +79,8 @@ async fn main() {
                 CHARGER_OFFER => {
                     let _ = task::spawn(receive_offer(shared_vehicle.clone(), p.payload));
                 }
-                CHARGER_PORT => {
-                    let _ = task::spawn(receive_port(shared_vehicle.clone(), p.payload));
-                }
-                CHARGER_CHARGING => {
-                    info!("Received CHARGER_CHARGING message");
+                CHARGER_CHARGING_ACK => {
+                    info!("Received CHARGER_CHARGING_ACK message");
                 }
                 _ => {
                     let _ = task::spawn(async move {

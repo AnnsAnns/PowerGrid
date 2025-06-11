@@ -3,8 +3,16 @@ use bytes::Bytes;
 use crate ::Position;
 
 /**
- * ChargeOffer represents an offer from a charger to a vehicle.
- * It includes the charger's name, the vehicle's name, the charge price, the amount of charge offered, and the charger's position.
+ * # Description
+ * Represents a charge offer made by a charger to a vehicle.
+ * 
+ * # Fields
+ * * `charger_name`: The name of the charger making the offer.
+ * * `vehicle_name`: The name of the vehicle receiving the offer.
+ * * `charge_price`: The price per kWh for the charge.
+ * * `charge_amount`: The amount of charge offered in kWh.
+ * * `charger_position`: The position of the charger.
+ * * `port`: The port number of the charger.
  */
 #[derive(Debug, Clone, Encode, Decode)]
 pub struct ChargeOffer {
@@ -15,6 +23,21 @@ pub struct ChargeOffer {
     pub charger_position: Position,
 }
 
+/**
+ * # Description
+ * Creates a new ChargeOffer instance.
+ * 
+ * # Arguments
+ * * `charger_name`: The name of the charger.
+ * * `vehicle_name`: The name of the vehicle.
+ * * `charge_price`: The price per kWh for the charge.
+ * * `charge_amount`: The amount of charge offered in kWh.
+ * * `charger_position`: The position of the charger.
+ * * `port`: The port number of the charger.
+ * 
+ * # Returns
+ * A new ChargeOffer instance.
+ */
 impl ChargeOffer {
     pub fn new(
         charger_name: String,

@@ -1,6 +1,6 @@
 use bytes::Bytes;
-use log::{debug, info};
-use powercable::{charger::{Arrival, ChargeAccept, ChargeOffer, ChargeRequest, Port, PRICE_DISTANCE_FACTOR}, Position, CHARGER_ACCEPT, CHARGER_ARRIVAL, CHARGER_REQUEST};
+use log::{debug, info, trace};
+use powercable::{charger::{Arrival, ChargeAccept, ChargeOffer, ChargeRequest, Port, PRICE_DISTANCE_FACTOR}, Position, CHARGER_ACCEPT, CHARGER_REQUEST, CHARGER_CHARGING_GET};
 use rumqttc::QoS;
 use crate::SharedVehicle;
 use crate::vehicle::VehicleStatus;
@@ -24,13 +24,11 @@ pub async fn create_charger_request(handler: SharedVehicle) {
             latitude: handler.vehicle.get_latitude(),
             longitude: handler.vehicle.get_longitude(),
         },
+        vehicle_consumption: handler.vehicle.get_consumption(),
     };
-    info!(
-        "Sending charge request for {} kWh from vehicle {} at position ({}, {})",
-        request.charge_amount, request.vehicle_name, request.vehicle_position.latitude, request.vehicle_position.longitude
-    );
-
+    
     // publish charging request to all chargers
+    info!("Sending charge request {:?}", request);
     handler
         .client
         .publish(CHARGER_REQUEST, QoS::ExactlyOnce, false, request.to_bytes())
@@ -52,12 +50,14 @@ pub async fn receive_offer(handler: SharedVehicle, payload: Bytes) {
     // Deserialize the ChargeOffer message
     let charge_offer = ChargeOffer::from_bytes(payload).unwrap();
 
+    // Check if the offer is for the current vehicle
     if charge_offer.vehicle_name.eq(handler.vehicle.get_name()) {
-        info!(
-            "Received charge offer from {}: {} kWh at {}€",
-            charge_offer.charger_name, charge_offer.charge_amount, charge_offer.charge_price
-        );
+        info!("Received charge offer: {:?}", charge_offer);
+        info!("{} is {}km away", charge_offer.charger_name, handler.vehicle.distance_to(charge_offer.charger_position.latitude, charge_offer.charger_position.longitude));
         handler.charge_offers.push(charge_offer.clone());
+    } else {
+        debug!("Received offer for another vehicle: {}. Ignoring.", charge_offer.vehicle_name);
+        trace!("Received offer for another vehicle: {:?}. Ignoring.", charge_offer);
     }
 }
 
@@ -116,31 +116,11 @@ pub async fn accept_offer(handler: SharedVehicle) {
 
     handler.charge_offers.clear();
     handler.target_charger = Some(offer.clone());
-
-    // Create a ChargeAccept message to send to the charger
-    let energy_for_way = (handler.vehicle.distance_to(
-        offer.charger_position.latitude,
-        offer.charger_position.longitude,
-    ) * handler.vehicle.get_consumption()) as usize;
-
+    
     let acceptance = ChargeAccept {
         charger_name: offer.charger_name.clone(),
         vehicle_name: handler.vehicle.get_name().clone(),
-        real_amount: offer.charge_amount as usize + energy_for_way as usize,// real amount is the charge amount + energy for the way to the charger
     };
-    info!(
-        "Vehicle {} accepts charge offer from {}:\n Instead of {}kWh {} needs {}kwh cause its {}km away and consumes {}kWh on the way",
-        handler.vehicle.get_name(),
-        acceptance.charger_name,
-        offer.charge_amount,
-        handler.vehicle.get_name(),
-        acceptance.real_amount,
-        handler.vehicle.get_location().distance_to(Position {
-            latitude: offer.charger_position.latitude,
-            longitude: offer.charger_position.longitude,
-        }) as usize,
-        energy_for_way
-    );
 
     handler.client.publish(
         CHARGER_ACCEPT,
@@ -149,52 +129,3 @@ pub async fn accept_offer(handler: SharedVehicle) {
         acceptance.to_bytes(),
     ).await.unwrap()
 }
-
-/**
- * # Description
- * Creates an arrival message to send to the charger when the vehicle arrives at the charger.
- * The arrival message contains the charger's name, the vehicle's name, and the amount of charge needed.
- * 
- * # Parameters
- * - `handler`: The shared vehicle handler containing the vehicle and its state.
- */
-pub async fn create_arrival(handler: SharedVehicle) {
-    let handler = handler.lock().await;
-    let arrival: Arrival = Arrival {
-        charger_name: handler.target_charger.as_ref().unwrap().charger_name.clone(),
-        vehicle_name: handler.vehicle.get_name().clone(),
-        needed_amount: handler.vehicle.battery_non_mut().get_free_capacity(),
-    };
-    info!("Send arrival: {:?} to charger: {}", arrival, arrival.charger_name);
-    handler.client.publish(
-        CHARGER_ARRIVAL,
-        QoS::ExactlyOnce,
-        false,
-        arrival.to_bytes(),
-    ).await.unwrap()
-}
-
-/**
- * # Description
- * Receives a port message from a charger and updates the vehicle's port information if the port is for this vehicle.
- * 
- * # Parameters
- * - `handler`: The shared vehicle handler containing the vehicle and its state.
- * - `payload`: The payload of the message received, containing the port information.
- */
-pub async fn receive_port(handler: SharedVehicle, payload: Bytes) {
-    let mut handler = handler.lock().await;
-
-    // Deserialize the Port message
-    let port: Port = Port::from_bytes(payload).unwrap();
-
-    // Check if the port is for this vehicle
-    if port.vehicle_name.eq(handler.vehicle.get_name()) {
-        info!(
-            "Received port information from charger {}: Port {} is now available for vehicle {}",
-            port.charger_name, port.port, port.vehicle_name
-        );
-        handler.vehicle.set_port(Some(port.port));
-    }
-}
-
