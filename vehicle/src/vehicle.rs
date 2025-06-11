@@ -1,10 +1,13 @@
 use std::f64::consts::PI;
 use powercable::{tickgen::INTERVAL_15_MINS, Position};
 use rand::Rng;
+use serde::Serialize;
 
 use crate::{battery::Battery, database::random_ev};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+const INTERVAL_5_MINS: usize = INTERVAL_15_MINS / 3;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 /**
  * VehicleStatus represents the current status of a vehicle.
  * It can be one of the following:
@@ -20,7 +23,7 @@ pub enum VehicleStatus {
     Broken,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 /**
  * Vehicle represents an electric vehicle in the simulation.
  * It contains information about the vehicle's name, model, status, location, destination,
@@ -32,7 +35,8 @@ pub struct Vehicle {
     status: VehicleStatus,
     location: Position,
     destination: Position,
-    consumption: f64,// kWh/km
+    consumption: f64, // kWh/100 km
+    speed: f64, // mps
     battery: Battery,
     port: Option<usize>,// Port number for charging, if applicable
 }
@@ -58,19 +62,20 @@ impl Vehicle {
             model: model.to_owned(),
             status: VehicleStatus::RANDOM,
             location,
-            destination: location,// Initially, the destination is the same as the location
+            destination: location, // Initially, the destination is the same as the location
             consumption,
+            speed: 50.0 / 3.6,
             battery,
-            port: None,// Initially, the vehicle is not connected to any charging port
+            port: None, // Initially, the vehicle is not connected to any charging port
         }
     }
 
     pub fn get_name(&self) -> &String {
-        return &self.name;
+        &self.name
     }
 
     pub fn get_model(&self) -> &String {
-        return &self.model;
+        &self.model
     }
 
     pub fn get_status(&self) -> &VehicleStatus {
@@ -79,18 +84,6 @@ impl Vehicle {
 
     pub fn set_status(&mut self, status: VehicleStatus) {
         self.status = status;
-    }
-
-    pub fn get_consumption(&self) -> f64 {
-        self.consumption
-    }
-
-    pub fn set_port(&mut self, port: Option<usize>) {
-        self.port = port;
-    }
-
-    pub fn get_port(&self) -> Option<usize> {
-        self.port
     }
 
     pub fn distance_to(&self, latitude: f64, longitude: f64) -> f64 { // TODO: simplify
@@ -115,6 +108,26 @@ impl Vehicle {
         self.destination
     }
 
+    pub fn set_destination(&mut self, destination: Position) {
+        self.destination = destination;
+    }
+
+    pub fn get_consumption(&self) -> f64 {
+        self.consumption
+    }
+
+    pub fn get_speed_mps(&self) -> f64 {
+        self.speed
+    }
+
+    pub fn get_speed_kph(&self) -> f64 {
+        self.speed * 3.6
+    }
+
+    pub fn set_speed_kph(&mut self, speed_kph: f64) {
+        self.speed = speed_kph / 3.6;
+    }
+
     pub fn battery(&mut self) -> &mut Battery {
         &mut self.battery
     }
@@ -123,8 +136,12 @@ impl Vehicle {
         &self.battery
     }
 
-    pub fn set_destination(&mut self, destination: Position) {
-        self.destination = destination;
+    pub fn get_port(&self) -> Option<usize> {
+        self.port
+    }
+
+    pub fn set_port(&mut self, port: Option<usize>) {
+        self.port = port;
     }
 
     pub fn get_longitude(&self) -> f64 {
@@ -135,17 +152,17 @@ impl Vehicle {
         self.location.latitude
     }
 
-    pub fn drive(&mut self, speed_kmh: f64) {
+    pub fn drive(&mut self) {
         let soc = self.battery.get_soc();
-        if soc <= 0.0 {
+        if soc <= 0.0 || self.status == VehicleStatus::Charging {
+            self.speed = 0.0;
             return;
         }
 
-        let distance_now = speed_kmh * (INTERVAL_15_MINS as f64 / 3600.0); // seconds to hours
-        let efficiency_factor = Vehicle::speed_efficiency_factor(speed_kmh);
-        let consumption_now = self.consumption * efficiency_factor;
+        let distance_now = self.speed * INTERVAL_5_MINS as f64 / 1000.0; // m to km
+        let consumption_now = self.consumption * self.speed_efficiency_factor();
         let charge_requested = distance_now * consumption_now;
-        let charge_used = self.battery.remove_charge(charge_requested as usize) as f64;
+        let charge_used = self.battery.remove_charge(charge_requested);
         let charge_factor = charge_requested / charge_used;
 
         let total_distance = self.distance_to(self.destination.latitude, self.destination.longitude) * charge_factor;
@@ -161,10 +178,10 @@ impl Vehicle {
         }
     }
 
-    fn speed_efficiency_factor(speed_kmh: f64) -> f64 {
+    fn speed_efficiency_factor(&self) -> f64 {
         let rolling_resistance = 0.0005; // approximate coefficient
         let aerodynamic_drag = 0.00003; // approximate drag factor
-        1.0 + rolling_resistance * speed_kmh + aerodynamic_drag * speed_kmh.powi(2)
+        1.0 + rolling_resistance * self.speed + aerodynamic_drag * self.speed.powi(2)
     }
 
     fn to_radians(deg: f64) -> f64 {
