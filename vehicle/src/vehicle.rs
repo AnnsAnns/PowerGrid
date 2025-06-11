@@ -35,7 +35,7 @@ pub struct Vehicle {
     status: VehicleStatus,
     location: Position,
     destination: Position,
-    consumption: f64, // kWh/km
+    consumption: f64, // kWh/100 km
     speed: f64, // mps
     battery: Battery,
     port: Option<usize>,// Port number for charging, if applicable
@@ -154,7 +154,7 @@ impl Vehicle {
 
     pub fn drive(&mut self) {
         let soc = self.battery.get_soc();
-        if soc <= 0.0 {
+        if soc <= 0.0 || self.status == VehicleStatus::Charging {
             self.speed = 0.0;
             return;
         }
@@ -162,7 +162,7 @@ impl Vehicle {
         let distance_now = self.speed * INTERVAL_5_MINS as f64 / 1000.0; // m to km
         let consumption_now = self.consumption * self.speed_efficiency_factor();
         let charge_requested = distance_now * consumption_now;
-        let charge_used = self.battery.remove_charge(charge_requested as usize) as f64;
+        let charge_used = self.battery.remove_charge(charge_requested);
         let charge_factor = charge_requested / charge_used;
 
         let total_distance = self.distance_to(self.destination.latitude, self.destination.longitude) * charge_factor;

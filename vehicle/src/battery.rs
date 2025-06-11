@@ -3,7 +3,7 @@ use serde::Serialize;
 #[derive(Debug, Serialize)]
 pub struct Battery {
     capacity: usize, // in kWh
-    level: usize, // in kWh
+    level: f64, // in kWh
     max_charge: usize, // in kW
 }
 
@@ -23,7 +23,7 @@ impl Battery {
     ) -> Self {
         Battery {
             capacity,
-            level: (capacity as f64 * soc) as usize,
+            level: capacity as f64 * soc,
             max_charge,
         }
     }
@@ -39,7 +39,7 @@ impl Battery {
      * Returns the current level of the battery in kWh.
      */
     pub fn get_level(&self) -> usize {
-        self.level
+        self.level as usize
     }
 
     /**
@@ -58,27 +58,27 @@ impl Battery {
 
     pub fn add_charge(&mut self, charge: usize) -> usize {
         // apply scaling
-        let applied_charge = charge.min(self.max_charge);
-        let charge_rate = applied_charge as f64 * self.charge_scaling();
+        let applied_charge = charge.min(self.max_charge) as f64;
+        let charge_rate = applied_charge * self.charge_scaling();
         
         // consume energy
         let charge_efficiency = 0.9;
         let charge_efficiency = charge_efficiency;
-        let energy_added = (charge_rate  * charge_efficiency) as usize;
-        self.level = (self.level + energy_added).min(self.capacity);
-        charge_rate as usize
+        let energy_added = charge_rate  * charge_efficiency;
+        self.level = (self.level + energy_added).min(self.capacity as f64);
+        energy_added as usize
     }
     
-    pub fn remove_charge(&mut self, charge: usize) -> usize {
+    pub fn remove_charge(&mut self, charge: f64) -> f64 {
         let discharge_efficiency = 0.94;
-        let energy_demand = (charge as f64 * discharge_efficiency) as usize;
+        let energy_demand = charge * discharge_efficiency;
         let energy_delivered = if self.level >= energy_demand {
             self.level -= energy_demand;
             energy_demand
         } else {
             let actual_energy = self.level as f64 * discharge_efficiency;
-            self.level = 0;
-            actual_energy as usize
+            self.level = 0.0;
+            actual_energy
         };
         energy_delivered
     }
