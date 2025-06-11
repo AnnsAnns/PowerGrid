@@ -60,7 +60,7 @@ pub struct Consumer {
     position: Position,
     consumer_type: ConsumerType,
     current_consumption: usize,
-    current_scale: usize,
+    scale: usize,
     timeline: Vec<f32>,
     current_pointer: usize,
 }
@@ -71,7 +71,7 @@ impl Consumer {
             position,
             consumer_type,
             current_consumption: 0,
-            current_scale: 1,
+            scale: 1,
             timeline: Vec::new(),
             current_pointer: 0,
         }
@@ -93,7 +93,7 @@ impl Consumer {
         &self.consumer_type
     }
 
-    pub fn set_current_consumption(&mut self, consumption: usize) {
+    pub fn set_current_consumption(&mut self, consumption: usize) {//TODO: consider scale here soo demand gets deleted
         self.current_consumption = consumption;
     }
 
@@ -133,21 +133,25 @@ impl Consumer {
     }
 
     /**
-     * Get the demand for the current time.
-     *
-     * @return The demand for the current time. Already rounded and scaled.
-     *         Returns None if the timeline is empty or current_pointer is out of bounds.
+     * # Description
+     * Returns the current demand based on the timeline and scale.
+     * 
+     * # Returns
+     * The current demand as a usize.
      */
     pub fn get_demand(&self) -> usize {
-        (self.timeline.get(self.current_pointer).unwrap().clone() * self.current_scale as f32)
+        (self.timeline.get(self.current_pointer).unwrap().clone() * self.scale as f32)
             as usize
     }
 
-    pub fn set_current_scale(&mut self, scale: usize) {
-        self.current_scale = scale;
-    }
-
-    pub fn get_current_scale(&self) -> usize {
-        self.current_scale
+    /**
+     * # Description
+     * Sets the scale of the consumer.
+     * 
+     * # Arguments
+     * `scale`: The new scale to set.
+     */
+    pub fn set_scale(&mut self, scale: usize) {
+        self.scale = scale;
     }
 }

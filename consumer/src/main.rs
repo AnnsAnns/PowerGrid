@@ -2,7 +2,9 @@ use log::{debug, info, trace, warn};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration, env};
 use tokio::{sync::Mutex, task};
-use powercable::*;
+use powercable::{
+    generate_rnd_pos, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CONFIG_SCALE_CONSUMER, MQTT_BROKER, MQTT_BROKER_PORT, TICK_TOPIC
+};
 use consumer::{Consumer, ConsumerType};
 use topic_handler::{accept_offer_handler, tick_handler, scale_handler};
 
@@ -39,7 +41,7 @@ async fn main() {
     debug!("Connected to MQTT broker as {}", consumer_type.to_string());
 
     client
-        .subscribe(powercable::TICK_TOPIC, QoS::ExactlyOnce)
+        .subscribe(TICK_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     trace!("Subscribed to {} topic", TICK_TOPIC);
@@ -49,10 +51,10 @@ async fn main() {
         .unwrap();
     trace!("Subscribed to {} topic", ACCEPT_BUY_OFFER_TOPIC);
     client
-        .subscribe(powercable::POWER_CONSUMER_SCALE, QoS::ExactlyOnce)
+        .subscribe(CONFIG_SCALE_CONSUMER, QoS::ExactlyOnce)
         .await
         .unwrap();
-    trace!("Subscribed to {} topic", POWER_CONSUMER_SCALE);
+    trace!("Subscribed to {} topic", CONFIG_SCALE_CONSUMER);
 
     consumer.parse_csv().await.unwrap();
     
@@ -74,7 +76,7 @@ async fn main() {
                 ACCEPT_BUY_OFFER_TOPIC => {
                     let _ = task::spawn(accept_offer_handler(shared_consumer.clone(), p.payload));
                 }
-                POWER_CONSUMER_SCALE => {
+                CONFIG_SCALE_CONSUMER => {
                     let _ = task::spawn( scale_handler(shared_consumer.clone(), p.payload));
                 }
                 _ => {
