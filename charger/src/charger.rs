@@ -2,6 +2,20 @@ use log::{debug, warn};
 use powercable::{offer::structure::OFFER_PACKAGE_SIZE, Position};
 
 #[derive(Debug, Clone)]
+/**
+ * # Description
+ * Represents a charger in the simulation.
+ * 
+ * # Fields
+ * - `name`: The name of the charger.
+ * - `position`: The geographical position of the charger.
+ * - `rate`: The charging rate of the charger in kW/s.
+ * - `capacity`: The total capacity of the charger in kWh.
+ * - `reserved_charge`: The amount of charge reserved for future use in kWh.
+ * - `current_charge`: The current charge level of the charger in kWh.
+ * - `charging_ports`: The number of charging ports available on the charger.
+ * - `reserved_ports`: The number of charging ports currently reserved.
+ */
 pub struct Charger {
     name: String,
     position: Position,
@@ -15,6 +29,7 @@ pub struct Charger {
 
 impl Charger {
     /**
+     * # Description
      * Creates a new Charger instance.
      * 
      * # Arguments
@@ -22,7 +37,10 @@ impl Charger {
      * `position`: The geographical position of the charger.
      * `rate`: The charging rate of the charger in kW/s.
      * `capacity`: The total capacity of the charger in kWh.
-     * `charging_ports`: The number of charging ports available on the charger.
+     * `charging_ports`: The number of charging ports the charger should have.
+     * 
+     * # Returns
+     * A new instance of `Charger`.
      */
     pub fn new(
         name: String,

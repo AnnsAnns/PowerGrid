@@ -2,26 +2,31 @@ use bitcode::{Decode, Encode};
 use bytes::Bytes;
 
 /**
- * Arrival represents a vehicle arriving at a charger.
- * It includes the charger's name, the vehicle's name, and the amount of charge needed.
+ * # Description
+ * Arrival represents a request from a vehicle to a charger for charging.
+ * 
+ * # Fields
+ * - `charger_name`: The name of the charger the vehicle is requesting to charge at.
+ * - `vehicle_name`: The name of the vehicle that is requesting to charge.
+ * - `needed_amount`: The amount of charge the vehicle needs.
  */
 #[derive(Debug, Clone, Encode, Decode)]
-pub struct Arrival {
+pub struct Get {
     pub charger_name: String,
     pub vehicle_name: String,
-    pub needed_amount: usize,
+    pub amount: usize,
 }
 
-impl Arrival {
+impl Get {
     pub fn new(
         charger_name: String,
         vehicle_name: String,
-        needed_amount: usize,
+        amount: usize,
     ) -> Self {
-        Arrival {
+        Get {
             charger_name,
             vehicle_name,
-            needed_amount,
+            amount,
         }
     }
 
@@ -35,27 +40,31 @@ impl Arrival {
 }
 
 /**
- * Port represents the answer from a charger to a vehicle
- * when the vehicle arrives at the charger.
- * It includes the charger's name, the vehicle's name, and the port number for the vehicle.
+ * # Description
+ * Ack represents an acknowledgment from a charger to a vehicle with the given amount of charge.
+ * 
+ * # Fields
+ * - `charger_name`: The name of the charger that is acknowledging the request.
+ * - `vehicle_name`: The name of the vehicle that is being acknowledged.
+ * - `amount`: The amount of charge that the charger is providing to the vehicle.
  */
 #[derive(Debug, Clone, Encode, Decode)]
-pub struct Port {
+pub struct Ack {
     pub charger_name: String,
     pub vehicle_name: String,
-    pub port: usize,
+    pub amount: usize,
 }
 
-impl Port {
+impl Ack {
     pub fn new(
         charger_name: String,
         vehicle_name: String,
-        port: usize,
+        amount: usize,
     ) -> Self {
-        Port {
+        Ack {
             charger_name,
             vehicle_name,
-            port,
+            amount,
         }
     }
 

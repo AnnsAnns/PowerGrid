@@ -138,7 +138,7 @@ pub async fn scale_handler(handler: SharedConsumer, payload: Bytes) {
     debug!("Received scale: {:?}", payload);
     let scale = serde_json::from_slice(&payload).unwrap();
     let mut handler = handler.lock().await;
-    handler.consumer.set_current_scale(scale);
+    handler.consumer.set_scale(scale);
     trace!(
         "Consumer {} scale set to {}",
         handler.consumer.get_consumer_type().to_string(),

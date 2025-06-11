@@ -11,6 +11,8 @@ pub use chart_entry::ChartEntry;
 pub use offer::offer_handler::OfferHandler;
 pub use offer::Offer;
 
+pub const CONFIG_SCALE_CONSUMER: &str = "config/scale/consumer";
+pub const CONFIG_SCALE_VEHICLE: &str = "config/scale/vehicle";
 pub const BUY_OFFER_TOPIC: &str = "market/buy_offer";
 pub const ACCEPT_BUY_OFFER_TOPIC: &str = "market/accept_buy_offer";
 pub const ACK_ACCEPT_BUY_OFFER_TOPIC: &str = "market/ack_accept_buy_offer";
@@ -26,7 +28,6 @@ pub const POWER_TRANSFORMER_EARNED_TOPIC: &str = "power/transformer/stats/earnin
 pub const POWER_CHARGER_TOPIC: &str = "power/charger";
 pub const POWER_CONSUMER_TOPIC: &str = "power/consumer";
 pub const POWER_LOCATION_TOPIC: &str = "power/location";
-pub const POWER_CONSUMER_SCALE: &str = "power/consumer/scale";
 pub const WORLDMAP_EVENT_TOPIC: &str = "worldmap/event";
 pub const CHARGER_REQUEST: &str = "charger/request";// vehicle send request to all chargers
 pub const CHARGER_OFFER: &str = "charger/offer";// charger sends offer to vehicle
@@ -48,8 +49,13 @@ const SOUTH_LIMIT: (f64, f64) = (49.11158947259421, 10.206213793834436);
 const WEST_LIMIT: (f64, f64) = (51.00929968161735, 6.282484743251983);
 
 /**
- * Position represents a geographical position with latitude and longitude.
+ * # Description
+ * The Position struct represents a geographical position defined by latitude and longitude.
  * It is used to represent the position of vehicles, chargers, and other entities in the system.
+ * 
+ * # Fields
+ * - `latitude`: The latitude of the position in degrees.
+ * - `longitude`: The longitude of the position in degrees.
  */
 #[derive(Debug, Clone, Copy, PartialEq, Encode, Decode, Serialize)]
 pub struct Position {

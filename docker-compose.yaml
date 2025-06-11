@@ -86,7 +86,7 @@ services:
     depends_on:
       - mosquitto_broker
     deploy:
-      replicas: 2
+      replicas: 4
       mode: replicated
 
   vehicle:

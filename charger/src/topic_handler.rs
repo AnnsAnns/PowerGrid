@@ -128,7 +128,7 @@ async fn commerce_tick(handler: SharedCharger, tick_payload: TickPayload) {
         .unwrap();
 
     info!(
-        "Charger {} has {} kWh of charge",
+        "{} has {} kWh of charge",
         handler.charger.get_name(),
         current_power
     );

@@ -35,8 +35,9 @@ pub struct Vehicle {
     status: VehicleStatus,
     location: Position,
     destination: Position,
-    consumption: f64, // kWh/100 km
-    speed: f64, // mps
+    consumption: f64,
+    scale: f64,
+    speed: f64,
     battery: Battery,
 }
 
@@ -63,6 +64,7 @@ impl Vehicle {
             location,
             destination: location, // Initially, the destination is the same as the location
             consumption,
+            scale: 1.0,
             speed: 50.0 / 3.6,
             battery,
         }
@@ -85,7 +87,11 @@ impl Vehicle {
     }
 
     pub fn get_consumption(&self) -> f64 {
-        self.consumption
+        self.consumption * self.scale
+    }
+
+    pub fn set_scale(&mut self, scale: f64) {
+        self.scale = scale;
     }
   
     pub fn distance_to(&self, latitude: f64, longitude: f64) -> f64 { // TODO: simplify
@@ -150,7 +156,7 @@ impl Vehicle {
         }
 
         let distance_now = self.speed * INTERVAL_5_MINS as f64 / 1000.0; // m to km
-        let consumption_now = self.consumption * self.speed_efficiency_factor();
+        let consumption_now = self.get_consumption() * self.speed_efficiency_factor();
         let charge_requested = distance_now * consumption_now;
         let charge_used = self.battery.remove_charge(charge_requested);
         let charge_factor = charge_requested / charge_used;
