@@ -1,10 +1,3 @@
-# PowerGrid
-
-
-
-http://127.0.0.1:1880 for config
-http://127.0.0.1:1880/ui for dashboard
-
 # Distributed Charging Station Reservation System & Power Grid Simulation
 
 ## 1. Introduction
@@ -92,3 +85,24 @@ There are also additional components for the sake of the simulation, such as a t
 #### 4.2.2 Charging Station Reservation
 
 ![Charging Station Sequence Diagram](docs/Charging.png)
+
+## 6. Evaluation
+
+### 6.1 Evaluation Scenarios
+
+- **Scenario 1**: Normal operation with sufficient renewable energy.
+- **Scenario 2**: High demand for charging stations with limited renewable energy.
+
+### 6.2 Simulation-Based Evaluation Preparation
+
+For Scenario 1 one we set the consumer demand to a normal level, meaning that the households will consume energy at a normal rate and the charging stations will have a normal amount of requests.
+
+For Scenario 2 we set the consumer demand to a high level, meaning that the households will consume energy at a high rate and the charging stations will have a high amount of requests. We also set the renewable energy sources to a low level, meaning that we will have to buy external energy to cover the demand.
+
+### 6.3 Preliminary Results and Feedback
+
+@TODO
+
+## 7. Conclusion and Outlook
+
+@TODO
