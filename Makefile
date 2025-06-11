@@ -4,13 +4,9 @@ all: build_docker
 .PHONY: build_docker
 build_docker: 
 	@echo "Building inside a Docker container ..."
-	@docker build . -t local/powergrid:latest
 	mkdir -p docker_data
 	@docker-compose up --build
-
-start_turbine:
-	@docker-compose up --build turbine
-
+	
 .PHONY: clean
 clean: remove_artifacts remove_docker_data
 
@@ -31,7 +27,6 @@ rebuild:
 .PHONY: windows_build
 windows_build:
 	@echo "Building inside a Docker container for Windows ..." 
-	@docker build . -t local/powergrid:latest
 	if not exist docker_data mkdir docker_data
 	@docker-compose up --build
 

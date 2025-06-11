@@ -8,10 +8,7 @@ mod transformer;
 
 const OWN_TOPIC: &str = "Total";
 
-#[tokio::main]
-async fn main() {
-    let log_path = format!("logs/transformer.log");
-    let _log2 = log2::open(log_path.as_str()).level("debug").start();
+pub async fn start_transformer() {
     info!("Starting turbine simulation...");
     
     let mut transformer = Transformer::new();

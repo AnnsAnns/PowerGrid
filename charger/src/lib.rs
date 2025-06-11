@@ -23,11 +23,8 @@ struct ChargerHandler {
     pub consumed_last_tick: f64,
 }
 
-#[tokio::main]
-async fn main() {
+pub async fn start_charger() {
     let charger_name: String = format!("Charger {}", generate_unique_name());
-    let log_path = format!("logs/charger_{}.log", charger_name.clone().replace(" ", "_"));
-    let _log2 = log2::open(log_path.as_str()).level("info").start();
     info!("Starting charger simulation...");
 
     let charger =

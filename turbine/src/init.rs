@@ -4,7 +4,6 @@ use log::info;
 use powercable::*;
 use rumqttc::{AsyncClient, EventLoop, MqttOptions, QoS};
 use serde_json::json;
-use log2::*;
 use tokio::sync::Mutex;
 
 use crate::{meta_data, precalculated_turbine::{self, PrecalculatedTurbine}, turbine, SharedTurbine, TurbineHandler};

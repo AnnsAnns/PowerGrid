@@ -6,7 +6,6 @@ authors.workspace = true
 
 [dependencies]
 bytes = "1.10.1"
-log2 = "0.2.1"
 log = "0.4.27"
 powercable = { path = "../powercable" }
 rand = "0.9.1"
