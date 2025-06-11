@@ -111,17 +111,10 @@ pub async fn accept_offer(handler: SharedVehicle) {
     handler.target_charger = Some(offer.clone());
 
     // Create a ChargeAccept message to send to the charger
-    debug!("{} has to drive {}km to the charger(lib.rs)",
-        handler.vehicle.get_name(),
-        handler.vehicle.get_location().distance_to(Position {
-            latitude: offer.charger_position.latitude,
-            longitude: offer.charger_position.longitude,
-        })
-    );
-    let energy_for_way = handler.vehicle.distance_to(
+    let energy_for_way = (handler.vehicle.distance_to(
         offer.charger_position.latitude,
         offer.charger_position.longitude,
-    ) * handler.vehicle.get_consumption();
+    ) * handler.vehicle.get_consumption()) as usize;
 
     let acceptance = ChargeAccept {
         charger_name: offer.charger_name.clone(),
@@ -129,10 +122,16 @@ pub async fn accept_offer(handler: SharedVehicle) {
         real_amount: offer.charge_amount as usize + energy_for_way as usize,// real amount is the charge amount + energy for the way to the charger
     };
     info!(
-        "Vehicle {} accepts charge offer from {}: {} kWh (including {} kWh for the way to the charger)",
+        "Vehicle {} accepts charge offer from {}:\n Instead of {}kWh {} needs {}kwh cause its {}km away and consumes {}kWh on the way",
         handler.vehicle.get_name(),
         acceptance.charger_name,
+        offer.charge_amount,
+        handler.vehicle.get_name(),
         acceptance.real_amount,
+        handler.vehicle.get_location().distance_to(Position {
+            latitude: offer.charger_position.latitude,
+            longitude: offer.charger_position.longitude,
+        }) as usize,
         energy_for_way
     );
 

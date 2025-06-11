@@ -32,12 +32,20 @@ pub struct Vehicle {
     status: VehicleStatus,
     location: Position,
     destination: Position,
-    consumption: f64,// Wh/km
+    consumption: f64,// kWh/km
     battery: Battery,
     port: Option<usize>,// Port number for charging, if applicable
 }
 
 impl Vehicle {
+    /**
+     * Creates a new Vehicle instance with a random model, consumption, and battery.
+     * * # Arguments
+     * `name`: The name of the vehicle.
+     * `location`: The geographical position of the vehicle.
+     * # Returns
+     * A new Vehicle instance with the specified name and location, and random model, consumption, and battery.
+     */
     pub fn new(
         name: String,
         location: Position,
@@ -128,7 +136,7 @@ impl Vehicle {
     }
 
     pub fn drive(&mut self, speed_kmh: f64) {
-        let soc = self.battery.state_of_charge();
+        let soc = self.battery.get_soc();
         if soc <= 0.0 {
             return;
         }
@@ -137,7 +145,7 @@ impl Vehicle {
         let efficiency_factor = Vehicle::speed_efficiency_factor(speed_kmh);
         let consumption_now = self.consumption * efficiency_factor;
         let charge_requested = distance_now * consumption_now;
-        let charge_used = self.battery.remove_charge(charge_requested);
+        let charge_used = self.battery.remove_charge(charge_requested as usize) as f64;
         let charge_factor = charge_requested / charge_used;
 
         let total_distance = self.distance_to(self.destination.latitude, self.destination.longitude) * charge_factor;

@@ -48,7 +48,7 @@ pub async fn process_tick(handler: SharedVehicle) {
         let mut locked_handler = handler.lock().await;
 
         if locked_handler.target_charger.is_none() {
-            if locked_handler.vehicle.battery().state_of_charge() <= 0.5 {
+            if locked_handler.vehicle.battery().get_soc() <= 0.5 {
                 info!(
                     "{} has no charge left, searching for charging station",
                     locked_handler.vehicle.get_name()
@@ -70,7 +70,7 @@ pub async fn process_tick(handler: SharedVehicle) {
             // Create an arrival message to send to the charger
             task::spawn(create_arrival(handler.clone()));
 
-        } else {
+        } else if locked_handler.vehicle.get_status().eq(&VehicleStatus::RANDOM) || locked_handler.vehicle.get_status().eq(&VehicleStatus::SearchingForCharger) {
             locked_handler.vehicle.drive(50.0);
         }
     }
@@ -94,7 +94,7 @@ pub async fn publish_vehicle(handler: SharedVehicle) {
     // Extract all values before mutably borrowing client
     let name = handler.vehicle.get_name().clone();
     let position = handler.vehicle.get_location();
-    let percentage = handler.vehicle.battery().state_of_charge() * 100.0;
+    let percentage = handler.vehicle.battery().get_soc() * 100.0;
     let client = &mut handler.client;
     let location_payload = json!({
         "name" : name,
@@ -120,7 +120,7 @@ pub async fn publish_soc(handler: SharedVehicle) {
     let mut handler = handler.lock().await;
     // Extract all values before mutably borrowing client
     let name = handler.vehicle.get_name().clone();
-    let soc = handler.vehicle.battery().state_of_charge() * 100.0;
+    let soc = handler.vehicle.battery().get_soc() * 100.0;
     let client = &mut handler.client;
 
     client
