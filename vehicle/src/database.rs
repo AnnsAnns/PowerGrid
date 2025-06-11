@@ -33,7 +33,7 @@ const EV_DATABASE: &[(&str, f64, usize, usize)] = &[
  * Returns a random electric vehicle (EV) from the database.
  * 
  * # Returns
- * A tuple containing the model name, consumption (kWh/km), battery capacity (kWh), and maximum charge rate (kW).
+ * A tuple containing the model name, consumption (kWh/100 km), battery capacity (kWh), and maximum charge rate (kW).
  */
 pub fn random_ev() -> (&'static str, f64, usize, usize) {
     let mut rng = rand::rng();

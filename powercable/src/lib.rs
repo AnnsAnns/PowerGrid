@@ -1,5 +1,6 @@
 use bitcode::{Decode, Encode};
 use rand::{seq::IteratorRandom, Rng};
+use serde::Serialize;
 
 pub mod charger;
 pub mod chart_entry;
@@ -32,6 +33,7 @@ pub const CHARGER_OFFER: &str = "charger/offer";// charger sends offer to vehicl
 pub const CHARGER_ACCEPT: &str = "charger/accept";// vehicle accepts offer from charger
 pub const CHARGER_CHARGING_GET: &str = "charger/charging/get";// vehicle requests energy from the charger
 pub const CHARGER_CHARGING_ACK: &str = "charger/charging/ack";// charger responds with energy to vehicle
+pub const VEHICLE_TOPIC: &str = "vehicle";
 pub const MQTT_BROKER: &str = "mosquitto_broker";
 pub const MQTT_BROKER_PORT: u16 = 1883;
 pub const MAP_UPDATE_SPEED_IN_SECS: u64 = 1;
@@ -49,7 +51,7 @@ const WEST_LIMIT: (f64, f64) = (51.00929968161735, 6.282484743251983);
  * Position represents a geographical position with latitude and longitude.
  * It is used to represent the position of vehicles, chargers, and other entities in the system.
  */
-#[derive(Debug, Clone, Copy, PartialEq, Encode, Decode)]
+#[derive(Debug, Clone, Copy, PartialEq, Encode, Decode, Serialize)]
 pub struct Position {
     pub latitude: f64,
     pub longitude: f64,
