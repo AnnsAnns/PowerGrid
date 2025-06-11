@@ -99,7 +99,7 @@ pub async fn publish_vehicle(handler: SharedVehicle) {
     let name = handler.name.clone();
     let mut vehicle_payload = json!(handler.vehicle);
     vehicle_payload["speed_kph"] = json!(handler.vehicle.get_speed_kph());
-    vehicle_payload["soc"] = json!(handler.vehicle.battery().state_of_charge() * 100.0);
+    vehicle_payload["soc"] = json!((handler.vehicle.battery().state_of_charge() * 100.0) as u32);
 
     let client = &mut handler.client;
     client

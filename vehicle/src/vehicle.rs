@@ -111,6 +111,10 @@ impl Vehicle {
         self.destination = (latitude, longitude);
     }
 
+    pub fn set_speed_kph(&mut self, speed_kph: f64) {
+        self.speed = speed_kph / 3.6;
+    }
+
     pub fn get_longitude(&self) -> f64 {
         self.location.1
     }
@@ -122,6 +126,7 @@ impl Vehicle {
     pub fn drive(&mut self) {
         let soc = self.battery.state_of_charge();
         if soc <= 0.0 {
+            self.speed = 0.0;
             return;
         }
 
