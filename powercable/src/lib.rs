@@ -1,5 +1,6 @@
 use bitcode::{Decode, Encode};
 use rand::{seq::IteratorRandom, Rng};
+use serde::Serialize;
 
 pub mod charger;
 pub mod chart_entry;
@@ -51,7 +52,7 @@ const WEST_LIMIT: (f64, f64) = (51.00929968161735, 6.282484743251983);
  * Position represents a geographical position with latitude and longitude.
  * It is used to represent the position of vehicles, chargers, and other entities in the system.
  */
-#[derive(Debug, Clone, Copy, PartialEq, Encode, Decode)]
+#[derive(Debug, Clone, Copy, PartialEq, Encode, Decode, Serialize)]
 pub struct Position {
     pub latitude: f64,
     pub longitude: f64,

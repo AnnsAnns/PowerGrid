@@ -101,7 +101,7 @@ pub async fn publish_vehicle(handler: SharedVehicle) {
     let name = handler.vehicle.get_name().clone();
     let mut vehicle_payload = json!(handler.vehicle);
     vehicle_payload["speed_kph"] = json!(handler.vehicle.get_speed_kph());
-    vehicle_payload["soc"] = json!((handler.vehicle.battery().state_of_charge() * 100.0) as u32);
+    vehicle_payload["soc"] = json!((handler.vehicle.battery().get_soc() * 100.0) as u32);
 
     let client = &mut handler.client;
     client
@@ -118,17 +118,17 @@ pub async fn publish_vehicle(handler: SharedVehicle) {
 pub async fn publish_location(handler: SharedVehicle) {
     let mut handler = handler.lock().await;
     // Extract all values before mutably borrowing client
-    let name = handler.name.clone();
-    let (latitude, longitude) = handler.vehicle.get_location();
-    let (destination_lat, destination_lon) = handler.vehicle.get_destination();
+    let name = handler.vehicle.get_name().clone();
+    let location = handler.vehicle.get_location();
+    let destination = handler.vehicle.get_destination();
     let speed = handler.vehicle.get_speed_kph();
-    let percentage = handler.vehicle.battery().state_of_charge() * 100.0;
+    let percentage = handler.vehicle.battery().get_soc() * 100.0;
     let client = &mut handler.client;
     let location_payload = json!({
         "name" : name,
-        "lat": latitude,
-        "lon": longitude,
-        "line": [[latitude, longitude], [destination_lat, destination_lon]],
+        "lat": location.latitude,
+        "lon": location.longitude,
+        "line": [[location.latitude, location.longitude], [destination.latitude, destination.longitude]],
         "color": "grey",
         "icon": ":car:",
         "label": format!("{:.1}%", percentage),

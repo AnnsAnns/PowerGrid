@@ -86,18 +86,6 @@ impl Vehicle {
         self.status = status;
     }
 
-    pub fn get_consumption(&self) -> f64 {
-        self.consumption
-    }
-
-    pub fn set_port(&mut self, port: Option<usize>) {
-        self.port = port;
-    }
-
-    pub fn get_port(&self) -> Option<usize> {
-        self.port
-    }
-
     pub fn distance_to(&self, latitude: f64, longitude: f64) -> f64 { // TODO: simplify
         let this_rad = (Vehicle::to_radians(self.location.latitude), Vehicle::to_radians(self.location.longitude));
         let other_rad = (Vehicle::to_radians(latitude), Vehicle::to_radians(longitude));
@@ -120,6 +108,10 @@ impl Vehicle {
         self.destination
     }
 
+    pub fn set_destination(&mut self, destination: Position) {
+        self.destination = destination;
+    }
+
     pub fn get_consumption(&self) -> f64 {
         self.consumption
     }
@@ -132,6 +124,10 @@ impl Vehicle {
         self.speed * 3.6
     }
 
+    pub fn set_speed_kph(&mut self, speed_kph: f64) {
+        self.speed = speed_kph / 3.6;
+    }
+
     pub fn battery(&mut self) -> &mut Battery {
         &mut self.battery
     }
@@ -140,12 +136,12 @@ impl Vehicle {
         &self.battery
     }
 
-    pub fn set_destination(&mut self, destination: Position) {
-        self.destination = destination;
+    pub fn get_port(&self) -> Option<usize> {
+        self.port
     }
 
-    pub fn set_speed_kph(&mut self, speed_kph: f64) {
-        self.speed = speed_kph / 3.6;
+    pub fn set_port(&mut self, port: Option<usize>) {
+        self.port = port;
     }
 
     pub fn get_longitude(&self) -> f64 {
@@ -157,7 +153,7 @@ impl Vehicle {
     }
 
     pub fn drive(&mut self) {
-        let soc = self.battery.get_soc()
+        let soc = self.battery.get_soc();
         if soc <= 0.0 {
             self.speed = 0.0;
             return;
