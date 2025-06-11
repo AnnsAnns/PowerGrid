@@ -1,4 +1,5 @@
 use std::f64::consts::PI;
+use log::info;
 use powercable::{tickgen::INTERVAL_15_MINS, Position};
 use rand::Rng;
 use serde::Serialize;
@@ -149,10 +150,12 @@ impl Vehicle {
     }
 
     pub fn drive(&mut self) {
-        let soc = self.battery.get_soc();
-        if soc <= 0.0 || self.status == VehicleStatus::Charging {
+        info!("Driving vehicle: {} to {:?}", self.name, self.destination);
+        if self.status == VehicleStatus::Charging {
             self.speed = 0.0;
             return;
+        } else {
+            self.set_speed_kph(50.0);
         }
 
         let distance_now = self.speed * INTERVAL_5_MINS as f64 / 1000.0; // m to km

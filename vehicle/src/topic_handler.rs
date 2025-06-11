@@ -7,6 +7,7 @@ use serde_json::json;
 use tokio::task;
 use crate::{charger_handling::{accept_offer, create_charger_request, create_get}, vehicle::VehicleStatus, SharedVehicle};
 
+const FIND_CHARGER_AT_LEAST: f64 = 0.6; // 60% charge left
 
 #[derive(Serialize, Deserialize, Debug)]
 /**
@@ -53,7 +54,7 @@ pub async fn process_tick(handler: SharedVehicle) {// TODO: rework this function
     let mut locked_handler = handler.lock().await;
   
     if locked_handler.target_charger.is_none() {// Driving randomly
-        if locked_handler.vehicle.battery().get_soc() <= 0.4 {// If the vehicle has less than 40% charge left, search for a charger
+        if locked_handler.vehicle.battery().get_soc() <= FIND_CHARGER_AT_LEAST {// If the vehicle has less than 40% charge left, search for a charger
             info!("{} has no charge left, searching for charging station", locked_handler.vehicle.get_name());
             locked_handler.vehicle.set_status(VehicleStatus::SearchingForCharger);
             task::spawn(create_charger_request(handler.clone()));

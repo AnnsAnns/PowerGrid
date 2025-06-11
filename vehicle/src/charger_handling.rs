@@ -1,6 +1,6 @@
 use bytes::Bytes;
 use log::{debug, info, trace};
-use powercable::{charger::{Get, Ack, ChargeAccept, ChargeOffer, ChargeRequest, PRICE_DISTANCE_FACTOR}, Position, CHARGER_ACCEPT, CHARGER_REQUEST, CHARGER_CHARGING_GET};
+use powercable::{charger::{ChargeAccept, ChargeOffer, ChargeRequest, Get, PRICE_DISTANCE_FACTOR}, generate_rnd_pos, Position, CHARGER_ACCEPT, CHARGER_CHARGING_GET, CHARGER_REQUEST};
 use rumqttc::{tokio_rustls::rustls::internal::msgs::handshake, QoS};
 use crate::SharedVehicle;
 use crate::vehicle::VehicleStatus;
@@ -143,7 +143,7 @@ pub async fn create_get(handler: SharedVehicle) {
     let get = Get {
         charger_name: handler.target_charger.as_ref().unwrap().charger_name.clone(),
         vehicle_name: handler.vehicle.get_name().clone(),
-        amount: handler.vehicle.battery_non_mut().get_max_charge(),
+        amount: handler.vehicle.battery_non_mut().max_addable_charge(None)
     };
 
     info!("Sending get: {:?}", get);
@@ -154,4 +154,25 @@ pub async fn create_get(handler: SharedVehicle) {
         false,
         get.to_bytes()
     ).await.unwrap();
+}
+
+pub async fn get_ack_handling(handler: SharedVehicle, payload: Bytes) {
+    let mut handler = handler.lock().await;
+
+    // Deserialize the Ack message
+    let get = Get::from_bytes(payload).unwrap();
+
+    // Check if the ack is for the current vehicle
+    if get.vehicle_name.eq(handler.vehicle.get_name()) {
+        handler.vehicle.battery().add_charge(get.amount);
+
+        info!("Received charge offer acknowledgement: {:?}", get);
+        // At 85% state of charge, we consider the vehicle fully charged
+        if handler.vehicle.battery().get_soc() >= 0.85 {
+            info!("{} has been fully charged.", handler.vehicle.get_name());
+            handler.vehicle.set_status(VehicleStatus::RANDOM);
+            handler.target_charger = None;
+            handler.vehicle.set_destination(generate_rnd_pos());
+        }
+    }
 }

@@ -31,7 +31,7 @@ async fn main() {
     info!("Starting charger simulation...");
 
     let charger =
-        Charger::new(charger_name.clone(), generate_rnd_pos(), 300, 10000, 5);
+        Charger::new(charger_name.clone(), generate_rnd_pos(), 300, 1000, 5);
     info!("{:#?}", charger);
     
     let mut mqttoptions = MqttOptions::new(

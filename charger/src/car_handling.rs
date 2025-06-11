@@ -1,6 +1,6 @@
 use bytes::Bytes;
 use log::{debug, info, trace, warn};
-use powercable::{charger::{Get, Ack, ChargeAccept, ChargeOffer, ChargeRequest}, CHARGER_OFFER, CHARGER_CHARGING_ACK};
+use powercable::{charger::{Get, ChargeAccept, ChargeOffer, ChargeRequest}, CHARGER_OFFER, CHARGER_CHARGING_ACK};
 use rumqttc::QoS;
 
 use crate::{offer_handling::ReservedOffer, SharedCharger};
@@ -94,23 +94,21 @@ pub async fn answer_get(charger: SharedCharger, payload: Bytes) {
 
     // Deserialize the payload into a Get object
     trace!("Received get payload: {:?}", payload);
-    let get: Get = Get::from_bytes(payload).unwrap();
+    let mut get: Get = Get::from_bytes(payload).unwrap();
     
     if get.charger_name.eq(handler.charger.get_name()) {
         info!("Received get request from {}", get.vehicle_name);
-        /*
-        let ack = Ack::new(
-            handler.charger.get_name().clone(),
-            get.vehicle_name,
-            handler.charger.get_free_ports() as usize,
-        );
-        info!("Sending ack: {:?}", ack);
+
+        let amount_we_can_give = handler.charger.take_reserved_charge(get.amount);
+
+        get.amount = amount_we_can_give;
+
+        info!("Sending ack: {:?}", get);
         handler.client.publish(
             CHARGER_CHARGING_ACK,
             QoS::ExactlyOnce,
             false,
-            ack.to_bytes(),
+            get.to_bytes(),
         ).await.unwrap();
-        */
     }
 }

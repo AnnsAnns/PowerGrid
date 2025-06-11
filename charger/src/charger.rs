@@ -178,6 +178,26 @@ impl Charger {
         }
     }
 
+    pub fn take_reserved_charge(&mut self, charge: usize) -> usize {
+        // Take reserved charge if available
+        if self.reserved_charge >= charge {
+            self.reserved_charge -= charge;
+            self.remove_charge(charge); // Also remove from current charge
+            charge
+        } else {
+            debug!("Charger {} does not have enough reserved charge to take {}. Reserved: {}", self.name, charge, self.reserved_charge);
+            let remaining_reserved_charge = self.reserved_charge;
+            let reservable_charge = if (charge - remaining_reserved_charge) > self.get_available_charge() {
+                self.get_available_charge()
+            } else {
+                charge - remaining_reserved_charge
+            };
+            self.remove_charge(reservable_charge + remaining_reserved_charge); // Remove available charge
+            self.reserved_charge = 0; // Reset reserved charge
+            reservable_charge + remaining_reserved_charge // Return what was taken
+        }
+    }
+
     pub fn release_reserved_charge(&mut self, charge: usize) -> isize {
         // Release reserved charge
         if self.reserved_charge >= charge {
