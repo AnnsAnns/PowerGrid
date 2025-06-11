@@ -34,7 +34,6 @@ pub struct Vehicle {
     destination: Position,
     consumption: f64,// kWh/km
     battery: Battery,
-    port: Option<usize>,// Port number for charging, if applicable
 }
 
 impl Vehicle {
@@ -61,7 +60,6 @@ impl Vehicle {
             destination: location,// Initially, the destination is the same as the location
             consumption,
             battery,
-            port: None,// Initially, the vehicle is not connected to any charging port
         }
     }
 
@@ -83,14 +81,6 @@ impl Vehicle {
 
     pub fn get_consumption(&self) -> f64 {
         self.consumption
-    }
-
-    pub fn set_port(&mut self, port: Option<usize>) {
-        self.port = port;
-    }
-
-    pub fn get_port(&self) -> Option<usize> {
-        self.port
     }
 
     pub fn distance_to(&self, latitude: f64, longitude: f64) -> f64 { // TODO: simplify
@@ -141,7 +131,7 @@ impl Vehicle {
             return;
         }
 
-        let distance_now = speed_kmh * (INTERVAL_15_MINS as f64 / 3600.0); // seconds to hours
+        let distance_now = speed_kmh * (INTERVAL_15_MINS as f64 / 3600.0);// seconds to hours
         let efficiency_factor = Vehicle::speed_efficiency_factor(speed_kmh);
         let consumption_now = self.consumption * efficiency_factor;
         let charge_requested = distance_now * consumption_now;

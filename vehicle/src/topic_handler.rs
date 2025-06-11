@@ -5,7 +5,7 @@ use rumqttc::QoS;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tokio::task;
-use crate::{charger_handling::{accept_offer, create_arrival, create_charger_request}, vehicle::VehicleStatus, SharedVehicle};
+use crate::{charger_handling::{accept_offer, create_charger_request}, vehicle::VehicleStatus, SharedVehicle};
 
 #[derive(Serialize, Deserialize, Debug)]
 /**
@@ -48,7 +48,7 @@ pub async fn process_tick(handler: SharedVehicle) {
         let mut locked_handler = handler.lock().await;
 
         if locked_handler.target_charger.is_none() {
-            if locked_handler.vehicle.battery().get_soc() <= 0.5 {
+            if locked_handler.vehicle.battery().get_soc() <= 0.6 {
                 info!(
                     "{} has no charge left, searching for charging station",
                     locked_handler.vehicle.get_name()
@@ -65,10 +65,9 @@ pub async fn process_tick(handler: SharedVehicle) {
             && locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination()
             && locked_handler.vehicle.get_status().eq(&VehicleStatus::SearchingForCharger)
         {
-            debug!("{} has arrived at the destination, requesting charge", locked_handler.vehicle.get_name());
+            info!("{} has arrived at the destination, requesting charge", locked_handler.vehicle.get_name());
             locked_handler.vehicle.set_status(VehicleStatus::Charging);
-            // Create an arrival message to send to the charger
-            task::spawn(create_arrival(handler.clone()));
+            // TODO: start sending charge requests per tick till satisfied
 
         } else if locked_handler.vehicle.get_status().eq(&VehicleStatus::RANDOM) || locked_handler.vehicle.get_status().eq(&VehicleStatus::SearchingForCharger) {
             locked_handler.vehicle.drive(50.0);

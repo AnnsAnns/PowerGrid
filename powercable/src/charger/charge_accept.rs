@@ -2,28 +2,40 @@ use bitcode::{Decode, Encode};
 use bytes::Bytes;
 
 /**
- * ChargeAccept represents the acceptance of a charge offer by a vehicle.
- * It contains the name of the charger, the name of the vehicle,
- * and the real amount of charge at the cars arrival in kWh.
- */
+* # Description
+* Represents a charge acceptance message sent by a charger to a vehicle.
+* This message is sent when a vehicle accepts a charge offer from a charger.
+* 
+* # Fields
+* - `charger_name`: The name of the charger accepting the request.
+* - `vehicle_name`: The name of the vehicle that made the charge request.
+*/
 #[derive(Debug, Clone, Encode, Decode)]
 pub struct ChargeAccept {
     pub charger_name: String,
     pub vehicle_name: String,
     // TODO: estimated arrival time
-    pub real_amount: usize, // in kWh
 }
 
 impl ChargeAccept {
+    /**
+     * # Description
+     * Creates a new ChargeAccept message.
+     * 
+     * # Arguments
+     * * `charger_name`: The name of the charger.
+     * * `vehicle_name`: The name of the vehicle.
+     * 
+     * # Returns
+     * A new ChargeAccept instance.
+     */
     pub fn new(
         charger_name: String,
         vehicle_name: String,
-        real_amount: usize,
     ) -> Self {
         ChargeAccept {
             charger_name,
             vehicle_name,
-            real_amount,
         }
     }
 
