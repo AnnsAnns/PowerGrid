@@ -532,62 +532,18 @@
         "name": "",
         "topic": "power/charger",
         "qos": "2",
-        "datatype": "utf8",
+        "datatype": "auto-detect",
         "broker": "c1c49a80.e500e",
         "nl": false,
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 310,
+        "x": 230,
         "y": 900,
         "wires": [
             [
-                "751f42e3afe4331a"
+                "ec6f8418521ea347"
             ]
-        ]
-    },
-    {
-        "id": "751f42e3afe4331a",
-        "type": "ui_chart",
-        "z": "5992b366.f9457c",
-        "name": "",
-        "group": "83cd261e79d613c8",
-        "order": 5,
-        "width": "8",
-        "height": "4",
-        "label": "Current Total Charger Battery",
-        "chartType": "line",
-        "legend": "false",
-        "xformat": "HH:mm:ss",
-        "interpolate": "linear",
-        "nodata": "",
-        "dot": false,
-        "ymin": "",
-        "ymax": "",
-        "removeOlder": 1,
-        "removeOlderPoints": "",
-        "removeOlderUnit": "3600",
-        "cutout": 0,
-        "useOneColor": false,
-        "useUTC": false,
-        "colors": [
-            "#1f77b4",
-            "#aec7e8",
-            "#ff7f0e",
-            "#2ca02c",
-            "#98df8a",
-            "#d62728",
-            "#ff9896",
-            "#9467bd",
-            "#c5b0d5"
-        ],
-        "outputs": 1,
-        "useDifferentColor": false,
-        "className": "",
-        "x": 720,
-        "y": 900,
-        "wires": [
-            []
         ]
     },
     {
@@ -1414,6 +1370,70 @@
             [
                 "066f6cc453b66c2a"
             ]
+        ]
+    },
+    {
+        "id": "ec6f8418521ea347",
+        "type": "function",
+        "z": "5992b366.f9457c",
+        "name": "ParsePayload",
+        "func": "return {payload: msg.payload[\"payload\"], topic: msg.payload[\"topic\"], timestamp: msg.payload[\"timestamp\"]}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 900,
+        "wires": [
+            [
+                "acb0fa524995096e"
+            ]
+        ]
+    },
+    {
+        "id": "acb0fa524995096e",
+        "type": "ui_chart",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "group": "83cd261e79d613c8",
+        "order": 4,
+        "width": "19",
+        "height": "5",
+        "label": "Battery %",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "dd HH:mm",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "10000",
+        "removeOlderUnit": "604800",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 740,
+        "y": 900,
+        "wires": [
+            []
         ]
     }
 ]

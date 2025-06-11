@@ -23,7 +23,7 @@ pub async fn tick_handler(handler: SharedCharger, payload: Bytes) {
             process_tick(handler, payload).await;
         }
         Phase::Commerce => {
-            commerce_tick(handler).await;
+            commerce_tick(handler, payload).await;
         }
         Phase::PowerImport => {
             // No action needed
@@ -108,7 +108,7 @@ async fn process_tick(handler: SharedCharger, payload: TickPayload) {
 /**
  * This function handles the tick event for commerce phase.
  */
-async fn commerce_tick(handler: SharedCharger) {
+async fn commerce_tick(handler: SharedCharger, tick_payload: TickPayload) {
     let handler = handler.lock().await;
     let current_power = handler.charger.get_current_charge();
 
@@ -118,10 +118,20 @@ async fn commerce_tick(handler: SharedCharger) {
             POWER_CHARGER_TOPIC,
             rumqttc::QoS::ExactlyOnce,
             false,
-            current_power.to_string(),
+            ChartEntry::new(
+                handler.charger.get_name().clone(),
+                current_power as isize,
+                tick_payload.timestamp,
+            ).to_string(),
         )
         .await
         .unwrap();
+
+    info!(
+        "Charger {} has {} kWh of charge",
+        handler.charger.get_name(),
+        current_power
+    );
 }
 
 /**
