@@ -50,6 +50,13 @@ impl Battery {
     }
 
     /**
+     * # Returns the maximum charge rate of the battery in kW.
+     */
+    pub fn get_max_charge(&self) -> usize {
+        self.max_charge
+    }
+
+    /**
      * Returns the free capacity of the battery in kWh.
      */
     pub fn get_free_capacity(&self) -> usize {

@@ -1,6 +1,6 @@
 use bytes::Bytes;
-use log::{debug, info, warn};
-use powercable::{charger::{Arrival, ChargeAccept, ChargeOffer, ChargeRequest, Port}, CHARGER_OFFER, CHARGER_CHARGING_ACK};
+use log::{debug, info, trace, warn};
+use powercable::{charger::{Get, Ack, ChargeAccept, ChargeOffer, ChargeRequest}, CHARGER_OFFER, CHARGER_CHARGING_ACK};
 use rumqttc::QoS;
 
 use crate::{offer_handling::ReservedOffer, SharedCharger};
@@ -78,5 +78,39 @@ pub async fn accept_handler(charger: SharedCharger, payload: Bytes) {
     } else {
         info!("We were accepted by {}", acceptance.vehicle_name);
         handler.accept_reserve(acceptance.vehicle_name.clone());
+    }
+}
+
+/**
+ * # Description
+ * Handles a GET request from a vehicle.
+ * 
+ * # Parameters
+ * - `charger`: The shared charger handler containing the charger and its state.
+ * - `payload`: The payload containing the GET request data.
+ */
+pub async fn answer_get(charger: SharedCharger, payload: Bytes) {
+    let mut handler = charger.lock().await;
+
+    // Deserialize the payload into a Get object
+    trace!("Received get payload: {:?}", payload);
+    let get: Get = Get::from_bytes(payload).unwrap();
+    
+    if get.charger_name.eq(handler.charger.get_name()) {
+        info!("Received get request from {}", get.vehicle_name);
+        /*
+        let ack = Ack::new(
+            handler.charger.get_name().clone(),
+            get.vehicle_name,
+            handler.charger.get_free_ports() as usize,
+        );
+        info!("Sending ack: {:?}", ack);
+        handler.client.publish(
+            CHARGER_CHARGING_ACK,
+            QoS::ExactlyOnce,
+            false,
+            ack.to_bytes(),
+        ).await.unwrap();
+        */
     }
 }

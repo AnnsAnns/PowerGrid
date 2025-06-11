@@ -1,5 +1,5 @@
 use bytes::Bytes;
-use log::{debug, info};
+use log::{debug, info, trace};
 use powercable::{
     generate_rnd_pos,
     tickgen::{Phase, TickPayload},
@@ -9,7 +9,7 @@ use rumqttc::QoS;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tokio::task;
-use crate::{charger_handling::{accept_offer, create_charger_request}, vehicle::VehicleStatus, SharedVehicle};
+use crate::{charger_handling::{accept_offer, create_charger_request, create_get}, vehicle::VehicleStatus, SharedVehicle};
 
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -53,33 +53,30 @@ pub async fn worldmap_event_handler(handler: SharedVehicle, payload: Bytes) {
     }
 }
 
-pub async fn process_tick(handler: SharedVehicle) {
+pub async fn process_tick(handler: SharedVehicle) {// TODO: rework this function cause its chaos
     let mut locked_handler = handler.lock().await;
   
-    if locked_handler.target_charger.is_none() {
-        if locked_handler.vehicle.battery().get_soc() <= 0.5 {
-            info!(
-                "{} has no charge left, searching for charging station",
-                locked_handler.vehicle.get_name()
-            );
+    if locked_handler.target_charger.is_none() {// Driving randomly
+        if locked_handler.vehicle.battery().get_soc() <= 0.6 {// If the vehicle has less than 60% charge left, search for a charger
+            info!("{} has no charge left, searching for charging station", locked_handler.vehicle.get_name());
             locked_handler.vehicle.set_status(VehicleStatus::SearchingForCharger);
             task::spawn(create_charger_request(handler.clone()));
         }
 
-        if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination() {
+        if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination() {// Reached destination so generate a new one
             locked_handler.vehicle.set_destination(generate_rnd_pos());
         }
-    }
-
-    if locked_handler.target_charger.is_some()
-        && locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination()
-        && locked_handler.vehicle.get_status().eq(&VehicleStatus::SearchingForCharger)
-    {
-        debug!("{} has arrived at the destination, requesting charge", locked_handler.vehicle.get_name());
-        locked_handler.vehicle.set_status(VehicleStatus::Charging);
-        // TODO: Charge
-    } else if locked_handler.vehicle.get_status().eq(&VehicleStatus::RANDOM) || locked_handler.vehicle.get_status().eq(&VehicleStatus::SearchingForCharger) {
-        // locked_handler.vehicle.drive(50.0);
+    } else {// Driving to a charger
+        if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination()
+            && locked_handler.vehicle.get_status().eq(&VehicleStatus::SearchingForCharger) {
+            info!("{} has arrived at the destination, requesting charge", locked_handler.vehicle.get_name());
+            locked_handler.vehicle.set_status(VehicleStatus::Charging);
+            // TODO: Charge
+        }
+        if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination()
+            && locked_handler.vehicle.get_status().eq(&VehicleStatus::Charging) {
+            task::spawn(create_get(handler.clone()));
+        }
     }
 }
 
@@ -90,7 +87,7 @@ pub async fn commerce_tick(handler: SharedVehicle) {
             return;
         }
     }
-    debug!("{} has received charge offers, accepting the best one", handler.lock().await.vehicle.get_name());
+    trace!("{} has received charge offers, accepting the best one", handler.lock().await.vehicle.get_name());
     accept_offer(handler.clone()).await;
 }
 
