@@ -48,8 +48,13 @@ const SOUTH_LIMIT: (f64, f64) = (49.11158947259421, 10.206213793834436);
 const WEST_LIMIT: (f64, f64) = (51.00929968161735, 6.282484743251983);
 
 /**
- * Position represents a geographical position with latitude and longitude.
+ * # Description
+ * The Position struct represents a geographical position defined by latitude and longitude.
  * It is used to represent the position of vehicles, chargers, and other entities in the system.
+ * 
+ * # Fields
+ * - `latitude`: The latitude of the position in degrees.
+ * - `longitude`: The longitude of the position in degrees.
  */
 #[derive(Debug, Clone, Copy, PartialEq, Encode, Decode, Serialize)]
 pub struct Position {

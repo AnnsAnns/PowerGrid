@@ -6,7 +6,7 @@ use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task};
 use topic_handler::{accept_offer_handler, tick_handler};
-use car_handling::{receive_request, accept_handler};
+use car_handling::{receive_request, accept_handler, answer_get};
 
 mod charger;
 mod topic_handler;
@@ -87,7 +87,7 @@ async fn main() {
                     let _ = task::spawn(accept_handler(shared_charger.clone(), p.payload));
                 }
                 CHARGER_CHARGING_GET => {
-                    info!("Received CHARGER_CHARGING_GET message");
+                    task::spawn(answer_get(shared_charger.clone(), p.payload));
                 }
                 _ => {
                     let _ = task::spawn(async move {

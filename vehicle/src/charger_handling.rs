@@ -1,7 +1,7 @@
 use bytes::Bytes;
 use log::{debug, info, trace};
-use powercable::{charger::{Arrival, ChargeAccept, ChargeOffer, ChargeRequest, Port, PRICE_DISTANCE_FACTOR}, Position, CHARGER_ACCEPT, CHARGER_REQUEST, CHARGER_CHARGING_GET};
-use rumqttc::QoS;
+use powercable::{charger::{Get, Ack, ChargeAccept, ChargeOffer, ChargeRequest, PRICE_DISTANCE_FACTOR}, Position, CHARGER_ACCEPT, CHARGER_REQUEST, CHARGER_CHARGING_GET};
+use rumqttc::{tokio_rustls::rustls::internal::msgs::handshake, QoS};
 use crate::SharedVehicle;
 use crate::vehicle::VehicleStatus;
 
@@ -128,4 +128,30 @@ pub async fn accept_offer(handler: SharedVehicle) {
         false,
         acceptance.to_bytes(),
     ).await.unwrap()
+}
+
+/**
+ * # Description
+ * Creates a Get message to request the amount for one tick of charging.
+ * 
+ * # Parameters
+ * - `handler`: The shared vehicle handler containing the vehicle and its state.
+ */
+pub async fn create_get(handler: SharedVehicle) {
+    let handler = handler.lock().await;
+
+    let get = Get {
+        charger_name: handler.target_charger.as_ref().unwrap().charger_name.clone(),
+        vehicle_name: handler.vehicle.get_name().clone(),
+        amount: handler.vehicle.battery_non_mut().get_max_charge(),
+    };
+
+    info!("Sending get: {:?}", get);
+    handler
+        .client
+        .publish(CHARGER_CHARGING_GET,
+        QoS::ExactlyOnce,
+        false,
+        get.to_bytes()
+    ).await.unwrap();
 }

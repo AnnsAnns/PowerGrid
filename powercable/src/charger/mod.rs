@@ -10,5 +10,5 @@ pub const PRICE_DISTANCE_FACTOR: f64 = 0.3;
 pub use self::charge_request::ChargeRequest;
 pub use self::charge_offer::ChargeOffer;
 pub use self::charge_accept::ChargeAccept;
-pub use self::charge_port::Arrival;
-pub use self::charge_port::Port;
+pub use self::charge_port::Get;
+pub use self::charge_port::Ack;
