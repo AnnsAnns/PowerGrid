@@ -104,5 +104,5 @@ async fn main() {
             }
         }
     }
-    info!("Exiting charger simulation...");
+    println!("Exiting charger simulation...");
 }
