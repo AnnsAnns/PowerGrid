@@ -180,10 +180,7 @@ async fn process_tick(handler: Arc<Mutex<FusionReactor>>, tick_payload: TickPayl
     handler.power_sold_this_tick = 0.0;
 }
 
-#[tokio::main]
-async fn main() {
-    let log_path = format!("logs/fusion_reactor.log");
-    let _log2 = log2::open(log_path.as_str()).level("debug").start();
+pub async fn start_fusion_gen() {
     info!("Starting fusion reactor simulation...");
 
     let mut mqttoptions = MqttOptions::new(

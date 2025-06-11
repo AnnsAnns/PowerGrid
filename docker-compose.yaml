@@ -28,116 +28,18 @@ services:
     depends_on:
       - mosquitto_broker
 
-  tickgen:
-    image: local/powergrid:latest
-    command: ./tickgen
-    volumes:
-      - ./.docker_data/logs:/app/logs
-    networks:
-      - mqtt_network
-    depends_on:
-      - mosquitto_broker
-
-  transformer:
-    # Transformer Simulator
-    image: local/powergrid:latest
-    command: ./transformer
-    volumes:
-      - ./.docker_data/logs:/app/logs
-    networks:
-      - mqtt_network
-    depends_on:
-      - mosquitto_broker
-
-  fusion_reactor:
-    image: local/powergrid:latest
-    command: ./fusion_reactor
-    volumes:
-      - ./.docker_data/logs:/app/logs
-    networks:
-      - mqtt_network
-    depends_on:
-      - mosquitto_broker
-
-  turbine:
-    # Turbine Simulator
-    image: local/powergrid:latest
-    command: ./turbine
-    volumes:
-      - ./.docker_data/Wind:/app/Wind
-      - ./.docker_data/AirTemperature:/app/AirTemperature
-      - ./.docker_data/logs:/app/logs
-    networks:
-      - mqtt_network
-    depends_on:
-      - mosquitto_broker
-    deploy:
-      replicas: 3
-      mode: replicated
-
-  charger:
-    # Charger Simulator
-    image: local/powergrid:latest
-    command: ./charger
-    volumes:
-      - ./.docker_data/logs:/app/logs
-    networks:
-      - mqtt_network
-    depends_on:
-      - mosquitto_broker
-    deploy:
-      replicas: 5
-      mode: replicated
-
-  vehicle:
-    # Vehicle Simulator
-    image: local/powergrid:latest
-    command: ./vehicle
-    volumes:
-      - ./.docker_data/logs:/app/logs
-    networks:
-      - mqtt_network
-    depends_on:
-      - mosquitto_broker
-    deploy:
-      replicas: 6
-      mode: replicated
-
-  haushalt:
-    image: local/powergrid:latest
-    command: ./consumer
-    volumes:
-      - ./.docker_data/logs:/app/logs
-    networks:
-      - mqtt_network
-    depends_on:
-      - mosquitto_broker
+  powergrid:
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
-      - CONSUMER_TYPE=H
-
-  gewerbe:
-    image: local/powergrid:latest
-    command: ./consumer
+      - RUST_LOG=debug
     volumes:
       - ./.docker_data/logs:/app/logs
     networks:
       - mqtt_network
     depends_on:
       - mosquitto_broker
-    environment:
-      - CONSUMER_TYPE=G
-
-  bauernhof:
-    image: local/powergrid:latest
-    command: ./consumer
-    volumes:
-      - ./.docker_data/logs:/app/logs
-    networks:
-      - mqtt_network
-    depends_on:
-      - mosquitto_broker
-    environment:
-      - CONSUMER_TYPE=L
     
 networks:
   mqtt_network:

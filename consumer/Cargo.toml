@@ -11,6 +11,5 @@ serde = {version = "1.0", features = ["derive"]}
 serde_json = "1.0.140"
 tokio = { version = "1", features = ["full"] }
 powercable = { path = "../powercable" }
-log2 = "0.2.1"
 log = "0.4.27"
 bytes = {version = "1.10.1", features = ["serde"] }

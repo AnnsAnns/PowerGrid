@@ -24,16 +24,13 @@ struct TurbineHandler {
     pub total_earned: f64,
 }
 
-#[tokio::main]
-async fn main() {
+pub async fn start_turbine() {
     // Print working directory
     //println!("Current working directory: {:?}", std::env::current_dir());
 
     let (handler, mut eventloop) = init::init().await;
 
     let name = handler.lock().await.name.clone();
-    let log_path = format!("logs/turbine_{}.log", name.clone().replace(" ", "_"));
-    let _log2 = log2::open(log_path.as_str()).level("info").start();
     info!("Turbine simulation started with name: {}", name);
 
     init::subscribe(handler.clone()).await;
