@@ -1453,7 +1453,7 @@
         "topicType": "msg",
         "min": "0",
         "max": "2",
-        "step": "0.5",
+        "step": "0.25",
         "className": "",
         "x": 480,
         "y": 480,

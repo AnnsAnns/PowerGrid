@@ -63,16 +63,28 @@ impl Battery {
         self.capacity as usize - self.level as usize
     }
 
+    /// Calculates the maximum amount of charge that can be added to the battery.
+    /// # Arguments
+    /// `charge`: An optional parameter that specifies the amount of charge to be added.
+    /// If `None`, the maximum charge rate of the battery is used.
+    pub fn max_addable_charge(&self, charge: Option<usize>) -> usize {
+        // apply scaling
+        let charge = charge.unwrap_or(self.max_charge);
+        let soc = self.get_soc();
+        let applied_charge = charge.min(self.get_free_capacity());
+        let charge_rate = applied_charge as f64 * self.charge_scaling();
+
+        // calculate energy that could be added
+        let charge_efficiency = 0.9;
+        let energy_added = charge_rate * charge_efficiency;
+        (energy_added.max(1.0) as usize).min(self.get_free_capacity())
+    }
+
     pub fn add_charge(&mut self, charge: usize) -> usize {
         // apply scaling
-        let applied_charge = charge.min(self.max_charge) as f64;
-        let charge_rate = applied_charge * self.charge_scaling();
-        
-        // consume energy
-        let charge_efficiency = 0.9;
-        let charge_efficiency = charge_efficiency;
-        let energy_added = charge_rate  * charge_efficiency;
-        self.level = (self.level + energy_added).min(self.capacity as f64);
+        let energy_added = self.max_addable_charge(Some(charge));
+
+        self.level = (self.level + energy_added as f64).min(self.capacity as f64);
         energy_added as usize
     }
     
@@ -85,7 +97,11 @@ impl Battery {
         } else {
             let actual_energy = self.level as f64 * discharge_efficiency;
             self.level = 0.0;
-            actual_energy
+            if actual_energy > 0.0 {
+                actual_energy
+            } else {
+                1.0
+            }
         };
         energy_delivered
     }

@@ -86,7 +86,7 @@ services:
     depends_on:
       - mosquitto_broker
     deploy:
-      replicas: 4
+      replicas: 10
       mode: replicated
 
   vehicle:
@@ -100,7 +100,7 @@ services:
     depends_on:
       - mosquitto_broker
     deploy:
-      replicas: 2
+      replicas: 30
       mode: replicated
 
   haushalt:

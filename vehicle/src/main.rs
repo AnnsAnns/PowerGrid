@@ -7,7 +7,7 @@ use topic_handler::{tick_handler, worldmap_event_handler};
 use charger_handling::{receive_offer};
 use vehicle::Vehicle;
 
-use crate::topic_handler::scale_handler;
+use crate::{charger_handling::get_ack_handling, topic_handler::scale_handler};
 
 mod battery;
 mod charger_handling;
@@ -86,7 +86,7 @@ async fn main() {
                     let _ = task::spawn(receive_offer(shared_vehicle.clone(), p.payload));
                 }
                 CHARGER_CHARGING_ACK => {
-                    info!("Received CHARGER_CHARGING_ACK message");
+                    let _ = task::spawn(get_ack_handling(shared_vehicle.clone(), p.payload));
                 }
                 CONFIG_SCALE_VEHICLE => {
                     let _ = task::spawn(scale_handler(shared_vehicle.clone(), p.payload));
