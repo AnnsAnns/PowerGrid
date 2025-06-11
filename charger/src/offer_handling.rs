@@ -1,8 +1,9 @@
 use log::debug;
-use powercable::offer;
-
 use crate::ChargerHandler;
 
+/**
+ * 
+ */
 pub struct ReservedOffer {
     id: String,
     quantity: usize,

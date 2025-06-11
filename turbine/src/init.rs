@@ -88,15 +88,15 @@ pub async fn subscribe(handler: SharedTurbine) {
     let mut handler = handler.lock().await;
     let client = &mut handler.client;
     client
-        .subscribe(TICK_TOPIC, QoS::AtMostOnce)
+        .subscribe(TICK_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     client
-        .subscribe(BUY_OFFER_TOPIC, QoS::AtMostOnce)
+        .subscribe(BUY_OFFER_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     client
-        .subscribe(ACK_ACCEPT_BUY_OFFER_TOPIC, QoS::AtMostOnce)
+        .subscribe(ACK_ACCEPT_BUY_OFFER_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     info!("Subscribed to topics");

@@ -7,8 +7,8 @@ pub struct Offer {
     id: String,
     price: f64,
     amount: f64,
-    latitude: f64,
-    longitude: f64,
+    latitude: f64,// TODO: needed?
+    longitude: f64,// TODO: needed?
     accepted_by: Option<String>,
     ack_for: Option<String>,
 }

@@ -27,9 +27,12 @@ pub const POWER_CONSUMER_TOPIC: &str = "power/consumer";
 pub const POWER_LOCATION_TOPIC: &str = "power/location";
 pub const POWER_CONSUMER_SCALE: &str = "power/consumer/scale";
 pub const WORLDMAP_EVENT_TOPIC: &str = "worldmap/event";
-pub const CHARGER_REQUEST: &str = "charger/request"; // vehicle send request to all chargers
-pub const CHARGER_OFFER: &str = "charger/offer"; // charger sends offer to vehicle
-pub const CHARGER_ACCEPT: &str = "charger/accept";
+pub const CHARGER_REQUEST: &str = "charger/request";// vehicle send request to all chargers
+pub const CHARGER_OFFER: &str = "charger/offer";// charger sends offer to vehicle
+pub const CHARGER_ACCEPT: &str = "charger/accept";// vehicle accepts offer from charger
+pub const CHARGER_ARRIVAL: &str = "charger/arrival";// vehicle sends arrival to charger
+pub const CHARGER_PORT: &str = "charger/port";// charger sends port to charge at to vehicle
+pub const CHARGER_CHARGING: &str = "charger/charging";// vehicle requests energy from the charger
 pub const VEHICLE_TOPIC: &str = "vehicle";
 pub const MQTT_BROKER: &str = "mosquitto_broker";
 pub const MQTT_BROKER_PORT: u16 = 1883;
@@ -48,17 +51,66 @@ const WEST_LIMIT: (f64, f64) = (51.00929968161735, 6.282484743251983);
  * Position represents a geographical position with latitude and longitude.
  * It is used to represent the position of vehicles, chargers, and other entities in the system.
  */
-#[derive(Debug, Clone, Copy, PartialEq, serde::Deserialize, serde::Serialize, Encode, Decode)]
+#[derive(Debug, Clone, Copy, PartialEq, Encode, Decode)]
 pub struct Position {
     pub latitude: f64,
     pub longitude: f64,
 }
 
 impl Position {
+    /**
+     * # Description
+     * Creates a new Position instance with the given latitude and longitude.
+     * 
+     * # Parameters
+     * - `latitude`: The latitude of the position.
+     * - `longitude`: The longitude of the position.
+     * 
+     * # Returns
+     * - A new Position instance.
+     */
     pub fn new(latitude: f64, longitude: f64) -> Self {
         Position { latitude, longitude }
     }
 
+    /**
+     * # Decscription
+     * Calculates the distance to another position using the Haversine formula.
+     * 
+     * # Parameters
+     * - `other_position`: The position to which the distance is calculated.
+     * 
+     * # Returns
+     * - The distance in kilometers between the two positions.
+     */
+    pub fn distance_to(&self, other_position: Position) -> f64 {
+        let earth_radius_km = 6371.0; // Radius of the Earth in kilometers
+
+        let lat1_rad = self.latitude.to_radians();
+        let lon1_rad = self.longitude.to_radians();
+        let lat2_rad = other_position.latitude.to_radians();
+        let lon2_rad = other_position.longitude.to_radians();
+
+        let delta_lat = lat2_rad - lat1_rad;
+        let delta_lon = lon2_rad - lon1_rad;
+
+        let a = (delta_lat / 2.0).sin().powi(2)
+            + lat1_rad.cos() * lat2_rad.cos() * (delta_lon / 2.0).sin().powi(2);
+        let c = 2.0 * a.sqrt().atan2((1.0 - a).sqrt());
+
+        earth_radius_km * c
+    }
+
+    /**
+     * # Description
+     * Creates a new Position instance from a tuple containing latitude and longitude.
+     * 
+     * # Parameters
+     * - `position`: A tuple containing the latitude and longitude.
+     * 
+     * # Returns
+     * - A new Position instance.
+     */
     pub fn from_tuple(position: (f64, f64)) -> Self {
         Position {
             latitude: position.0,
@@ -66,20 +118,24 @@ impl Position {
         }
     }
 
+    /**
+     * # Description
+     * Converts the Position instance into a tuple containing latitude and longitude.
+     * 
+     * # Returns
+     * - A tuple containing the latitude and longitude of the position.
+     */
     pub fn to_tuple(&self) -> (f64, f64) {
         (self.latitude, self.longitude)
     }
 }
 
-pub fn generate_latitude_longitude_within_germany() -> (f64, f64) {
-    let mut rng = rand::rng();
-    let latitude = rng.random_range(SOUTH_LIMIT.0..NORTH_LIMIT.0);
-    let longitude = rng.random_range(WEST_LIMIT.1..EAST_LIMIT.1);
-    (latitude, longitude)
-}
-
 /**
- * Generates a random position within the defined limits of Germany.
+ * # Description
+ * Generates a random position within the defined geographical limits.
+ * 
+ * # Returns
+ * - A Position instance with random latitude and longitude values.
  */
 pub fn generate_rnd_pos() -> Position {
     let mut rng = rand::rng();

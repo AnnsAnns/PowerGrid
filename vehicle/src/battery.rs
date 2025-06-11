@@ -2,62 +2,89 @@ use serde::Serialize;
 
 #[derive(Debug, Serialize)]
 pub struct Battery {
-    capacity: f64, // in Wh
-    level: f64, // in Wh
-    max_charge: f64, // in W
+    capacity: usize, // in kWh
+    level: usize, // in kWh
+    max_charge: usize, // in kW
 }
 
 impl Battery {
+    /**
+     * Creates a new Battery instance.
+     * 
+     * # Arguments
+     * `capacity`: The total capacity of the battery in kWh.
+     * `soc`: The initial state of charge of the battery (0..1).
+     * `max_charge`: The maximum charge rate of the battery in kW.
+     */
     pub fn new(
-        capacity: f64,
-        soc: f64, // State of Charge (0..1)
-        max_charge: f64,
+        capacity: usize,
+        soc: f64,
+        max_charge: usize,
     ) -> Self {
         Battery {
             capacity,
-            level: capacity * soc,
+            level: (capacity as f64 * soc) as usize,
             max_charge,
         }
     }
 
-    pub fn state_of_charge(&self) -> f64 {
-        self.level / self.capacity
+    /**
+     * Returns the total capacity of the battery in kWh.
+     */
+    pub fn get_capacity(&self) -> usize {
+        self.capacity
     }
 
+    /**
+     * Returns the current level of the battery in kWh.
+     */
+    pub fn get_level(&self) -> usize {
+        self.level
+    }
+
+    /**
+     * Returns the state of charge (SoC) of the battery as a percentage (0..1).
+     */
+    pub fn get_soc(&self) -> f64 {
+        self.level as f64 / self.capacity as f64
+    }
+
+    /**
+     * Returns the free capacity of the battery in kWh.
+     */
     pub fn get_free_capacity(&self) -> usize {
         self.capacity as usize - self.level as usize
     }
 
-    pub fn add_charge(&mut self, charge: f64) -> f64 {
+    pub fn add_charge(&mut self, charge: usize) -> usize {
         // apply scaling
         let applied_charge = charge.min(self.max_charge);
-        let charge_rate = applied_charge * self.charge_scaling();
+        let charge_rate = applied_charge as f64 * self.charge_scaling();
         
         // consume energy
         let charge_efficiency = 0.9;
         let charge_efficiency = charge_efficiency;
-        let energy_drawn = charge_rate;
-        let energy_added = energy_drawn * charge_efficiency;
+        let energy_added = (charge_rate  * charge_efficiency) as usize;
         self.level = (self.level + energy_added).min(self.capacity);
-        energy_drawn
+        charge_rate as usize
     }
     
-    pub fn remove_charge(&mut self, charge: f64) -> f64 {
+    pub fn remove_charge(&mut self, charge: usize) -> usize {
         let discharge_efficiency = 0.94;
-        let energy_demand = charge * discharge_efficiency;
+        let energy_demand = (charge as f64 * discharge_efficiency) as usize;
         let energy_delivered = if self.level >= energy_demand {
             self.level -= energy_demand;
             energy_demand
         } else {
-            let actual_energy = self.level * discharge_efficiency;
-            self.level = 0.0;
-            actual_energy
+            let actual_energy = self.level as f64 * discharge_efficiency;
+            self.level = 0;
+            actual_energy as usize
         };
         energy_delivered
     }
 
     fn charge_scaling(&self) -> f64 {
-        let soc = self.state_of_charge();
+        let soc = self.get_soc();
 
         // trickle charging (0..10%)
         if soc < 0.1 {
