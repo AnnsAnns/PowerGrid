@@ -59,7 +59,7 @@ pub async fn process_tick(handler: SharedVehicle) {// TODO: rework this function
             task::spawn(create_charger_request(handler.clone()));
         }
 
-        if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination() {// Reached destination so generate a new one
+        if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination() {// Reached destination so generate a new one// Reached destination so generate a new one
             locked_handler.vehicle.set_destination(generate_rnd_pos());
         }
     } else {// Driving to a charger
