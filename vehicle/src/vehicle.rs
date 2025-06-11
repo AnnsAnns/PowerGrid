@@ -114,10 +114,6 @@ impl Vehicle {
         self.destination = destination;
     }
 
-    pub fn get_consumption(&self) -> f64 {
-        self.consumption
-    }
-
     pub fn get_speed_mps(&self) -> f64 {
         self.speed
     }
@@ -136,14 +132,6 @@ impl Vehicle {
 
     pub fn battery_non_mut(&self) -> &Battery {
         &self.battery
-    }
-
-    pub fn get_port(&self) -> Option<usize> {
-        self.port
-    }
-
-    pub fn set_port(&mut self, port: Option<usize>) {
-        self.port = port;
     }
 
     pub fn get_longitude(&self) -> f64 {

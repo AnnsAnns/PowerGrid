@@ -77,8 +77,7 @@ pub async fn process_tick(handler: SharedVehicle) {
     {
         debug!("{} has arrived at the destination, requesting charge", locked_handler.vehicle.get_name());
         locked_handler.vehicle.set_status(VehicleStatus::Charging);
-        // Create an arrival message to send to the charger
-        task::spawn(create_arrival(handler.clone()));
+        // TODO: Charge
     } else if locked_handler.vehicle.get_status().eq(&VehicleStatus::RANDOM) || locked_handler.vehicle.get_status().eq(&VehicleStatus::SearchingForCharger) {
         // locked_handler.vehicle.drive(50.0);
     }
