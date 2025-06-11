@@ -34,6 +34,7 @@ pub const CHARGER_OFFER: &str = "charger/offer";// charger sends offer to vehicl
 pub const CHARGER_ACCEPT: &str = "charger/accept";// vehicle accepts offer from charger
 pub const CHARGER_CHARGING_GET: &str = "charger/charging/get";// vehicle requests energy from the charger
 pub const CHARGER_CHARGING_ACK: &str = "charger/charging/ack";// charger responds with energy to vehicle
+pub const CHARGER_CHARGING_RELEASE: &str = "charger/charging/release";
 pub const VEHICLE_TOPIC: &str = "vehicle";
 pub const MQTT_BROKER: &str = "mosquitto_broker";
 pub const MQTT_BROKER_PORT: u16 = 1883;

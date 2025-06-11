@@ -363,7 +363,7 @@
         "height": "1",
         "name": "",
         "label": "Simulation Speed",
-        "format": "{{msg.payload.configuration.speed}}s/tick",
+        "format": "{{msg.payload.configuration.speed}}s per Tick",
         "layout": "row-spread",
         "className": "",
         "style": false,

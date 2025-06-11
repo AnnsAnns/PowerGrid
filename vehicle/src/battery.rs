@@ -77,12 +77,13 @@ impl Battery {
         // calculate energy that could be added
         let charge_efficiency = 0.9;
         let energy_added = charge_rate * charge_efficiency;
-        (energy_added as usize).min(self.get_free_capacity())
+        (energy_added.max(1.0) as usize).min(self.get_free_capacity())
     }
 
     pub fn add_charge(&mut self, charge: usize) -> usize {
         // apply scaling
         let energy_added = self.max_addable_charge(Some(charge));
+
         self.level = (self.level + energy_added as f64).min(self.capacity as f64);
         energy_added as usize
     }

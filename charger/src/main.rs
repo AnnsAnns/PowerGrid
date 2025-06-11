@@ -1,17 +1,22 @@
+use car_handling::{accept_handler, answer_get, receive_request};
 use charger::Charger;
 use log::{debug, info};
 use offer_handling::ReservedOffer;
-use powercable::{generate_rnd_pos, generate_unique_name, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CHARGER_ACCEPT, CHARGER_CHARGING_GET, CHARGER_REQUEST, TICK_TOPIC};
+use powercable::{
+    generate_rnd_pos, generate_unique_name, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CHARGER_ACCEPT,
+    CHARGER_CHARGING_GET, CHARGER_CHARGING_RELEASE, CHARGER_REQUEST, TICK_TOPIC,
+};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task};
 use topic_handler::{accept_offer_handler, tick_handler};
-use car_handling::{receive_request, accept_handler, answer_get};
 
-mod charger;
-mod topic_handler;
+use crate::car_handling::release_car;
+
 mod car_handling;
+mod charger;
 mod offer_handling;
+mod topic_handler;
 
 type SharedCharger = Arc<Mutex<ChargerHandler>>;
 
@@ -26,14 +31,16 @@ struct ChargerHandler {
 #[tokio::main]
 async fn main() {
     let charger_name: String = format!("Charger {}", generate_unique_name());
-    let log_path = format!("logs/charger_{}.log", charger_name.clone().replace(" ", "_"));
+    let log_path = format!(
+        "logs/charger_{}.log",
+        charger_name.clone().replace(" ", "_")
+    );
     let _log2 = log2::open(log_path.as_str()).level("info").start();
     info!("Starting charger simulation...");
 
-    let charger =
-        Charger::new(charger_name.clone(), generate_rnd_pos(), 300, 1000, 5);
+    let charger = Charger::new(charger_name.clone(), generate_rnd_pos(), 100, 300, 5);
     info!("{:#?}", charger);
-    
+
     let mut mqttoptions = MqttOptions::new(
         charger_name.clone(),
         powercable::MQTT_BROKER,
@@ -59,6 +66,10 @@ async fn main() {
         .unwrap();
     client
         .subscribe(CHARGER_CHARGING_GET, QoS::ExactlyOnce)
+        .await
+        .unwrap();
+    client
+        .subscribe(CHARGER_CHARGING_RELEASE, QoS::ExactlyOnce)
         .await
         .unwrap();
     info!("Connected to MQTT broker");
@@ -88,6 +99,9 @@ async fn main() {
                 }
                 CHARGER_CHARGING_GET => {
                     task::spawn(answer_get(shared_charger.clone(), p.payload));
+                }
+                CHARGER_CHARGING_RELEASE => {
+                    let _ = task::spawn(release_car(shared_charger.clone(), p.payload));
                 }
                 _ => {
                     let _ = task::spawn(async move {

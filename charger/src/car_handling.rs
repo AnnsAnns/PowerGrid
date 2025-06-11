@@ -74,7 +74,7 @@ pub async fn accept_handler(charger: SharedCharger, payload: Bytes) {
         return;
     } else if &acceptance.charger_name != handler.charger.get_name() {
         warn!("We were not accepted by {}, removing from reserved list", acceptance.vehicle_name);
-        handler.release_offer(acceptance.vehicle_name.clone());
+        handler.release_offer(acceptance.vehicle_name.clone(), true);
     } else {
         info!("We were accepted by {}", acceptance.vehicle_name);
         handler.accept_reserve(acceptance.vehicle_name.clone());
@@ -110,5 +110,20 @@ pub async fn answer_get(charger: SharedCharger, payload: Bytes) {
             false,
             get.to_bytes(),
         ).await.unwrap();
+    }
+}
+
+pub async fn release_car(charger: SharedCharger, payload: Bytes) {
+    let mut handler = charger.lock().await;
+
+    // Deserialize the payload into a Get object
+    trace!("Received release payload: {:?}", payload);
+    let get: Get = Get::from_bytes(payload).unwrap();
+
+    if get.charger_name.eq(handler.charger.get_name()) {
+        info!("Received release request from {}", get.vehicle_name);
+        handler.release_offer(get.vehicle_name, false);
+    } else {
+        warn!("Received release request for {} but we are not the charger", get.charger_name);
     }
 }
