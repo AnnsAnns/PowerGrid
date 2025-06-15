@@ -1,35 +1,44 @@
-use std::f64::consts::PI;
-use log::info;
-use powercable::{tickgen::INTERVAL_15_MINS, Position};
+use log::debug;
+use powercable::{tickgen::PHASE_AS_HOUR, Position};
 use rand::Rng;
 use serde::Serialize;
 
 use crate::{battery::Battery, database::random_ev};
 
-const INTERVAL_5_MINS: usize = INTERVAL_15_MINS / 3;
+const ROLLING_RESISTANCE: f64 = 0.0005; // approximate coefficient
+const AERODYNAMIC_DRAG: f64 = 0.00003; // approximate drag factor
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-/**
- * VehicleStatus represents the current status of a vehicle.
- * It can be one of the following:
- * - Randp,: Vehicle is driving randomly
- * - SearchingForCharger: Vehicle is searching for a charging station
- * - Charging: Vehicle is currently charging
- * - Broken: Vehicle is broken and cannot be used
- */
+/// # Description
+/// The `VehicleStatus` enum represents the different states a vehicle can be in.
+/// 
+/// # Variants
+/// - `RANDOM`: The vehicle is in a random state.
+/// - `SearchingForCharger`: The vehicle is looking for a charger.
+/// - `Charging`: The vehicle is currently charging.
+/// - `Broken`: The vehicle is broken and cannot be used.
 pub enum VehicleStatus {
     RANDOM,
+    WAITING,
     SearchingForCharger,
     Charging,
     Broken,
 }
 
 #[derive(Debug, Serialize)]
-/**
- * Vehicle represents an electric vehicle in the simulation.
- * It contains information about the vehicle's name, model, status, location, destination,
- * consumption, battery, and port number if charging.
- */
+/// # Description
+/// The `Vehicle` struct represents an electric vehicle in our simulation.
+/// It can drive and charge on a `charger::Charger`.
+/// 
+/// # Fields
+/// - `name`: The name of the vehicle.
+/// - `model`: The model of the vehicle.
+/// - `status`: The current status of the vehicle.
+/// - `location`: The current geographical position of the vehicle.
+/// - `destination`: The destination position of the vehicle.
+/// - `consumption`: The consumption of the vehicle in kWh per 100 km.
+/// - `scale`: A scale factor for the vehicle's consumption, default is 1.0.
+/// - `speed`: The speed of the vehicle in km/h, default is 50 km/h.
 pub struct Vehicle {
     name: String,
     model: String,
@@ -38,152 +47,178 @@ pub struct Vehicle {
     destination: Position,
     consumption: f64,
     scale: f64,
-    speed: f64,
+    speed: usize,
     battery: Battery,
 }
 
 impl Vehicle {
-    /**
-     * Creates a new Vehicle instance with a random model, consumption, and battery.
-     * * # Arguments
-     * `name`: The name of the vehicle.
-     * `location`: The geographical position of the vehicle.
-     * # Returns
-     * A new Vehicle instance with the specified name and location, and random model, consumption, and battery.
-     */
+    /// # Description
+    /// Creates a new `Vehicle` instance.
+    /// 
+    /// # Arguments
+    /// - `name`: The name of the vehicle.
+    /// - `location`: The initial geographical position of the vehicle.
+    /// 
+    /// # Returns
+    /// A new `Vehicle` instance with the specified `name` and `location`, and a random `model`, `consumption`, and `battery`.
     pub fn new(
         name: String,
         location: Position,
     ) -> Self {
         let mut rng = rand::rng();
-        let (model, consumption,capacity , max_charge) = random_ev();
+        let (model, consumption, capacity, max_charge) = random_ev();
         let battery = Battery::new(capacity, rng.random_range(0.4..1.0), max_charge);
         Vehicle {
             name,
             model: model.to_owned(),
             status: VehicleStatus::RANDOM,
             location,
-            destination: location, // Initially, the destination is the same as the location
+            destination: location,// Initially, the destination is the same as the location
             consumption,
             scale: 1.0,
-            speed: 50.0 / 3.6,
+            speed: 50,
             battery,
         }
     }
 
-    pub fn get_name(&self) -> &String {
-        &self.name
+    /// # Returns
+    /// The name of the vehicle as a `String`.
+    pub fn get_name(&self) -> String {
+        self.name.clone()
     }
 
-    pub fn get_model(&self) -> &String {
-        &self.model
+    /// # Returns
+    /// The model of the vehicle as a `String`.
+    pub fn get_model(&self) -> String {
+        self.model.clone()
     }
 
-    pub fn get_status(&self) -> &VehicleStatus {
-        &self.status
-    }
-
+    /// # Sets
+    /// The status of the vehicle.
+    /// 
+    /// # Arguments
+    /// - `status`: The new status to set for the vehicle.
     pub fn set_status(&mut self, status: VehicleStatus) {
         self.status = status;
     }
 
+    /// # Returns
+    /// The current status of the vehicle as a `VehicleStatus`.
+    pub fn get_status(&self) -> VehicleStatus {
+        self.status
+    }
+
+    /// # Description
+    /// Returns the consumption of the vehicle in kWh per 100 km.
+    /// The consumption is scaled by the `scale` factor, which can be adjusted.
+    /// 
+    /// # Returns
+    /// The scaled consumption value (kWh/100km).
     pub fn get_consumption(&self) -> f64 {
         self.consumption * self.scale
     }
 
+    /// # Returns
+    /// The speed efficiency factor of the vehicle, which is a function of its speed.
+    /// The higher the speed, the more energy is consumed due to rolling resistance and aerodynamic drag.
+    fn speed_efficiency_factor(&self) -> f64 {
+        1.0 + ROLLING_RESISTANCE * self.speed as f64 + AERODYNAMIC_DRAG * (self.speed as f64).powi(2)
+    }
+
+    /// # Returns
+    /// The current consumption of the vehicle in kWh/100km, adjusted for the vehicle's speed.
+    pub fn get_current_consumption(&self) -> f64 {
+        self.get_consumption() * self.speed_efficiency_factor()
+    }
+
+    /// # Description
+    /// Returns the range of the vehicle in kilometers based on its battery capacity and consumption.
+    /// 
+    /// # Returns
+    /// The range of the vehicle in kilometers.
+    pub fn get_range(&self) -> f64 {
+        self.battery.get_level() / (self.get_consumption() / 100.0)// kWh / kWh/km = km
+    }
+
+    /// # Sets
+    /// The scale factor for the vehicle's consumption.
+    /// 
+    /// # Arguments
+    /// - `scale`: The new scale factor to set.
     pub fn set_scale(&mut self, scale: f64) {
         self.scale = scale;
     }
-  
-    pub fn distance_to(&self, latitude: f64, longitude: f64) -> f64 { // TODO: simplify
-        let this_rad = (Vehicle::to_radians(self.location.latitude), Vehicle::to_radians(self.location.longitude));
-        let other_rad = (Vehicle::to_radians(latitude), Vehicle::to_radians(longitude));
 
-        let lat_diff = other_rad.0 - this_rad.0;
-        let lon_diff = other_rad.1 - this_rad.1;
-
-        let haversine_component = (lat_diff / 2.0).sin().powi(2) + this_rad.0.cos() * other_rad.0.cos() * (lon_diff / 2.0).sin().powi(2);
-        let angular_distance = 2.0 * haversine_component.sqrt().atan2((1.0 - haversine_component).sqrt());
-
-        let earth_radius_km = 6371.0;
-        earth_radius_km * angular_distance
-    }
-
+    /// # Returns
+    /// The location of the vehicle as a `Position`.
     pub fn get_location(&self) -> Position {
         self.location
     }
 
-    pub fn get_destination(&self) -> Position {
-        self.destination
-    }
-
+    /// # Sets
+    /// The destination of the vehicle.
     pub fn set_destination(&mut self, destination: Position) {
         self.destination = destination;
     }
 
-    pub fn get_speed_mps(&self) -> f64 {
+    /// # Returns
+    /// The destination of the vehicle as a `Position`.
+    pub fn get_destination(&self) -> Position {
+        self.destination
+    }    
+
+    /// # Sets
+    /// The speed of the vehicle in km/h.
+    pub fn set_speed(&mut self, speed: usize) {
+        self.speed = speed;
+    }
+
+    /// # Returns
+    /// The speed of the vehicle in km/h.
+    pub fn get_speed(&self) -> usize {
         self.speed
     }
 
-    pub fn get_speed_kph(&self) -> f64 {
-        self.speed * 3.6
-    }
-
-    pub fn set_speed_kph(&mut self, speed_kph: f64) {
-        self.speed = speed_kph / 3.6;
-    }
-
+    /// # Returns
+    /// The battery of the vehicle as a mutable reference.
     pub fn battery(&mut self) -> &mut Battery {
         &mut self.battery
     }
 
+    /// # Returns
+    /// The battery of the vehicle as a non-mutable reference.
     pub fn battery_non_mut(&self) -> &Battery {
         &self.battery
     }
 
-    pub fn get_longitude(&self) -> f64 {
-        self.location.longitude
+    /// # Returns
+    /// The distance from the vehicle's current location to another position.
+    pub fn distance_to(&self, other:Position) -> f64 {
+        self.location.distance_to(other)
     }
 
-    pub fn get_latitude(&self) -> f64 {
-        self.location.latitude
-    }
-
+    /// # Description
     pub fn drive(&mut self) {
-        info!("Driving vehicle: {} to {:?}", self.name, self.destination);
-        if self.status == VehicleStatus::Charging {
-            self.speed = 0.0;
-            return;
-        } else {
-            self.set_speed_kph(50.0);
-        }
+        let wanted_distance = self.get_speed() as f64 * PHASE_AS_HOUR;// km/h * h = km
+        let wanted_energy = (self.get_current_consumption() / 100.0) * wanted_distance;// kWh/km * km = kWh
+        let used_energy = self.battery.remove_charge(wanted_energy);
+        debug!("Wanded distance: {}, wanted energy: {}, used energy: {}", 
+            wanted_distance, wanted_energy, used_energy);
 
-        let distance_now = self.speed * INTERVAL_5_MINS as f64 / 1000.0; // m to km
-        let consumption_now = self.get_consumption() * self.speed_efficiency_factor();
-        let charge_requested = distance_now * consumption_now;
-        let charge_used = self.battery.remove_charge(charge_requested);
-        let charge_factor = charge_requested / charge_used;
+        let charge_factor = wanted_energy / used_energy;
 
-        let total_distance = self.distance_to(self.destination.latitude, self.destination.longitude) * charge_factor;
+        let total_distance = self.distance_to(self.get_destination()) * charge_factor;
+        debug!("Total distance: {}", total_distance);
         if total_distance > 0.0 {
-            let step_ratio = distance_now / total_distance;
+            let step_ratio = wanted_distance/ total_distance;
             self.location.latitude += step_ratio * (self.destination.latitude - self.location.latitude);
             self.location.longitude += step_ratio * (self.destination.longitude - self.location.longitude);
 
             // do the rest for free :)
-            if total_distance <= distance_now {
+            if total_distance <= wanted_distance {
                 self.location = self.destination;
             }
         }
-    }
-
-    fn speed_efficiency_factor(&self) -> f64 {
-        let rolling_resistance = 0.0005; // approximate coefficient
-        let aerodynamic_drag = 0.00003; // approximate drag factor
-        1.0 + rolling_resistance * self.speed + aerodynamic_drag * self.speed.powi(2)
-    }
-
-    fn to_radians(deg: f64) -> f64 {
-        deg * PI / 180.0
+        
     }
 }

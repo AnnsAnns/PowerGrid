@@ -1,13 +1,12 @@
 use std::{sync::Arc, time::Duration};
 
-use log::info;
+use log::{info, trace};
 use powercable::*;
 use rumqttc::{AsyncClient, EventLoop, MqttOptions, QoS};
 use serde_json::json;
-use log2::*;
 use tokio::sync::Mutex;
 
-use crate::{meta_data, precalculated_turbine::{self, PrecalculatedTurbine}, turbine, SharedTurbine, TurbineHandler};
+use crate::{meta_data, precalculated_turbine::{PrecalculatedTurbine}, turbine, SharedTurbine, TurbineHandler};
 
 pub async fn init() -> (SharedTurbine, EventLoop) {
     let (latitude, longitude, name) = {
@@ -17,7 +16,7 @@ pub async fn init() -> (SharedTurbine, EventLoop) {
     };
     let name = format!("{} {}", name, generate_unique_name()); // In cases where we have multiple turbines at the same location, we generate a unique name.
 
-    let mut turbine = turbine::Turbine::new(
+    let turbine = turbine::Turbine::new(
         turbine::random_rotor_dimension(),
         latitude,
         longitude,
@@ -73,15 +72,13 @@ pub async fn publish_location(
     })
     .to_string();
 
-    client
-        .publish(
-            POWER_LOCATION_TOPIC,
-            QoS::ExactlyOnce,
-            true,
-            location_payload,
-        )
-        .await
-        .unwrap();
+    client.publish(
+        POWER_LOCATION_TOPIC,
+        QoS::ExactlyOnce,
+        true,
+        location_payload.clone(),
+    ).await.unwrap();
+    trace!("Published on topic {}: {}", POWER_LOCATION_TOPIC, location_payload.clone());
 }
 
 pub async fn subscribe(handler: SharedTurbine) {

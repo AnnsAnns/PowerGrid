@@ -2,9 +2,7 @@ use log::{debug, info, trace, warn};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration, env};
 use tokio::{sync::Mutex, task};
-use powercable::{
-    generate_rnd_pos, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CONFIG_SCALE_CONSUMER, MQTT_BROKER, MQTT_BROKER_PORT, TICK_TOPIC
-};
+use powercable::{OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CONFIG_SCALE_CONSUMER, TICK_TOPIC,};
 use consumer::{Consumer, ConsumerType};
 use topic_handler::{accept_offer_handler, tick_handler, scale_handler};
 

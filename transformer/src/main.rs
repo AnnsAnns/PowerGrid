@@ -1,5 +1,5 @@
 use log::{debug, info, warn};
-use powercable::{tickgen::{Phase, TickPayload, INTERVAL_15_MINS}, ChartEntry, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, POWER_TRANSFORMER_PRICE_TOPIC};
+use powercable::{tickgen::{Phase, TickPayload, TICK_AS_SEC}, ChartEntry, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, POWER_TRANSFORMER_PRICE_TOPIC};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::time::Duration;
 use transformer::Transformer;
@@ -61,7 +61,7 @@ async fn main() {
                             ChartEntry::new(
                                 "Consumption".to_string(),
                                 transformer.get_current_consumption() as isize,
-                                tick_payload.timestamp - INTERVAL_15_MINS,
+                                tick_payload.timestamp - TICK_AS_SEC,
                             ).to_string(),
                         )
                         .await
@@ -74,7 +74,7 @@ async fn main() {
                             ChartEntry::new(
                                 "Generation".to_string(),
                                 transformer.get_current_power() as isize,
-                                tick_payload.timestamp - INTERVAL_15_MINS,
+                                tick_payload.timestamp - TICK_AS_SEC,
                             ).to_string(),
                         )
                         .await
@@ -87,7 +87,7 @@ async fn main() {
                             ChartEntry::new(
                                 OWN_TOPIC.to_string(),
                                 transformer.get_difference() as isize,
-                                tick_payload.timestamp - INTERVAL_15_MINS,
+                                tick_payload.timestamp - TICK_AS_SEC,
                             ).to_string(),
                         )
                         .await
@@ -100,7 +100,7 @@ async fn main() {
                         ChartEntry::new(
                             "Lowest Sell Price".to_string(),
                             (lowest_sell_price_of_tick * 100.0) as isize,
-                            tick_payload.timestamp - INTERVAL_15_MINS,
+                            tick_payload.timestamp - TICK_AS_SEC,
                         ).to_string(),
                     ).await.unwrap();
 
@@ -117,7 +117,7 @@ async fn main() {
                         ChartEntry::new(
                             "Average Sell Price".to_string(),
                             average_sell_price,
-                            tick_payload.timestamp - INTERVAL_15_MINS,
+                            tick_payload.timestamp - TICK_AS_SEC,
                         ).to_string(),
                     ).await.unwrap();
 

@@ -1,6 +1,6 @@
 use log::{debug, info, warn};
 use powercable::{
-    tickgen::{Phase, TickPayload, INTERVAL_15_MINS}, ChartEntry, Offer, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, MAP_UPDATE_SPEED_IN_SECS, POWER_LOCATION_TOPIC, POWER_TRANSFORMER_EARNED_TOPIC, POWER_TRANSFORMER_GENERATION_TOPIC
+    tickgen::{Phase, TickPayload, TICK_AS_SEC}, ChartEntry, Offer, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, MAP_UPDATE_SPEED_IN_SECS, POWER_LOCATION_TOPIC, POWER_TRANSFORMER_EARNED_TOPIC, POWER_TRANSFORMER_GENERATION_TOPIC
 };
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use serde_json::json;
@@ -158,7 +158,7 @@ async fn process_tick(handler: Arc<Mutex<FusionReactor>>, tick_payload: TickPayl
         ChartEntry::new(
             OWN_TOPIC.to_string(),
             handler.cash_earned as isize,
-            tick_payload.timestamp - INTERVAL_15_MINS,
+            tick_payload.timestamp - TICK_AS_SEC,
         ).to_string(),
     ).await.unwrap();
 
@@ -171,7 +171,7 @@ async fn process_tick(handler: Arc<Mutex<FusionReactor>>, tick_payload: TickPayl
             ChartEntry::new(
                 OWN_TOPIC.to_string(),
                 handler.power_sold_this_tick as isize,
-                tick_payload.timestamp - INTERVAL_15_MINS,
+                tick_payload.timestamp - TICK_AS_SEC,
             )
             .to_string(),
         )

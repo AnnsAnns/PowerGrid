@@ -29,13 +29,13 @@ async fn main() {
     // init vehicle
     let vehicle_name: String = powercable::generate_unique_name();
     let vehicle = Vehicle::new(vehicle_name.clone(), powercable::generate_rnd_pos());
-
+    
     let log_path = format!(
         "logs/vehicle_{}.log",
         vehicle_name.clone().replace(" ", "_")
     );
     let _log2 = log2::open(log_path.as_str()).level("info").start();
-
+    
     info!("{:#?}", vehicle);
 
     let mut mqttoptions = MqttOptions::new(

@@ -1,7 +1,6 @@
-use log::{debug, warn};
+use log::debug;
 use powercable::{offer::structure::OFFER_PACKAGE_SIZE, Position};
 
-#[derive(Debug, Clone)]
 /**
  * # Description
  * Represents a charger in the simulation.
@@ -16,6 +15,7 @@ use powercable::{offer::structure::OFFER_PACKAGE_SIZE, Position};
  * - `charging_ports`: The number of charging ports available on the charger.
  * - `reserved_ports`: The number of charging ports currently reserved.
  */
+#[derive(Debug, Clone)]
 pub struct Charger {
     name: String,
     position: Position,
@@ -104,8 +104,8 @@ impl Charger {
         }
     }
 
-    pub fn get_position(&self) -> &Position {
-        &self.position
+    pub fn get_position(&self) -> Position {
+        self.position
     }
 
     pub fn get_latitude(&self) -> f64 {
@@ -137,7 +137,7 @@ impl Charger {
     }
 
     pub fn get_current_price(&self) -> f64 {
-        1.0 - self.get_charge_percentage()
+        1.1 - self.get_charge_percentage()// TODO: !!!@Tom!!! habe das auf 1.1 gesetzt, damit es nie 0.0 wird, weil dann alle Offers gleichen Preis haben obowhl sie unterschiedlich weit weg sind
     }
 
     /// Gets the amount of charge needed to fill the charger

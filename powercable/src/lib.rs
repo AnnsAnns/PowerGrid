@@ -65,31 +65,27 @@ pub struct Position {
 }
 
 impl Position {
-    /**
-     * # Description
-     * Creates a new Position instance with the given latitude and longitude.
-     * 
-     * # Parameters
-     * - `latitude`: The latitude of the position.
-     * - `longitude`: The longitude of the position.
-     * 
-     * # Returns
-     * - A new Position instance.
-     */
+    /// # Description
+    /// Creates a new Position instance with the specified latitude and longitude.
+    /// 
+    /// # Parameters
+    /// - `latitude`: The latitude of the position in degrees.
+    /// - `longitude`: The longitude of the position in degrees.
+    /// 
+    /// # Returns
+    /// - A new Position instance with the specified latitude and longitude.
     pub fn new(latitude: f64, longitude: f64) -> Self {
         Position { latitude, longitude }
     }
 
-    /**
-     * # Decscription
-     * Calculates the distance to another position using the Haversine formula.
-     * 
-     * # Parameters
-     * - `other_position`: The position to which the distance is calculated.
-     * 
-     * # Returns
-     * - The distance in kilometers between the two positions.
-     */
+    /// # Description
+    /// Calculates the distance to another position using the Haversine formula.
+    /// 
+    /// # Parameters
+    /// - `other_position`: The other position to which the distance is calculated.
+    /// 
+    /// # Returns
+    /// - The distance in kilometers between the two positions.
     pub fn distance_to(&self, other_position: Position) -> f64 {
         let earth_radius_km = 6371.0; // Radius of the Earth in kilometers
 
@@ -108,16 +104,14 @@ impl Position {
         earth_radius_km * c
     }
 
-    /**
-     * # Description
-     * Creates a new Position instance from a tuple containing latitude and longitude.
-     * 
-     * # Parameters
-     * - `position`: A tuple containing the latitude and longitude.
-     * 
-     * # Returns
-     * - A new Position instance.
-     */
+    /// # Description
+    /// Creates a new Position instance from a tuple containing latitude and longitude.
+    /// 
+    /// # Parameters
+    /// - `position`: A tuple containing the latitude and longitude of the position.
+    /// 
+    /// # Returns
+    /// - A new Position instance with the specified latitude and longitude.
     pub fn from_tuple(position: (f64, f64)) -> Self {
         Position {
             latitude: position.0,
@@ -125,25 +119,21 @@ impl Position {
         }
     }
 
-    /**
-     * # Description
-     * Converts the Position instance into a tuple containing latitude and longitude.
-     * 
-     * # Returns
-     * - A tuple containing the latitude and longitude of the position.
-     */
+    /// # Description
+    /// Converts the Position instance to a tuple containing latitude and longitude.
+    /// 
+    /// # Returns
+    /// - A tuple containing the latitude and longitude of the position.
     pub fn to_tuple(&self) -> (f64, f64) {
         (self.latitude, self.longitude)
     }
 }
 
-/**
- * # Description
- * Generates a random position within the defined geographical limits.
- * 
- * # Returns
- * - A Position instance with random latitude and longitude values.
- */
+/// # Description
+/// Generates a random geographical position within the defined limits of Germany.
+/// 
+/// # Returns
+/// - A Position instance with a random latitude and longitude.
 pub fn generate_rnd_pos() -> Position {
     let mut rng = rand::rng();
     let latitude = rng.random_range(SOUTH_LIMIT.0..NORTH_LIMIT.0);

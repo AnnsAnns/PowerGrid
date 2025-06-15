@@ -2,7 +2,7 @@ use bytes::Bytes;
 use log::{debug, info, warn};
 use powercable::{
     offer::structure::OFFER_PACKAGE_SIZE,
-    tickgen::{Phase, TickPayload, INTERVAL_15_MINS},
+    tickgen::{Phase, TickPayload, TICK_AS_SEC},
     ChartEntry, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, BUY_OFFER_TOPIC, POWER_CHARGER_TOPIC,
     POWER_LOCATION_TOPIC, POWER_TRANSFORMER_CONSUMPTION_TOPIC,
 };
@@ -38,7 +38,7 @@ async fn process_tick(handler: SharedCharger, payload: TickPayload) {
     // Publish the amount of power we consumed in the last tick
     {
         let mut handler = handler.lock().await;
-        let last_timestamp = payload.timestamp - INTERVAL_15_MINS;
+        let last_timestamp = payload.timestamp - TICK_AS_SEC;
 
         handler
             .client

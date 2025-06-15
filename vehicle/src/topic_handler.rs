@@ -1,5 +1,5 @@
 use bytes::Bytes;
-use log::{trace, debug, info, warn};
+use log::{trace, debug, info};
 use powercable::{generate_rnd_pos, tickgen::{Phase, TickPayload}, POWER_LOCATION_TOPIC, VEHICLE_TOPIC};
 use rumqttc::QoS;
 use serde::{Deserialize, Serialize};
@@ -37,7 +37,14 @@ pub async fn tick_handler(handler: SharedVehicle, payload: Bytes) {
     }
 
     // do these actions on all ticks (every 5 minutes)
-    handler.lock().await.vehicle.drive();
+    {
+        let mut l_handler = handler.lock().await;
+        if l_handler.vehicle.get_status() == VehicleStatus::RANDOM
+            || l_handler.vehicle.get_status() == VehicleStatus::SearchingForCharger
+        {
+            l_handler.vehicle.drive();
+        }
+    }
     publish_vehicle(handler.clone()).await;
     publish_location(handler.clone()).await;
 }
@@ -68,7 +75,6 @@ pub async fn process_tick(handler: SharedVehicle) {// TODO: rework this function
             && locked_handler.vehicle.get_status().eq(&VehicleStatus::SearchingForCharger) {
             info!("{} has arrived at the destination, requesting charge", locked_handler.vehicle.get_name());
             locked_handler.vehicle.set_status(VehicleStatus::Charging);
-            // TODO: Charge
         }
         if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination()
             && locked_handler.vehicle.get_status().eq(&VehicleStatus::Charging) {
@@ -93,8 +99,8 @@ pub async fn publish_vehicle(handler: SharedVehicle) {
     // Extract all values before mutably borrowing client
     let name = handler.vehicle.get_name().clone();
     let mut vehicle_payload = json!(handler.vehicle);
-    vehicle_payload["speed_kph"] = json!(handler.vehicle.get_speed_kph());
-    vehicle_payload["soc"] = json!((handler.vehicle.battery().get_soc() * 100.0) as u32);
+    vehicle_payload["speed_kph"] = json!(handler.vehicle.get_speed());
+    vehicle_payload["soc"] = json!((handler.vehicle.battery().get_soc_percentage()) as u32);
 
     let client = &mut handler.client;
     client
@@ -114,8 +120,7 @@ pub async fn publish_location(handler: SharedVehicle) {
     let name = handler.vehicle.get_name().clone();
     let location = handler.vehicle.get_location();
     let destination = handler.vehicle.get_destination();
-    let speed = handler.vehicle.get_speed_kph();
-    let percentage = handler.vehicle.battery().get_soc() * 100.0;
+    let percentage = handler.vehicle.battery().get_soc_percentage();// TODO: why still warning about speed?
     let client = &mut handler.client;
     let location_payload = json!({
         "name" : name,

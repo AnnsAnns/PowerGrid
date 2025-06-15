@@ -5,11 +5,14 @@ use tokio::{
     io::{AsyncBufReadExt, BufReader},
 };
 
+/// # Description
+/// ConsumerType represents the type of consumer in the system.
+/// 
+/// # Variants
+/// - `H`: Household consumer
+/// - `G`: Commercial consumer
+/// - `L`: Agricultural consumer
 #[derive(Debug, Clone, Copy)]
-/**
- * ConsumerType represents the type of consumer.
- * It can be Household (H), Business (G), or Farmer (L).
- */
 pub enum ConsumerType {
     H,
     G,
@@ -51,11 +54,16 @@ impl ConsumerType {
     }
 }
 
-/**
- * Consumer represents a consumer in the system.
- * It has a position, type, current consumption, and a timeline of demand.
- * The timeline is loaded from a CSV file and contains the demand for each time step.
- */
+/// # Description
+/// Consumer represents a consumer in the system.
+/// 
+/// # Fields
+/// - `position`: The geographical position of the consumer.
+/// - `consumer_type`: The type of consumer (Household, Commercial, Agricultural).
+/// - `current_consumption`: The current consumption of the consumer in kWh.
+/// - `scale`: The scale of the consumer, used to adjust the demand.
+/// - `timeline`: A vector representing the demand timeline of the consumer.
+/// - `current_pointer`: A pointer to the current position in the timeline for demand calculation.
 pub struct Consumer {
     position: Position,
     consumer_type: ConsumerType,
@@ -85,8 +93,8 @@ impl Consumer {
         self.position.longitude
     }
 
-    pub fn get_position(&self) -> &Position {
-        &self.position
+    pub fn get_position(&self) -> Position {
+        self.position
     }
 
     pub fn get_consumer_type(&self) -> &ConsumerType {
@@ -132,25 +140,21 @@ impl Consumer {
         Ok(())
     }
 
-    /**
-     * # Description
-     * Returns the current demand based on the timeline and scale.
-     * 
-     * # Returns
-     * The current demand as a usize.
-     */
+    /// # Description
+    /// Returns the current demand of the consumer based on the timeline and scale.
+    /// 
+    /// # Returns
+    /// The current demand in kWh, adjusted by the scale factor.
     pub fn get_demand(&self) -> usize {
         (self.timeline.get(self.current_pointer).unwrap().clone() * self.scale as f32)
             as usize
     }
 
-    /**
-     * # Description
-     * Sets the scale of the consumer.
-     * 
-     * # Arguments
-     * `scale`: The new scale to set.
-     */
+    /// # Description
+    /// Sets the scale of the consumer.
+    /// 
+    /// # Arguments
+    /// - `scale`: The new scale value to set for the consumer.
     pub fn set_scale(&mut self, scale: usize) {
         self.scale = scale;
     }
