@@ -1,6 +1,13 @@
 use bytes::Bytes;
 
-pub const INTERVAL_15_MINS: usize = 900; // 15 minutes in seconds
+pub const TICK_AS_MIN: usize = 15;// our tick in minutes
+
+// do not change these values
+pub const TICK_AS_SEC: usize = TICK_AS_MIN * 60;// our tick in seconds
+pub const TICK_AS_HOUR: f64 = TICK_AS_MIN as f64 / 60.0;// our tick in hours
+pub const PHASE_AS_MIN: usize = TICK_AS_MIN / 3;// our phase in minutes
+pub const PHASE_AS_SEC: usize = PHASE_AS_MIN * 60;// our phase in seconds
+pub const PHASE_AS_HOUR: f64 = PHASE_AS_MIN as f64 / 60.0;// our phase in hours
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum Phase {

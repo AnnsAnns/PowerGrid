@@ -1,14 +1,11 @@
 use bytes::Bytes;
-use chrono::{NaiveDateTime, NaiveTime, Timelike};
 use log::{debug, info, trace, warn};
 use powercable::{
     offer::structure::OFFER_PACKAGE_SIZE,
     tickgen::{Phase, TickPayload},
-    ChartEntry, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, BUY_OFFER_TOPIC, POWER_CONSUMER_TOPIC,
-    POWER_LOCATION_TOPIC, POWER_TRANSFORMER_CONSUMPTION_TOPIC,
+    ChartEntry, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, BUY_OFFER_TOPIC, POWER_TRANSFORMER_CONSUMPTION_TOPIC,
 };
 use rumqttc::QoS::*;
-use serde_json::json;
 
 use crate::SharedConsumer;
 
@@ -16,7 +13,7 @@ pub async fn tick_handler(handler: SharedConsumer, payload: Bytes) {
     let tick_payload: TickPayload = serde_json::from_slice(&payload).unwrap();
     match tick_payload.phase {
         Phase::Process => {
-            process_tick(handler, payload).await;
+            process_tick(handler).await;
         }
         Phase::Commerce => {
             commerce_tick(handler, payload).await;
@@ -27,7 +24,7 @@ pub async fn tick_handler(handler: SharedConsumer, payload: Bytes) {
     }
 }
 
-pub async fn process_tick(handler: SharedConsumer, payload: Bytes) {
+pub async fn process_tick(handler: SharedConsumer) {
     let mut demand = {
         let mut handler = handler.lock().await;
         handler.consumer.tick();

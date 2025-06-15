@@ -5,7 +5,6 @@ use precalculated_turbine::PrecalculatedTurbine;
 use rumqttc::AsyncClient;
 use std::sync::Arc;
 use tokio::{sync::Mutex, task};
-use turbine::Turbine;
 
 mod handler;
 mod init;

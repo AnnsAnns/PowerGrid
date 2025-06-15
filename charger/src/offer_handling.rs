@@ -1,9 +1,16 @@
 use crate::ChargerHandler;
 use log::debug;
 
-/**
- *
- */
+/// # Description
+/// The `ReservedOffer` struct represents an offer that the charger has reserved for a vehicle.
+/// Its used only in the charger to manage reserved offers.
+/// 
+/// # Fields
+/// - `id`: A unique identifier for the reserved offer.
+/// - `quantity`: The amount of charge reserved for the offer, in kWh.
+/// - `price`: The price per unit of charge for the reserved offer.
+/// - `was_accepted`: A boolean indicating whether the offer was accepted by the vehicle or not.
+#[derive(Debug, Clone)]
 pub struct ReservedOffer {
     id: String,
     quantity: usize,
@@ -12,6 +19,16 @@ pub struct ReservedOffer {
 }
 
 impl ReservedOffer {
+    /// # Description
+    /// Creates a new `ReservedOffer` instance with the specified parameters.
+    /// 
+    /// # Parameters
+    /// - `id`: A unique identifier for the reserved offer.
+    /// - `quantity`: The amount of charge reserved for the offer, in kWh.
+    /// - `price`: The price per unit of charge for the reserved offer.
+    /// 
+    /// # Returns
+    /// A new `ReservedOffer` instance.
     pub fn new(id: String, quantity: usize, price: f64) -> Self {
         ReservedOffer {
             id,
@@ -64,26 +81,26 @@ impl ChargerHandler {
         self.currently_reserved_for.retain(|o| o.id != offer_id);
     }
 
-    /// Get a reserved offer by its ID
+    /// # Description
+    /// Get a reserved offer by its ID.<br>
+    /// This method searches for a reserved offer by its ID and returns it if found.<br>
+    /// If the offer is not found, it returns `None`.
     ///
     /// # Arguments
-    /// * `offer_id` - The ID of the offer to retrieve
-    ///
-    /// This method searches for a reserved offer by its ID and returns it if found.
-    /// If the offer is not found, it returns `None`.
+    /// - `offer_id` - The ID of the offer to retrieve
     pub fn get_reserved_offer(&self, offer_id: String) -> Option<&ReservedOffer> {
         self.currently_reserved_for
             .iter()
             .find(|o| o.id == offer_id)
     }
 
-    /// Accept a reserved offer by marking it as accepted
+    /// # Description
+    /// Accept a reserved offer by marking it as accepted.<br>
+    /// This method will mark the offer as accepted if it exists in the reserved offers.<br>
+    /// If the offer is not found, it will log a debug message.
     ///
     /// # Arguments
-    /// * `offer_id` - The ID of the offer to accept
-    ///
-    /// This method will mark the offer as accepted if it exists in the reserved offers.
-    /// If the offer is not found, it will log a debug message.
+    /// - `offer_id` - The ID of the offer to accept
     pub fn accept_reserve(&mut self, offer_id: String) {
         if self.get_reserved_offer(offer_id.clone()).is_some() {
             debug!("Accepting reserved offer with ID: {}", offer_id);

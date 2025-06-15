@@ -1,17 +1,18 @@
 use crate::vehicle::VehicleStatus;
 use crate::SharedVehicle;
 use bytes::Bytes;
-use log::{debug, info, trace};
+use log::{debug, info, warn};
 use powercable::{
-    charger::{ChargeAccept, ChargeOffer, ChargeRequest, Get, PRICE_DISTANCE_FACTOR}, generate_rnd_pos, Position, CHARGER_ACCEPT, CHARGER_CHARGING_GET, CHARGER_CHARGING_RELEASE, CHARGER_REQUEST
+    charger::{ChargeAccept, ChargeOffer, ChargeRequest, Get}, generate_rnd_pos, CHARGER_ACCEPT, CHARGER_CHARGING_GET, CHARGER_CHARGING_RELEASE, CHARGER_REQUEST
 };
-use rumqttc::{tokio_rustls::rustls::internal::msgs::handshake, QoS};
+use rumqttc::QoS;
 
 /**
  * # Description
- * Sends a charge request to all chargers.
+ * Sends a charge request to all chargers.<br>
  * This function creates a ChargeRequest message containing the vehicle's name, the amount of charge needed,
- * and the vehicle's current position. Important is that the amount doesn´t contains the amount of energy needed to drive to the charger
+ * and the vehicle's current position.<br>
+ * Important is that the amount doesn´t contains the amount of energy needed to drive to the charger
  *
  * # Parameters
  * - `handler`: The shared vehicle handler containing the vehicle and its state.
@@ -21,11 +22,8 @@ pub async fn create_charger_request(handler: SharedVehicle) {
 
     let request = ChargeRequest {
         vehicle_name: handler.vehicle.get_name().clone(),
-        charge_amount: handler.vehicle.battery_non_mut().get_free_capacity(),
-        vehicle_position: Position {
-            latitude: handler.vehicle.get_latitude(),
-            longitude: handler.vehicle.get_longitude(),
-        },
+        charge_amount: handler.vehicle.battery_non_mut().get_free_capacity() as usize,// TODO
+        vehicle_position: handler.vehicle.get_location(),
         vehicle_consumption: handler.vehicle.get_consumption(),
     };
 
@@ -51,39 +49,22 @@ pub async fn receive_offer(handler: SharedVehicle, payload: Bytes) {
 
     // Deserialize the ChargeOffer message
     let charge_offer = ChargeOffer::from_bytes(payload).unwrap();
+    
 
     // Check if the offer is for the current vehicle
-    if charge_offer.vehicle_name.eq(handler.vehicle.get_name()) {
-        info!("Received charge offer: {:?}", charge_offer);
-        info!(
-            "{} is {}km away",
-            charge_offer.charger_name,
-            handler.vehicle.distance_to(
-                charge_offer.charger_position.latitude,
-                charge_offer.charger_position.longitude
-            )
-        );
+    if charge_offer.vehicle_name.eq(&handler.vehicle.get_name()) {
+        debug!("Received charge offer: {:?}", charge_offer);
         handler.charge_offers.push(charge_offer.clone());
-    } else {
-        debug!(
-            "Received offer for another vehicle: {}. Ignoring.",
-            charge_offer.vehicle_name
-        );
-        trace!(
-            "Received offer for another vehicle: {:?}. Ignoring.",
-            charge_offer
-        );
     }
 }
 
-/**
- * # Description
- * Accepts the best charge offer based on the distance to the charger and the charge price.
- * The best offer is determined by calculating a price that combines the charge price and the distance to the charger.
- *
- * # Parameters
- * - `handler`: The shared vehicle handler containing the vehicle and its state.
- */
+/// # Description
+/// Accepts the best charge offer available.<br>
+/// This function calculates the best offer based on the distance to the charger and the charge price,<br>
+/// then drives the vehicle to the charger and publishes an acceptance message.
+/// 
+/// # Parameters
+/// - `handler`: The shared vehicle handler containing the vehicle and its state.
 pub async fn accept_offer(handler: SharedVehicle) {
     let mut handler = handler.lock().await;
 
@@ -91,52 +72,66 @@ pub async fn accept_offer(handler: SharedVehicle) {
         info!("No charge offers available to accept.");
         return;
     }
-    // We calculate the best offer based on the distance to the charger * PRICE_DISTANCE_FACTOR and the charge price * (1.0-PRICE_DISTANCE_FACTOR)
-    let mut best_offer = (None, 1.0);
+    
+    let mut best_satisfiable_offer = (None, f64::MAX);// If satisfied, the lower the cost, the better
+    let mut best_unsatisfiable_offer = (None, usize::MIN);// If not satisfied, the higher the amount, the better
+    info!("Evaluating charge offers...");
     for offer in handler.charge_offers.iter() {
-        let distance = handler.vehicle.distance_to(
-            offer.charger_position.latitude,
-            offer.charger_position.longitude,
-        );
-        let price =
-            offer.charge_price * (1.0 - PRICE_DISTANCE_FACTOR) + distance * PRICE_DISTANCE_FACTOR;
+        if handler.vehicle.distance_to(offer.charger_position) > handler.vehicle.get_range() {
+            debug!("Offer from {} is too far away: {} km, vehicle range: {} km",
+                offer.charger_name, handler.vehicle.distance_to(offer.charger_position), handler.vehicle.get_range());
+            continue;
+        }
 
-        debug!(
-            "Offer from {}: {} kWh at {}€ (distance: {} km, calculated price (with distance): {:.2}€)",
-            offer.charger_name,
-            offer.charge_amount,
-            offer.charge_price,
-            distance,
-            price
-        );
-
-        if best_offer.0.is_none() || price < best_offer.1 {
-            best_offer = (Some(offer.clone()), price);
+        let energy_for_way = (handler.vehicle.distance_to(offer.charger_position) * (handler.vehicle.get_consumption()/ 100.0)) as usize;// km * kWh/km = kWh
+        debug!("energy needed for way to {}: {} kWh", offer.charger_name, energy_for_way);
+        let needed_amount = handler.vehicle.battery_non_mut().get_free_capacity() as usize + energy_for_way;// including the energy for the way
+        debug!("needed amount for charging: {} kWh", needed_amount);
+        if offer.charge_amount < needed_amount {// Offer is not enough to fully charge
+            debug!("Offer from {} is not enough to fully charge", offer.charger_name);
+            if best_unsatisfiable_offer.0.is_none() || offer.charge_amount > best_unsatisfiable_offer.1 {// If not satisfied, the higher the amount, the better
+                best_unsatisfiable_offer = (Some(offer.clone()), offer.charge_amount);
+                debug!("Amount is {}", offer.charge_amount);
+            }
+        } else {// Offer is enough to fully charge
+            debug!("Offer from {} is enough to fully charge", offer.charger_name);
+            let costs = offer.charge_amount as f64 * offer.charge_price;
+            debug!("Cost is {}", costs);
+            if best_satisfiable_offer.0.is_none() || costs < best_satisfiable_offer.1 {
+                best_satisfiable_offer = (Some(offer.clone()), costs);
+            }
         }
     }
 
-    // Has to be something by now
-    let offer = best_offer.0.unwrap();
+    let best_offer = if best_satisfiable_offer.0.is_some() {
+        debug!("Found satisfiable offer");
+        best_satisfiable_offer.0.unwrap()
+    } else {
+        if best_unsatisfiable_offer.0.is_some() {
+            debug!("Found unsatisfiable offer");
+            best_unsatisfiable_offer.0.unwrap()
+        } else {
+            warn!("No suitable charge offers found, take first offer.");
+            handler.charge_offers[0].clone()// Fallback to the first offer if no suitable offer was found
+        }
+    };
 
     // drive to the charger
     handler
         .vehicle
         .set_status(VehicleStatus::SearchingForCharger);
-    handler.vehicle.set_destination(Position {
-        latitude: offer.charger_position.latitude,
-        longitude: offer.charger_position.longitude,
-    });
+    handler.vehicle.set_destination(best_offer.charger_position.clone());
 
     info!(
         "Accepting best offer from {}: {} kWh at {}€",
-        offer.charger_name, offer.charge_amount, offer.charge_price
+        best_offer.charger_name, best_offer.charge_amount, best_offer.charge_price
     );
 
     handler.charge_offers.clear();
-    handler.target_charger = Some(offer.clone());
+    handler.target_charger = Some(best_offer.clone());
 
     let acceptance = ChargeAccept {
-        charger_name: offer.charger_name.clone(),
+        charger_name: best_offer.charger_name.clone(),
         vehicle_name: handler.vehicle.get_name().clone(),
     };
 
@@ -152,13 +147,11 @@ pub async fn accept_offer(handler: SharedVehicle) {
         .unwrap()
 }
 
-/**
- * # Description
- * Creates a Get message to request the amount for one tick of charging.
- *
- * # Parameters
- * - `handler`: The shared vehicle handler containing the vehicle and its state.
- */
+/// # Description
+/// Creates a Get message to request charging from the target charger.
+/// 
+/// # Parameters
+/// - `handler`: The shared vehicle handler containing the vehicle and its state.
 pub async fn create_get(handler: SharedVehicle) {
     let handler = handler.lock().await;
 
@@ -193,7 +186,7 @@ pub async fn get_ack_handling(handler: SharedVehicle, payload: Bytes) {
     let get = Get::from_bytes(payload).unwrap();
 
     // Check if the ack is for the current vehicle
-    if get.vehicle_name.eq(handler.vehicle.get_name()) {
+    if get.vehicle_name.eq(&handler.vehicle.get_name()) {
         let amount_charged = handler.vehicle.battery().add_charge(get.amount);
         info!(
             "Charged {} kWh of {} kWh requested",

@@ -1,66 +1,79 @@
 use serde::Serialize;
 
+pub const CHARGE_EFFICIENCY: f64 = 0.9;// 90% charge efficiency
+pub const DISCHARGE_EFFICIENCY: f64 = 0.94;// 94% discharge efficiency
+
 #[derive(Debug, Serialize)]
+/// # Description
+/// The `Battery` struct represents an electric vehicle's battery.
+/// 
+/// # Fields
+/// - `max_capacity`: The maximum capacity of the battery in kWh.
+/// - `level`: The current level of charge in the battery in kWh.
+/// - `max_charge_rate`: The maximum charge rate of the battery in kW. !! 150 kW means 150 kWh can be added in one hour. !!
 pub struct Battery {
-    capacity: usize, // in kWh
-    level: f64, // in kWh
-    max_charge: usize, // in kW
+    max_capacity: f64,
+    level: f64,
+    max_charge_rate: usize,
 }
 
 impl Battery {
-    /**
-     * Creates a new Battery instance.
-     * 
-     * # Arguments
-     * `capacity`: The total capacity of the battery in kWh.
-     * `soc`: The initial state of charge of the battery (0..1).
-     * `max_charge`: The maximum charge rate of the battery in kW.
-     */
+    /// # Description
+    /// Creates a new Battery instance.
+    /// 
+    /// # Arguments
+    /// - `max_capacity`: The maximum capacity of the battery in kWh.
+    /// - `soc`: The state of charge of the battery as a fraction (0.0 to 1.0).
+    /// - `max_charge_rate`: The maximum charge rate of the battery in kW.
+    /// 
+    /// # Returns
+    /// A new Battery instance with the specified parameters.
     pub fn new(
-        capacity: usize,
+        max_capacity: f64,
         soc: f64,
-        max_charge: usize,
+        max_charge_rate: usize,
     ) -> Self {
         Battery {
-            capacity,
-            level: capacity as f64 * soc,
-            max_charge,
+            max_capacity,
+            level: max_capacity as f64 * soc,
+            max_charge_rate,
         }
     }
 
-    /**
-     * Returns the total capacity of the battery in kWh.
-     */
-    pub fn get_capacity(&self) -> usize {
-        self.capacity
+    /// # Returns
+    /// The total capacity of the battery in kWh.
+    pub fn get_max_capacity(&self) -> f64 {
+        self.max_capacity
     }
 
-    /**
-     * Returns the current level of the battery in kWh.
-     */
-    pub fn get_level(&self) -> usize {
-        self.level as usize
+    /// # Returns
+    /// The current level of charge in the battery in kWh.
+    pub fn get_level(&self) -> f64 {
+        self.level
     }
 
-    /**
-     * Returns the state of charge (SoC) of the battery as a percentage (0..1).
-     */
+    /// # Returns
+    /// The maximum charge rate of the battery in kW.
+    pub fn get_max_charge_rate(&self) -> usize {
+        self.max_charge_rate
+    }
+
+    /// # Returns
+    /// The state of charge (SoC) of the battery(0.0 to 1.0).
     pub fn get_soc(&self) -> f64 {
-        self.level as f64 / self.capacity as f64
+        self.get_level()/ self.get_max_capacity()
     }
 
-    /**
-     * # Returns the maximum charge rate of the battery in kW.
-     */
-    pub fn get_max_charge(&self) -> usize {
-        self.max_charge
+    /// # Returns
+    /// The current state of charge (SoC) of the battery as a percentage (0 to 100).
+    pub fn get_soc_percentage(&self) -> f64 {
+        self.get_soc() * 100.0
     }
 
-    /**
-     * Returns the free capacity of the battery in kWh.
-     */
-    pub fn get_free_capacity(&self) -> usize {
-        self.capacity as usize - self.level as usize
+    /// # Returns
+    /// The amount of free capacity in the battery in kWh.
+    pub fn get_free_capacity(&self) -> f64 {
+        self.get_max_capacity() - self.get_level()
     }
 
     /// Calculates the maximum amount of charge that can be added to the battery.
@@ -69,33 +82,30 @@ impl Battery {
     /// If `None`, the maximum charge rate of the battery is used.
     pub fn max_addable_charge(&self, charge: Option<usize>) -> usize {
         // apply scaling
-        let charge = charge.unwrap_or(self.max_charge);
-        let soc = self.get_soc();
-        let applied_charge = charge.min(self.get_free_capacity());
+        let charge = charge.unwrap_or(self.max_charge_rate);
+        let applied_charge = charge.min(self.get_free_capacity() as usize);
         let charge_rate = applied_charge as f64 * self.charge_scaling();
 
         // calculate energy that could be added
-        let charge_efficiency = 0.9;
-        let energy_added = charge_rate * charge_efficiency;
-        (energy_added.max(1.0) as usize).min(self.get_free_capacity())
+        let energy_added = charge_rate * CHARGE_EFFICIENCY;
+        (energy_added.max(1.0) as usize).min(self.get_free_capacity() as usize)
     }
 
     pub fn add_charge(&mut self, charge: usize) -> usize {
         // apply scaling
         let energy_added = self.max_addable_charge(Some(charge));
 
-        self.level = (self.level + energy_added as f64).min(self.capacity as f64);
+        self.level = (self.level + energy_added as f64).min(self.get_max_capacity() as f64);
         energy_added as usize
     }
     
     pub fn remove_charge(&mut self, charge: f64) -> f64 {
-        let discharge_efficiency = 0.94;
-        let energy_demand = charge * discharge_efficiency;
+        let energy_demand = charge * DISCHARGE_EFFICIENCY;
         let energy_delivered = if self.level >= energy_demand {
             self.level -= energy_demand;
             energy_demand
         } else {
-            let actual_energy = self.level as f64 * discharge_efficiency;
+            let actual_energy = self.level as f64 * DISCHARGE_EFFICIENCY;
             self.level = 0.0;
             if actual_energy > 0.0 {
                 actual_energy
