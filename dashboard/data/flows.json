@@ -279,7 +279,7 @@
         "topic": "tickgen/configure_speed",
         "payload": "1",
         "payloadType": "num",
-        "x": 260,
+        "x": 240,
         "y": 320,
         "wires": [
             [
@@ -1509,5 +1509,86 @@
         "x": 790,
         "y": 480,
         "wires": []
+    },
+    {
+        "id": "58a7283bc9a05c84",
+        "type": "inject",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "config/vehicle/stupid",
+        "payload": "false",
+        "payloadType": "bool",
+        "x": 230,
+        "y": 560,
+        "wires": [
+            [
+                "728fed7378419e5a"
+            ]
+        ]
+    },
+    {
+        "id": "2a713f22cdb70cab",
+        "type": "mqtt out",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "topic": "config/vehicle/stupid",
+        "qos": "2",
+        "retain": "true",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "c1c49a80.e500e",
+        "x": 800,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "728fed7378419e5a",
+        "type": "ui_switch",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "label": "Vehicle Algorithm",
+        "tooltip": "",
+        "group": "a02ac196.2c23f",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "topic",
+        "topicType": "msg",
+        "style": "",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "animate": false,
+        "className": "",
+        "x": 510,
+        "y": 560,
+        "wires": [
+            [
+                "2a713f22cdb70cab"
+            ]
+        ]
     }
 ]

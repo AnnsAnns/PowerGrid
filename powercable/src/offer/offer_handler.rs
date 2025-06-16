@@ -1,7 +1,5 @@
 use std::collections::HashMap;
-
 use super::Offer;
-
 
 pub struct OfferHandler {
     outstanding_offers: HashMap<String, Offer>,

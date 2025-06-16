@@ -1,5 +1,5 @@
 use bytes::Bytes;
-use log::{trace, debug, info};
+use log::{debug, info, trace};
 use powercable::{generate_rnd_pos, tickgen::{Phase, TickPayload}, POWER_LOCATION_TOPIC, VEHICLE_TOPIC};
 use rumqttc::QoS;
 use serde::{Deserialize, Serialize};
@@ -150,4 +150,12 @@ pub async fn scale_handler(handler: SharedVehicle, payload: Bytes) {
     let scale = serde_json::from_slice(&payload).unwrap();
     handler.vehicle.set_scale(scale);
     debug!("Consumption Scale set to: {}", scale);
+}
+
+pub async fn stupid_handler(handler: SharedVehicle, payload: Bytes) {
+    let mut handler = handler.lock().await;
+    trace!("Received stupid: {:?}", payload);
+    let stupid: bool = serde_json::from_slice(&payload).unwrap();
+    handler.vehicle.set_stupid(stupid);
+    debug!("Stupid mode set to: {}", stupid);
 }
