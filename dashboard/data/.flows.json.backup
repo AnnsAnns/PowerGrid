@@ -279,7 +279,7 @@
         "topic": "tickgen/configure_speed",
         "payload": "1",
         "payloadType": "num",
-        "x": 260,
+        "x": 240,
         "y": 320,
         "wires": [
             [
@@ -363,7 +363,7 @@
         "height": "1",
         "name": "",
         "label": "Simulation Speed",
-        "format": "{{msg.payload.configuration.speed}}s/tick",
+        "format": "{{msg.payload.configuration.speed}}s per Tick",
         "layout": "row-spread",
         "className": "",
         "style": false,
@@ -1509,5 +1509,81 @@
         "x": 790,
         "y": 480,
         "wires": []
+    },
+    {
+        "id": "58a7283bc9a05c84",
+        "type": "inject",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "config/vehicle/stupid",
+        "payload": "false",
+        "payloadType": "bool",
+        "x": 230,
+        "y": 560,
+        "wires": [
+            [
+                "d165e9a9a2a03e11"
+            ]
+        ]
+    },
+    {
+        "id": "2a713f22cdb70cab",
+        "type": "mqtt out",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "topic": "config/vehicle/stupid",
+        "qos": "2",
+        "retain": "true",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "c1c49a80.e500e",
+        "x": 800,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "d165e9a9a2a03e11",
+        "type": "switch",
+        "z": "5992b366.f9457c",
+        "name": "Vehicle Algorithm",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "true"
+            },
+            {
+                "t": "false"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 490,
+        "y": 560,
+        "wires": [
+            [
+                "2a713f22cdb70cab"
+            ],
+            [
+                "2a713f22cdb70cab"
+            ]
+        ]
     }
 ]

@@ -39,6 +39,7 @@ pub enum VehicleStatus {
 /// - `consumption`: The consumption of the vehicle in kWh per 100 km.
 /// - `scale`: A scale factor for the vehicle's consumption, default is 1.0.
 /// - `speed`: The speed of the vehicle in km/h, default is 50 km/h.
+/// - `stupid`: If vehicle is stupid is always drives to the nearest charger to charge, default is false.
 pub struct Vehicle {
     name: String,
     model: String,
@@ -49,6 +50,7 @@ pub struct Vehicle {
     scale: f64,
     speed: usize,
     battery: Battery,
+    stupid: bool,
 }
 
 impl Vehicle {
@@ -78,6 +80,7 @@ impl Vehicle {
             scale: 1.0,
             speed: 50,
             battery,
+            stupid: false,
         }
     }
 
@@ -107,6 +110,24 @@ impl Vehicle {
     pub fn get_status(&self) -> VehicleStatus {
         self.status
     }
+
+    /// # Returns
+    /// The location of the vehicle as a `Position`.
+    pub fn get_location(&self) -> Position {
+        self.location
+    }
+
+    /// # Sets
+    /// The destination of the vehicle.
+    pub fn set_destination(&mut self, destination: Position) {
+        self.destination = destination;
+    }
+
+    /// # Returns
+    /// The destination of the vehicle as a `Position`.
+    pub fn get_destination(&self) -> Position {
+        self.destination
+    } 
 
     /// # Description
     /// Returns the consumption of the vehicle in kWh per 100 km.
@@ -149,24 +170,6 @@ impl Vehicle {
         self.scale = scale;
     }
 
-    /// # Returns
-    /// The location of the vehicle as a `Position`.
-    pub fn get_location(&self) -> Position {
-        self.location
-    }
-
-    /// # Sets
-    /// The destination of the vehicle.
-    pub fn set_destination(&mut self, destination: Position) {
-        self.destination = destination;
-    }
-
-    /// # Returns
-    /// The destination of the vehicle as a `Position`.
-    pub fn get_destination(&self) -> Position {
-        self.destination
-    }    
-
     /// # Sets
     /// The speed of the vehicle in km/h.
     pub fn set_speed(&mut self, speed: usize) {
@@ -195,6 +198,21 @@ impl Vehicle {
     /// The distance from the vehicle's current location to another position.
     pub fn distance_to(&self, other:Position) -> f64 {
         self.location.distance_to(other)
+    }
+
+    /// # Sets
+    /// Sets whether the vehicle is "stupid", meaning it always drives to the nearest charger to charge.
+    /// 
+    /// # Arguments
+    /// - `stupid`: A boolean indicating if the vehicle is stupid.
+    pub fn set_stupid(&mut self, stupid: bool) {
+        self.stupid = stupid;
+    }
+
+    /// # Returns
+    /// Checks if the vehicle is "stupid", meaning it always drives to the nearest charger to charge.
+    pub fn is_stupid(&self) -> bool {
+        self.stupid
     }
 
     /// # Description

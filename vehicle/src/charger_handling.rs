@@ -75,12 +75,22 @@ pub async fn accept_offer(handler: SharedVehicle) {
     
     let mut best_satisfiable_offer = (None, f64::MAX);// If satisfied, the lower the cost, the better
     let mut best_unsatisfiable_offer = (None, usize::MIN);// If not satisfied, the higher the amount, the better
-    info!("Evaluating charge offers...");
+    let mut best_stupid_offer = (None, f64::MAX);// If the vehicle is stupid, the lower the distance to the charger, the better
+    
     for offer in handler.charge_offers.iter() {
-        if handler.vehicle.distance_to(offer.charger_position) > handler.vehicle.get_range() {
+        if !handler.vehicle.is_stupid() && handler.vehicle.distance_to(offer.charger_position) > handler.vehicle.get_range() {// if stupid, ignore range
             debug!("Offer from {} is too far away: {} km, vehicle range: {} km",
                 offer.charger_name, handler.vehicle.distance_to(offer.charger_position), handler.vehicle.get_range());
             continue;
+        }
+
+        if handler.vehicle.is_stupid() {
+            let distance = handler.vehicle.distance_to(offer.charger_position);
+            if best_stupid_offer.0.is_none() || distance < best_stupid_offer.1 {
+                best_stupid_offer = (Some(offer.clone()), distance);
+                warn!("Stupid vehicle found a better offer from {}: {} km away", offer.charger_name, distance);
+            }
+            continue;// skip complicated part
         }
 
         let energy_for_way = (handler.vehicle.distance_to(offer.charger_position) * (handler.vehicle.get_consumption()/ 100.0)) as usize;// km * kWh/km = kWh
@@ -91,7 +101,7 @@ pub async fn accept_offer(handler: SharedVehicle) {
             debug!("Offer from {} is not enough to fully charge", offer.charger_name);
             if best_unsatisfiable_offer.0.is_none() || offer.charge_amount > best_unsatisfiable_offer.1 {// If not satisfied, the higher the amount, the better
                 best_unsatisfiable_offer = (Some(offer.clone()), offer.charge_amount);
-                debug!("Amount is {}", offer.charge_amount);
+                debug!("Cost is {}", offer.charge_amount);
             }
         } else {// Offer is enough to fully charge
             debug!("Offer from {} is enough to fully charge", offer.charger_name);
@@ -103,7 +113,10 @@ pub async fn accept_offer(handler: SharedVehicle) {
         }
     }
 
-    let best_offer = if best_satisfiable_offer.0.is_some() {
+    let best_offer = if handler.vehicle.is_stupid() {
+        debug!("Found stupid offer");
+        best_stupid_offer.0.unwrap()
+    } else if best_satisfiable_offer.0.is_some() {
         debug!("Found satisfiable offer");
         best_satisfiable_offer.0.unwrap()
     } else {
@@ -117,9 +130,7 @@ pub async fn accept_offer(handler: SharedVehicle) {
     };
 
     // drive to the charger
-    handler
-        .vehicle
-        .set_status(VehicleStatus::SearchingForCharger);
+    handler.vehicle.set_status(VehicleStatus::SearchingForCharger);
     handler.vehicle.set_destination(best_offer.charger_position.clone());
 
     info!(
@@ -142,9 +153,7 @@ pub async fn accept_offer(handler: SharedVehicle) {
             QoS::ExactlyOnce,
             false,
             acceptance.to_bytes(),
-        )
-        .await
-        .unwrap()
+        ).await.unwrap();
 }
 
 /// # Description
@@ -174,9 +183,7 @@ pub async fn create_get(handler: SharedVehicle) {
             QoS::ExactlyOnce,
             false,
             get.to_bytes(),
-        )
-        .await
-        .unwrap();
+        ).await.unwrap();
 }
 
 pub async fn get_ack_handling(handler: SharedVehicle, payload: Bytes) {
@@ -211,9 +218,7 @@ pub async fn get_ack_handling(handler: SharedVehicle, payload: Bytes) {
                     QoS::ExactlyOnce,
                     false,
                     get.to_bytes(),
-                )
-                .await
-                .unwrap();
+                ).await.unwrap();
 
             handler.vehicle.set_status(VehicleStatus::RANDOM);
             handler.target_charger = None;
