@@ -7,7 +7,7 @@ use topic_handler::{tick_handler, worldmap_event_handler};
 use charger_handling::{receive_offer};
 use vehicle::Vehicle;
 
-use crate::{charger_handling::get_ack_handling, topic_handler::{scale_handler, stupid_handler}};
+use crate::{charger_handling::get_ack_handling, topic_handler::{scale_handler, algorithm_handler}};
 
 mod battery;
 mod charger_handling;
@@ -35,7 +35,7 @@ async fn main() {
         vehicle_name.clone().replace(" ", "_")
     );
     let _log2 = log2::open(log_path.as_str())
-        .level("debug")
+        .level("info")
         .module_filter(|module| !module.starts_with("rumqttc"))
         .start();
     
@@ -93,7 +93,7 @@ async fn main() {
                     let _ = task::spawn(scale_handler(shared_vehicle.clone(), p.payload));
                 }
                 CONFIG_VEHICLE_STUPID => {
-                    let _ = task::spawn(stupid_handler(shared_vehicle.clone(), p.payload));
+                    let _ = task::spawn(algorithm_handler(shared_vehicle.clone(), p.payload));
                 }
                 _ => {
                     let _ = task::spawn(async move {

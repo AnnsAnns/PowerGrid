@@ -1529,13 +1529,13 @@
         "once": true,
         "onceDelay": 0.1,
         "topic": "config/vehicle/stupid",
-        "payload": "false",
-        "payloadType": "bool",
-        "x": 230,
+        "payload": "BEST",
+        "payloadType": "str",
+        "x": 240,
         "y": 560,
         "wires": [
             [
-                "d165e9a9a2a03e11"
+                "06d698de3c74a41f"
             ]
         ]
     },
@@ -1558,29 +1558,48 @@
         "wires": []
     },
     {
-        "id": "d165e9a9a2a03e11",
-        "type": "switch",
+        "id": "06d698de3c74a41f",
+        "type": "ui_dropdown",
         "z": "5992b366.f9457c",
-        "name": "Vehicle Algorithm",
-        "property": "payload",
-        "propertyType": "msg",
-        "rules": [
+        "name": "",
+        "label": "Vehicle Algorithm",
+        "tooltip": "",
+        "place": "Best",
+        "group": "a02ac196.2c23f",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "multiple": false,
+        "options": [
             {
-                "t": "true"
+                "label": "Best",
+                "value": 0,
+                "type": "num"
             },
             {
-                "t": "false"
+                "label": "Random",
+                "value": 1,
+                "type": "num"
+            },
+            {
+                "label": "Nearest",
+                "value": 2,
+                "type": "num"
+            },
+            {
+                "label": "Cheapest",
+                "value": 3,
+                "type": "num"
             }
         ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 2,
-        "x": 490,
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 510,
         "y": 560,
         "wires": [
-            [
-                "2a713f22cdb70cab"
-            ],
             [
                 "2a713f22cdb70cab"
             ]

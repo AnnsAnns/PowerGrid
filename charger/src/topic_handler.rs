@@ -17,6 +17,7 @@ use crate::SharedCharger;
  * and does nothing for `PowerImport`.
  */
 pub async fn tick_handler(handler: SharedCharger, payload: Bytes) {
+    warn!("Tick handler called with payload: {:?}", payload);
     let payload: TickPayload = serde_json::from_slice(&payload).unwrap();
     match payload.phase {
         Phase::Process => {

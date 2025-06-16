@@ -1,10 +1,12 @@
-use crate::vehicle::VehicleStatus;
+use crate::vehicle::{self, Vehicle, VehicleStatus, VehicleAlgorithm};
 use crate::SharedVehicle;
 use bytes::Bytes;
 use log::{debug, info, warn};
+use powercable::offer;
 use powercable::{
     charger::{ChargeAccept, ChargeOffer, ChargeRequest, Get}, generate_rnd_pos, CHARGER_ACCEPT, CHARGER_CHARGING_GET, CHARGER_CHARGING_RELEASE, CHARGER_REQUEST
 };
+use rand::Rng;
 use rumqttc::QoS;
 
 /**
@@ -79,13 +81,13 @@ pub async fn accept_offer(handler: SharedVehicle) {
     
     for offer in handler.charge_offers.iter() {
         // TODO: still remember best offer if no in range offer is found
-        if !handler.vehicle.is_stupid() && handler.vehicle.distance_to(offer.charger_position) > handler.vehicle.get_range() {// if stupid, ignore range
+        if handler.vehicle.get_algorithm() == VehicleAlgorithm::BEST && handler.vehicle.distance_to(offer.charger_position) > handler.vehicle.get_range() {// if stupid, ignore range
             debug!("Offer from {} is too far away: {} km, vehicle range: {} km",
                 offer.charger_name, handler.vehicle.distance_to(offer.charger_position), handler.vehicle.get_range());
             continue;
         }
 
-        if handler.vehicle.is_stupid() {
+        if handler.vehicle.get_algorithm() == VehicleAlgorithm::NEAREST {
             let distance = handler.vehicle.distance_to(offer.charger_position);
             if best_stupid_offer.0.is_none() || distance < best_stupid_offer.1 {
                 best_stupid_offer = (Some(offer.clone()), distance);
@@ -114,7 +116,7 @@ pub async fn accept_offer(handler: SharedVehicle) {
         }
     }
 
-    let best_offer = if handler.vehicle.is_stupid() {
+    let best_offer = if handler.vehicle.get_algorithm() ==  VehicleAlgorithm::NEAREST {
         debug!("Found stupid offer");
         best_stupid_offer.0.unwrap()
     } else if best_satisfiable_offer.0.is_some() {
@@ -129,6 +131,7 @@ pub async fn accept_offer(handler: SharedVehicle) {
             handler.charge_offers[0].clone()// Fallback to the first offer if no suitable offer was found
         }
     };
+
 
     // drive to the charger
     handler.vehicle.set_status(VehicleStatus::SearchingForCharger);
@@ -155,6 +158,44 @@ pub async fn accept_offer(handler: SharedVehicle) {
             false,
             acceptance.to_bytes(),
         ).await.unwrap();
+}
+
+fn get_best_offer(offers: &[ChargeOffer]) -> Option<ChargeOffer> {
+    if offers.is_empty() {
+        return None;
+    }
+
+    // Find the best offer based on the charge price and distance
+    offers.iter().min_by(|a, b| {
+        let costs = a.charge_price * a.charge_amount as f64;
+        let costs_b = b.charge_price * b.charge_amount as f64;
+        costs.partial_cmp(&costs_b).unwrap()
+    }).cloned()
+}
+
+fn get_random_offer(offers: &[ChargeOffer]) -> Option<ChargeOffer> {
+    if offers.is_empty() {
+        return None;
+    }
+    
+    let mut rng = rand::rng();// TODO: use seed for reproducibility
+    Some(offers[rng.random_range(0..offers.len())].clone())
+}
+
+fn get_cheapest_offer(offers: &[ChargeOffer]) -> Option<ChargeOffer> {
+    if offers.is_empty() {
+        return None;
+    }
+
+    offers.iter().min_by(|a, b| a.charge_price.partial_cmp(&b.charge_price).unwrap()).cloned()
+}
+
+fn get_closest_offer(offers: &[ChargeOffer]) -> Option<ChargeOffer> {
+    if offers.is_empty() {
+        return None;
+    }
+
+    offers.iter().min_by(|a, b| a.way.partial_cmp(&b.way).unwrap()).cloned()
 }
 
 /// # Description

@@ -1,11 +1,11 @@
 use bytes::Bytes;
-use log::{debug, info, trace};
+use log::{debug, info, trace, warn};
 use powercable::{generate_rnd_pos, tickgen::{Phase, TickPayload}, POWER_LOCATION_TOPIC, VEHICLE_TOPIC};
 use rumqttc::QoS;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tokio::task;
-use crate::{charger_handling::{accept_offer, create_charger_request, create_get}, vehicle::VehicleStatus, SharedVehicle};
+use crate::{charger_handling::{accept_offer, create_charger_request, create_get}, vehicle::{VehicleAlgorithm, VehicleStatus}, SharedVehicle};
 
 const FIND_CHARGER_AT_LEAST: f64 = 0.6; // 60% charge left
 
@@ -152,10 +152,20 @@ pub async fn scale_handler(handler: SharedVehicle, payload: Bytes) {
     debug!("Consumption Scale set to: {}", scale);
 }
 
-pub async fn stupid_handler(handler: SharedVehicle, payload: Bytes) {
+pub async fn algorithm_handler(handler: SharedVehicle, payload: Bytes) {
     let mut handler = handler.lock().await;
-    trace!("Received stupid: {:?}", payload);
-    let stupid: bool = serde_json::from_slice(&payload).unwrap();
-    handler.vehicle.set_stupid(stupid);
-    debug!("Stupid mode set to: {}", stupid);
+    trace!("Received algorithm: {:?}", payload);
+    let algo_num = serde_json::from_slice(&payload).unwrap();
+    let algorithm = match algo_num {// TODO: isn´t enum equal to int --> optimize
+        0 => VehicleAlgorithm::BEST,
+        1 => VehicleAlgorithm::RANDOM,
+        2 => VehicleAlgorithm::NEAREST,
+        3 => VehicleAlgorithm::CHEAPEST,
+        _ => {
+            warn!("Unknown algorithm number: {}, defaulting to Best", algo_num);
+            VehicleAlgorithm::BEST
+        }
+    };
+    handler.vehicle.set_algorithm(algorithm);
+    debug!("Algorithm set to: {:?}", algorithm);
 }

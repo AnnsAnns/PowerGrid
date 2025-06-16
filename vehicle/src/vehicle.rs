@@ -1,14 +1,13 @@
 use log::debug;
 use powercable::{tickgen::PHASE_AS_HOUR, Position};
 use rand::Rng;
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 
 use crate::{battery::Battery, database::random_ev};
 
 const ROLLING_RESISTANCE: f64 = 0.0005; // approximate coefficient
 const AERODYNAMIC_DRAG: f64 = 0.00003; // approximate drag factor
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 /// # Description
 /// The `VehicleStatus` enum represents the different states a vehicle can be in.
 /// 
@@ -17,6 +16,7 @@ const AERODYNAMIC_DRAG: f64 = 0.00003; // approximate drag factor
 /// - `SearchingForCharger`: The vehicle is looking for a charger.
 /// - `Charging`: The vehicle is currently charging.
 /// - `Broken`: The vehicle is broken and cannot be used.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum VehicleStatus {
     RANDOM,
     WAITING,
@@ -25,7 +25,22 @@ pub enum VehicleStatus {
     Broken,
 }
 
-#[derive(Debug, Serialize)]
+/// # Description
+/// The `VehicleAlgorithm` enum defines the different algorithms that can be used to determine the vehicle's behavior when searching for a charger.
+/// 
+/// # Variants
+/// - `BEST`: The vehicle will choose the best charger, based on cheapest overall cost.
+/// - `RANDOM`: The vehicle will choose a charger randomly.
+/// - `NEAREST`: The vehicle will choose the nearest charger.
+/// - `CHEAPEST`: The vehicle will choose the cheapest charger, based on price per kWh.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum VehicleAlgorithm {
+    BEST,
+    RANDOM,
+    NEAREST,
+    CHEAPEST,
+}
+
 /// # Description
 /// The `Vehicle` struct represents an electric vehicle in our simulation.
 /// It can drive and charge on a `charger::Charger`.
@@ -39,7 +54,8 @@ pub enum VehicleStatus {
 /// - `consumption`: The consumption of the vehicle in kWh per 100 km.
 /// - `scale`: A scale factor for the vehicle's consumption, default is 1.0.
 /// - `speed`: The speed of the vehicle in km/h, default is 50 km/h.
-/// - `stupid`: If vehicle is stupid is always drives to the nearest charger to charge, default is false.
+/// - `algorithm`: The algorithm used by the vehicle to determine its behavior when searching for a charger.
+#[derive(Debug, Serialize)]
 pub struct Vehicle {
     name: String,
     model: String,
@@ -50,7 +66,7 @@ pub struct Vehicle {
     scale: f64,
     speed: usize,
     battery: Battery,
-    stupid: bool,
+    algorithm: VehicleAlgorithm,
 }
 
 impl Vehicle {
@@ -62,7 +78,7 @@ impl Vehicle {
     /// - `location`: The initial geographical position of the vehicle.
     /// 
     /// # Returns
-    /// A new `Vehicle` instance with the specified `name` and `location`, and a random `model`, `consumption`, and `battery`.
+    /// A new `Vehicle` instance with the specified `name` and `location`, and a random `model`, `consumption`, `battery`.
     pub fn new(
         name: String,
         location: Position,
@@ -80,7 +96,7 @@ impl Vehicle {
             scale: 1.0,
             speed: 50,
             battery,
-            stupid: false,
+            algorithm: VehicleAlgorithm::BEST,
         }
     }
 
@@ -201,18 +217,15 @@ impl Vehicle {
     }
 
     /// # Sets
-    /// Sets whether the vehicle is "stupid", meaning it always drives to the nearest charger to charge.
-    /// 
-    /// # Arguments
-    /// - `stupid`: A boolean indicating if the vehicle is stupid.
-    pub fn set_stupid(&mut self, stupid: bool) {
-        self.stupid = stupid;
+    /// The algorithm used by the vehicle to determine its behavior when searching for a charger.
+    pub fn set_algorithm(&mut self, algorithm: VehicleAlgorithm) {
+        self.algorithm = algorithm;
     }
 
     /// # Returns
-    /// Checks if the vehicle is "stupid", meaning it always drives to the nearest charger to charge.
-    pub fn is_stupid(&self) -> bool {
-        self.stupid
+    /// The algorithm used by the vehicle to determine its behavior when searching for a charger.
+    pub fn get_algorithm(&self) -> VehicleAlgorithm {
+        self.algorithm
     }
 
     /// # Description
