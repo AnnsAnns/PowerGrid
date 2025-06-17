@@ -174,9 +174,7 @@ async fn process_tick(handler: Arc<Mutex<FusionReactor>>, tick_payload: TickPayl
                 tick_payload.timestamp - TICK_AS_SEC,
             )
             .to_string(),
-        )
-        .await
-        .unwrap();
+        ).await.unwrap();
 
     handler.total_power_produced += handler.power_sold_this_tick;
     handler.power_sold_this_tick = 0.0;

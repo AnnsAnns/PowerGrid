@@ -1,31 +1,47 @@
 use log::debug;
 use powercable::{tickgen::PHASE_AS_HOUR, Position};
 use rand::Rng;
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 
 use crate::{battery::Battery, database::random_ev};
 
 const ROLLING_RESISTANCE: f64 = 0.0005; // approximate coefficient
 const AERODYNAMIC_DRAG: f64 = 0.00003; // approximate drag factor
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 /// # Description
 /// The `VehicleStatus` enum represents the different states a vehicle can be in.
 /// 
 /// # Variants
-/// - `RANDOM`: The vehicle is in a random state.
+/// - `Random`: The vehicle is in a random state.
+/// - `Waiting`: The vehicle is waiting.
 /// - `SearchingForCharger`: The vehicle is looking for a charger.
 /// - `Charging`: The vehicle is currently charging.
 /// - `Broken`: The vehicle is broken and cannot be used.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum VehicleStatus {
-    RANDOM,
-    WAITING,
+    Random,
+    Waiting,
     SearchingForCharger,
     Charging,
     Broken,
 }
 
-#[derive(Debug, Serialize)]
+/// # Description
+/// The `VehicleAlgorithm` enum defines the different algorithms that can be used to determine the vehicle's behavior when searching for a charger.
+/// 
+/// # Variants
+/// - `Best`: The vehicle will choose the best charger, based on cheapest overall cost.
+/// - `Random`: The vehicle will choose a charger randomly.
+/// - `Closest`: The vehicle will choose the closest charger.
+/// - `Cheapest`: The vehicle will choose the cheapest charger, based on price per kWh.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum VehicleAlgorithm {
+    Best,
+    Random,
+    Closest,
+    Cheapest,
+}
+
 /// # Description
 /// The `Vehicle` struct represents an electric vehicle in our simulation.
 /// It can drive and charge on a `charger::Charger`.
@@ -33,12 +49,14 @@ pub enum VehicleStatus {
 /// # Fields
 /// - `name`: The name of the vehicle.
 /// - `model`: The model of the vehicle.
-/// - `status`: The current status of the vehicle.
+/// - `status`: The current status of the vehicle, default is `VehicleStatus::Random`.
 /// - `location`: The current geographical position of the vehicle.
 /// - `destination`: The destination position of the vehicle.
 /// - `consumption`: The consumption of the vehicle in kWh per 100 km.
 /// - `scale`: A scale factor for the vehicle's consumption, default is 1.0.
 /// - `speed`: The speed of the vehicle in km/h, default is 50 km/h.
+/// - `algorithm`: The algorithm used by the vehicle to determine its behavior when searching for a charger.
+#[derive(Clone, Debug, Serialize)]
 pub struct Vehicle {
     name: String,
     model: String,
@@ -49,6 +67,7 @@ pub struct Vehicle {
     scale: f64,
     speed: usize,
     battery: Battery,
+    algorithm: VehicleAlgorithm,
 }
 
 impl Vehicle {
@@ -60,7 +79,7 @@ impl Vehicle {
     /// - `location`: The initial geographical position of the vehicle.
     /// 
     /// # Returns
-    /// A new `Vehicle` instance with the specified `name` and `location`, and a random `model`, `consumption`, and `battery`.
+    /// A new `Vehicle` instance with the specified `name` and `location`, and a random `model`, `consumption`, `battery`.
     pub fn new(
         name: String,
         location: Position,
@@ -71,13 +90,14 @@ impl Vehicle {
         Vehicle {
             name,
             model: model.to_owned(),
-            status: VehicleStatus::RANDOM,
+            status: VehicleStatus::Random,
             location,
             destination: location,// Initially, the destination is the same as the location
             consumption,
             scale: 1.0,
             speed: 50,
             battery,
+            algorithm: VehicleAlgorithm::Best,
         }
     }
 
@@ -107,6 +127,24 @@ impl Vehicle {
     pub fn get_status(&self) -> VehicleStatus {
         self.status
     }
+
+    /// # Returns
+    /// The location of the vehicle as a `Position`.
+    pub fn get_location(&self) -> Position {
+        self.location
+    }
+
+    /// # Sets
+    /// The destination of the vehicle.
+    pub fn set_destination(&mut self, destination: Position) {
+        self.destination = destination;
+    }
+
+    /// # Returns
+    /// The destination of the vehicle as a `Position`.
+    pub fn get_destination(&self) -> Position {
+        self.destination
+    } 
 
     /// # Description
     /// Returns the consumption of the vehicle in kWh per 100 km.
@@ -149,24 +187,6 @@ impl Vehicle {
         self.scale = scale;
     }
 
-    /// # Returns
-    /// The location of the vehicle as a `Position`.
-    pub fn get_location(&self) -> Position {
-        self.location
-    }
-
-    /// # Sets
-    /// The destination of the vehicle.
-    pub fn set_destination(&mut self, destination: Position) {
-        self.destination = destination;
-    }
-
-    /// # Returns
-    /// The destination of the vehicle as a `Position`.
-    pub fn get_destination(&self) -> Position {
-        self.destination
-    }    
-
     /// # Sets
     /// The speed of the vehicle in km/h.
     pub fn set_speed(&mut self, speed: usize) {
@@ -195,6 +215,18 @@ impl Vehicle {
     /// The distance from the vehicle's current location to another position.
     pub fn distance_to(&self, other:Position) -> f64 {
         self.location.distance_to(other)
+    }
+
+    /// # Sets
+    /// The algorithm used by the vehicle to determine its behavior when searching for a charger.
+    pub fn set_algorithm(&mut self, algorithm: VehicleAlgorithm) {
+        self.algorithm = algorithm;
+    }
+
+    /// # Returns
+    /// The algorithm used by the vehicle to determine its behavior when searching for a charger.
+    pub fn get_algorithm(&self) -> VehicleAlgorithm {
+        self.algorithm
     }
 
     /// # Description

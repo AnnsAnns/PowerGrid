@@ -1,5 +1,5 @@
 use log::{debug, info};
-use powercable::{charger::ChargeOffer, CHARGER_CHARGING_ACK, CHARGER_OFFER, MQTT_BROKER, MQTT_BROKER_PORT, TICK_TOPIC, WORLDMAP_EVENT_TOPIC, CONFIG_SCALE_VEHICLE};
+use powercable::{charger::ChargeOffer, CHARGER_CHARGING_ACK, CHARGER_OFFER, CONFIG_VEHICLE_SCALE, MQTT_BROKER, MQTT_BROKER_PORT, TICK_TOPIC, CONFIG_VEHICLE_ALGORITHM, WORLDMAP_EVENT_TOPIC};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task};
@@ -7,7 +7,7 @@ use topic_handler::{tick_handler, worldmap_event_handler};
 use charger_handling::{receive_offer};
 use vehicle::Vehicle;
 
-use crate::{charger_handling::get_ack_handling, topic_handler::scale_handler};
+use crate::{charger_handling::get_ack_handling, topic_handler::{scale_handler, algorithm_handler}};
 
 mod battery;
 mod charger_handling;
@@ -34,7 +34,10 @@ async fn main() {
         "logs/vehicle_{}.log",
         vehicle_name.clone().replace(" ", "_")
     );
-    let _log2 = log2::open(log_path.as_str()).level("info").start();
+    let _log2 = log2::open(log_path.as_str())
+        .level("info")
+        .module_filter(|module| !module.starts_with("rumqttc"))
+        .start();
     
     info!("{:#?}", vehicle);
 
@@ -47,23 +50,21 @@ async fn main() {
     let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
     client
         .subscribe(TICK_TOPIC, QoS::ExactlyOnce)
-        .await
-        .unwrap();
+        .await.unwrap();
     client
         .subscribe(WORLDMAP_EVENT_TOPIC, QoS::ExactlyOnce)
-        .await
-        .unwrap();
+        .await.unwrap();
     client.subscribe(CHARGER_OFFER, QoS::ExactlyOnce)
-        .await
-        .unwrap();
+        .await.unwrap();
     client
         .subscribe(CHARGER_CHARGING_ACK, QoS::ExactlyOnce)
-        .await
-        .unwrap();
+        .await.unwrap();
     client
-        .subscribe(CONFIG_SCALE_VEHICLE, QoS::ExactlyOnce)
-        .await
-        .unwrap();
+        .subscribe(CONFIG_VEHICLE_SCALE, QoS::ExactlyOnce)
+        .await.unwrap();
+    client
+        .subscribe(CONFIG_VEHICLE_ALGORITHM, QoS::ExactlyOnce)
+        .await.unwrap();
     info!("Connected to MQTT broker");
 
     let shared_vehicle = Arc::new(Mutex::new(VehicleHandler {
@@ -88,8 +89,11 @@ async fn main() {
                 CHARGER_CHARGING_ACK => {
                     let _ = task::spawn(get_ack_handling(shared_vehicle.clone(), p.payload));
                 }
-                CONFIG_SCALE_VEHICLE => {
+                CONFIG_VEHICLE_SCALE => {
                     let _ = task::spawn(scale_handler(shared_vehicle.clone(), p.payload));
+                }
+                CONFIG_VEHICLE_ALGORITHM => {
+                    let _ = task::spawn(algorithm_handler(shared_vehicle.clone(), p.payload));
                 }
                 _ => {
                     let _ = task::spawn(async move {

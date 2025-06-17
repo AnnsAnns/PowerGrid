@@ -1,11 +1,11 @@
 use bytes::Bytes;
-use log::{trace, debug, info};
+use log::{debug, info, trace, warn};
 use powercable::{generate_rnd_pos, tickgen::{Phase, TickPayload}, POWER_LOCATION_TOPIC, VEHICLE_TOPIC};
 use rumqttc::QoS;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tokio::task;
-use crate::{charger_handling::{accept_offer, create_charger_request, create_get}, vehicle::VehicleStatus, SharedVehicle};
+use crate::{charger_handling::{accept_offer, create_charger_request, create_get}, vehicle::{VehicleAlgorithm, VehicleStatus}, SharedVehicle};
 
 const FIND_CHARGER_AT_LEAST: f64 = 0.6; // 60% charge left
 
@@ -39,7 +39,7 @@ pub async fn tick_handler(handler: SharedVehicle, payload: Bytes) {
     // do these actions on all ticks (every 5 minutes)
     {
         let mut l_handler = handler.lock().await;
-        if l_handler.vehicle.get_status() == VehicleStatus::RANDOM
+        if l_handler.vehicle.get_status() == VehicleStatus::Random
             || l_handler.vehicle.get_status() == VehicleStatus::SearchingForCharger
         {
             l_handler.vehicle.drive();
@@ -150,4 +150,22 @@ pub async fn scale_handler(handler: SharedVehicle, payload: Bytes) {
     let scale = serde_json::from_slice(&payload).unwrap();
     handler.vehicle.set_scale(scale);
     debug!("Consumption Scale set to: {}", scale);
+}
+
+pub async fn algorithm_handler(handler: SharedVehicle, payload: Bytes) {
+    let mut handler = handler.lock().await;
+    trace!("Received algorithm: {:?}", payload);
+    let algo_num = serde_json::from_slice(&payload).unwrap();
+    let algorithm = match algo_num {// TODO: isn´t enum equal to int --> optimize
+        0 => VehicleAlgorithm::Best,
+        1 => VehicleAlgorithm::Random,
+        2 => VehicleAlgorithm::Closest,
+        3 => VehicleAlgorithm::Cheapest,
+        _ => {
+            warn!("Unknown algorithm number: {}, defaulting to Best", algo_num);
+            VehicleAlgorithm::Best
+        }
+    };
+    handler.vehicle.set_algorithm(algorithm);
+    debug!("Algorithm set to: {:?}", algorithm);
 }

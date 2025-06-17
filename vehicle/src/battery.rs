@@ -3,7 +3,6 @@ use serde::Serialize;
 pub const CHARGE_EFFICIENCY: f64 = 0.9;// 90% charge efficiency
 pub const DISCHARGE_EFFICIENCY: f64 = 0.94;// 94% discharge efficiency
 
-#[derive(Debug, Serialize)]
 /// # Description
 /// The `Battery` struct represents an electric vehicle's battery.
 /// 
@@ -11,6 +10,7 @@ pub const DISCHARGE_EFFICIENCY: f64 = 0.94;// 94% discharge efficiency
 /// - `max_capacity`: The maximum capacity of the battery in kWh.
 /// - `level`: The current level of charge in the battery in kWh.
 /// - `max_charge_rate`: The maximum charge rate of the battery in kW. !! 150 kW means 150 kWh can be added in one hour. !!
+#[derive(Clone, Debug, Serialize)]
 pub struct Battery {
     max_capacity: f64,
     level: f64,
