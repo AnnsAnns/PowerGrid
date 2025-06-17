@@ -121,7 +121,7 @@ pub async fn accept_offer(handler: SharedVehicle) {
 /// # Returns
 /// An `Option<ChargeOffer>` containing the best charge offer, or `None` if no offers are available.
 fn get_best_offer(offers: &[ChargeOffer], vehicle: Vehicle) -> Option<ChargeOffer> {
-    info!("Selecting the best charge offer.");
+    debug!("Selecting the best charge offer.");
     if offers.is_empty() {
         return None;
     }
@@ -133,17 +133,18 @@ fn get_best_offer(offers: &[ChargeOffer], vehicle: Vehicle) -> Option<ChargeOffe
         let costs_b = b.charge_price * b.charge_amount as f64;
         costs.partial_cmp(&costs_b).unwrap()
     });
+    debug!("Sorted offers by cost: {:?}", sorted_offers);
 
     // Return the first offer that is enough to fully charge the vehicle
     for offer in &sorted_offers {
         let energy_for_way = (vehicle.distance_to(offer.charger_position) * (vehicle.get_consumption()/ 100.0)) as usize;// km * kWh/km = kWh
-        debug!("energy needed for way to {}: {} kWh", offer.charger_name, energy_for_way);
         let needed_amount = vehicle.battery_non_mut().get_free_capacity() as usize + energy_for_way;// including the energy for the way
+        debug!("needed amount: {} kWh, offer from {}: {} kWh, costs: {}", needed_amount, offer.charger_name, offer.charge_amount, offer.charge_price * offer.charge_amount as f64);
         if offer.charge_amount >= needed_amount {
-            debug!("Found best offer from {}: {} kWh at {}€", offer.charger_name, offer.charge_amount, offer.charge_price);
             return Some(offer.clone());
         }
     };
+    debug!("No satisfying offer found, returning best unsatisfying offer: {:?}", sorted_offers.first());
     return sorted_offers.first().cloned();// If no satifiable offer was found, return the best offer that doesn't satisfy
 }
 
@@ -156,7 +157,7 @@ fn get_best_offer(offers: &[ChargeOffer], vehicle: Vehicle) -> Option<ChargeOffe
 /// # Returns
 /// An `Option<ChargeOffer>` containing a randomly selected charge offer, or `None` if no offers are available.
 fn get_random_offer(offers: &[ChargeOffer]) -> Option<ChargeOffer> {
-    info!("Selecting a random charge offer.");
+    debug!("Selecting a random charge offer.");
     if offers.is_empty() {
         return None;
     }
@@ -174,12 +175,14 @@ fn get_random_offer(offers: &[ChargeOffer]) -> Option<ChargeOffer> {
 /// # Returns
 /// An `Option<ChargeOffer>` containing the cheapest charge offer, or `None` if no offers are available.
 fn get_cheapest_offer(offers: &[ChargeOffer]) -> Option<ChargeOffer> {
-    info!("Selecting the cheapest charge offer.");
+    debug!("Selecting the cheapest charge offer.");
     if offers.is_empty() {
         return None;
     }
-
-    offers.iter().min_by(|a, b| a.charge_price.partial_cmp(&b.charge_price).unwrap()).cloned()
+    debug!("Offers: {:?}", offers);
+    let res = offers.iter().min_by(|a, b| a.charge_price.partial_cmp(&b.charge_price).unwrap()).cloned();
+    debug!("Cheapest offer: {:?}", res);
+    res
 }
 
 /// # Description
@@ -192,12 +195,14 @@ fn get_cheapest_offer(offers: &[ChargeOffer]) -> Option<ChargeOffer> {
 /// # Returns
 /// An `Option<ChargeOffer>` containing the closest charge offer, or `None` if no offers are available.
 fn get_closest_offer(offers: &[ChargeOffer], vehicle: Vehicle) -> Option<ChargeOffer> {
-    info!("Selecting the closest charge offer.");
+    debug!("Selecting the closest charge offer.");
     if offers.is_empty() {
         return None;
     }
-
-    offers.iter().min_by(|a, b| vehicle.distance_to(a.charger_position).partial_cmp(&vehicle.distance_to(b.charger_position)).unwrap()).cloned()
+    debug!("Offers: {:?}", offers);
+    let res = offers.iter().min_by(|a, b| vehicle.distance_to(a.charger_position).partial_cmp(&vehicle.distance_to(b.charger_position)).unwrap()).cloned();
+    debug!("Closest offer: {:?}", res);
+    res
 }
 
 /// # Description
