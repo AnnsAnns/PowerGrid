@@ -1,5 +1,5 @@
 use bytes::Bytes;
-use log::{debug, info, warn};
+use log::{debug, info, trace, warn};
 use powercable::{
     offer::structure::OFFER_PACKAGE_SIZE,
     tickgen::{Phase, TickPayload, TICK_AS_SEC},
@@ -17,7 +17,7 @@ use crate::SharedCharger;
  * and does nothing for `PowerImport`.
  */
 pub async fn tick_handler(handler: SharedCharger, payload: Bytes) {
-    warn!("Tick handler called with payload: {:?}", payload);
+    trace!("Tick handler called with payload: {:?}", payload);
     let payload: TickPayload = serde_json::from_slice(&payload).unwrap();
     match payload.phase {
         Phase::Process => {
