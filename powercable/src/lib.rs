@@ -12,8 +12,8 @@ pub use offer::offer_handler::OfferHandler;
 pub use offer::Offer;
 
 pub const CONFIG_SCALE_CONSUMER: &str = "config/scale/consumer";
-pub const CONFIG_SCALE_VEHICLE: &str = "config/scale/vehicle";
-pub const CONFIG_VEHICLE_STUPID: &str = "config/vehicle/stupid";
+pub const CONFIG_VEHICLE_SCALE: &str = "config/vehicle/scale";
+pub const CONFIG_VEHICLE_ALGORITHM: &str = "config/vehicle/algorithm";
 pub const BUY_OFFER_TOPIC: &str = "market/buy_offer";
 pub const ACCEPT_BUY_OFFER_TOPIC: &str = "market/accept_buy_offer";
 pub const ACK_ACCEPT_BUY_OFFER_TOPIC: &str = "market/ack_accept_buy_offer";

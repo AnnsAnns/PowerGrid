@@ -159,7 +159,7 @@
         "id": "9433bdbccc800a84",
         "type": "ui_group",
         "name": "Map",
-        "tab": "8d5b248b.b32978",
+        "tab": "4c5728327e2ec2a9",
         "order": 3,
         "disp": true,
         "width": "24",
@@ -189,7 +189,7 @@
         "id": "d54d87a82fb70f0c",
         "type": "ui_group",
         "name": "Vehicle",
-        "tab": "8d5b248b.b32978",
+        "tab": "4c5728327e2ec2a9",
         "order": 5,
         "disp": true,
         "width": "24",
@@ -228,8 +228,8 @@
         "topic": "tickgen/tick",
         "payload": "0",
         "payloadType": "num",
-        "x": 270,
-        "y": 140,
+        "x": 210,
+        "y": 120,
         "wires": [
             [
                 "ea18c282.7d0be8"
@@ -248,8 +248,8 @@
         "nl": false,
         "rap": false,
         "inputs": 0,
-        "x": 270,
-        "y": 180,
+        "x": 230,
+        "y": 160,
         "wires": [
             [
                 "ea18c282.7d0be8",
@@ -279,7 +279,7 @@
         "topic": "tickgen/configure_speed",
         "payload": "1",
         "payloadType": "num",
-        "x": 240,
+        "x": 200,
         "y": 320,
         "wires": [
             [
@@ -304,8 +304,8 @@
         "font": "",
         "fontSize": "",
         "color": "#000000",
-        "x": 500,
-        "y": 180,
+        "x": 460,
+        "y": 160,
         "wires": []
     },
     {
@@ -370,8 +370,8 @@
         "font": "",
         "fontSize": "",
         "color": "#000000",
-        "x": 490,
-        "y": 220,
+        "x": 450,
+        "y": 200,
         "wires": []
     },
     {
@@ -387,8 +387,8 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 230,
-        "y": 1020,
+        "x": 250,
+        "y": 920,
         "wires": [
             [
                 "a51664a99e0eb2ed"
@@ -433,8 +433,8 @@
         "outputs": 1,
         "useDifferentColor": false,
         "className": "",
-        "x": 780,
-        "y": 1020,
+        "x": 800,
+        "y": 920,
         "wires": [
             []
         ]
@@ -452,8 +452,8 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 240,
-        "y": 1080,
+        "x": 260,
+        "y": 980,
         "wires": [
             [
                 "c3e79c32a768de90"
@@ -498,8 +498,8 @@
         "outputs": 1,
         "useDifferentColor": false,
         "className": "",
-        "x": 770,
-        "y": 1080,
+        "x": 790,
+        "y": 980,
         "wires": [
             []
         ]
@@ -538,8 +538,8 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 230,
-        "y": 900,
+        "x": 310,
+        "y": 1160,
         "wires": [
             [
                 "ec6f8418521ea347"
@@ -574,11 +574,11 @@
         "group": "9433bdbccc800a84",
         "order": 0,
         "width": "24",
-        "height": "10",
+        "height": "15",
         "name": "",
         "lat": "51.143847516749936",
         "lon": "10.401517838090468",
-        "zoom": "6",
+        "zoom": "7",
         "layer": "OSMC",
         "cluster": "",
         "maxage": "",
@@ -620,8 +620,8 @@
         "font": "",
         "fontSize": "",
         "color": "#000000",
-        "x": 450,
-        "y": 280,
+        "x": 410,
+        "y": 240,
         "wires": []
     },
     {
@@ -672,7 +672,7 @@
         "topic": "config/scale/consumer",
         "payload": "5",
         "payloadType": "num",
-        "x": 230,
+        "x": 210,
         "y": 400,
         "wires": [
             [
@@ -763,8 +763,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 500,
-        "y": 1080,
+        "x": 520,
+        "y": 980,
         "wires": [
             [
                 "66a3388ee9d6020b"
@@ -783,8 +783,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 500,
-        "y": 1020,
+        "x": 520,
+        "y": 920,
         "wires": [
             [
                 "49f72289542aa70b"
@@ -937,8 +937,8 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 210,
-        "y": 1160,
+        "x": 250,
+        "y": 1040,
         "wires": [
             [
                 "a67defbe0b3efa1a"
@@ -957,8 +957,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 460,
-        "y": 1160,
+        "x": 520,
+        "y": 1040,
         "wires": [
             [
                 "d25779f2ecc65dd4"
@@ -1003,8 +1003,8 @@
         "outputs": 1,
         "useDifferentColor": false,
         "className": "",
-        "x": 720,
-        "y": 1160,
+        "x": 780,
+        "y": 1040,
         "wires": [
             []
         ]
@@ -1022,8 +1022,8 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 220,
-        "y": 1220,
+        "x": 260,
+        "y": 1100,
         "wires": [
             [
                 "5b10771c8f32388c"
@@ -1042,8 +1042,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 480,
-        "y": 1220,
+        "x": 520,
+        "y": 1100,
         "wires": [
             [
                 "fee38065243d2d51"
@@ -1088,8 +1088,8 @@
         "outputs": 1,
         "useDifferentColor": false,
         "className": "",
-        "x": 740,
-        "y": 1220,
+        "x": 780,
+        "y": 1100,
         "wires": [
             []
         ]
@@ -1185,8 +1185,8 @@
         "font": "",
         "fontSize": 16,
         "color": "#000000",
-        "x": 760,
-        "y": 1920,
+        "x": 750,
+        "y": 1880,
         "wires": []
     },
     {
@@ -1199,7 +1199,7 @@
         "height": "1",
         "name": "",
         "label": "Capacity",
-        "format": "{{msg.payload.battery.capacity}}",
+        "format": "{{msg.payload.battery.max_capacity}}",
         "layout": "row-left",
         "className": "",
         "style": false,
@@ -1207,7 +1207,7 @@
         "fontSize": 16,
         "color": "#000000",
         "x": 740,
-        "y": 1880,
+        "y": 1840,
         "wires": []
     },
     {
@@ -1237,7 +1237,7 @@
         "z": "5992b366.f9457c",
         "group": "d54d87a82fb70f0c",
         "order": 3,
-        "width": "3",
+        "width": "5",
         "height": "1",
         "name": "",
         "label": "Status",
@@ -1248,8 +1248,8 @@
         "font": "",
         "fontSize": 16,
         "color": "#000000",
-        "x": 740,
-        "y": 1840,
+        "x": 730,
+        "y": 1920,
         "wires": []
     },
     {
@@ -1304,7 +1304,7 @@
         "seg2": "",
         "diff": false,
         "className": "",
-        "x": 740,
+        "x": 730,
         "y": 1960,
         "wires": []
     },
@@ -1384,8 +1384,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 460,
-        "y": 900,
+        "x": 520,
+        "y": 1160,
         "wires": [
             [
                 "acb0fa524995096e"
@@ -1399,9 +1399,9 @@
         "name": "",
         "group": "83cd261e79d613c8",
         "order": 4,
-        "width": "19",
-        "height": "5",
-        "label": "Battery %",
+        "width": "24",
+        "height": "6",
+        "label": "Battery in kWh",
         "chartType": "line",
         "legend": "true",
         "xformat": "dd HH:mm",
@@ -1430,8 +1430,8 @@
         "outputs": 1,
         "useDifferentColor": false,
         "className": "",
-        "x": 740,
-        "y": 900,
+        "x": 780,
+        "y": 1160,
         "wires": [
             []
         ]
@@ -1481,7 +1481,7 @@
         "crontab": "",
         "once": true,
         "onceDelay": 0.1,
-        "topic": "config/scale/vehicle",
+        "topic": "config/vehicle/scale",
         "payload": "1",
         "payloadType": "num",
         "x": 220,
@@ -1497,7 +1497,7 @@
         "type": "mqtt out",
         "z": "5992b366.f9457c",
         "name": "",
-        "topic": "config/scale/vehicle",
+        "topic": "config/vehicle/scale",
         "qos": "2",
         "retain": "true",
         "respTopic": "",
@@ -1528,10 +1528,10 @@
         "crontab": "",
         "once": true,
         "onceDelay": 0.1,
-        "topic": "config/vehicle/stupid",
+        "topic": "config/vehicle/algorithm",
         "payload": "0",
         "payloadType": "num",
-        "x": 220,
+        "x": 230,
         "y": 560,
         "wires": [
             [
@@ -1544,7 +1544,7 @@
         "type": "mqtt out",
         "z": "5992b366.f9457c",
         "name": "",
-        "topic": "config/vehicle/stupid",
+        "topic": "config/vehicle/algorithm",
         "qos": "2",
         "retain": "true",
         "respTopic": "",
@@ -1553,7 +1553,7 @@
         "correl": "",
         "expiry": "",
         "broker": "c1c49a80.e500e",
-        "x": 800,
+        "x": 810,
         "y": 560,
         "wires": []
     },
@@ -1583,7 +1583,7 @@
                 "type": "num"
             },
             {
-                "label": "Nearest",
+                "label": "Closest",
                 "value": 2,
                 "type": "num"
             },
@@ -1597,7 +1597,7 @@
         "topic": "topic",
         "topicType": "msg",
         "className": "",
-        "x": 510,
+        "x": 490,
         "y": 560,
         "wires": [
             [

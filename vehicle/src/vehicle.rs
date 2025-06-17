@@ -12,14 +12,15 @@ const AERODYNAMIC_DRAG: f64 = 0.00003; // approximate drag factor
 /// The `VehicleStatus` enum represents the different states a vehicle can be in.
 /// 
 /// # Variants
-/// - `RANDOM`: The vehicle is in a random state.
+/// - `Random`: The vehicle is in a random state.
+/// - `Waiting`: The vehicle is waiting.
 /// - `SearchingForCharger`: The vehicle is looking for a charger.
 /// - `Charging`: The vehicle is currently charging.
 /// - `Broken`: The vehicle is broken and cannot be used.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum VehicleStatus {
-    RANDOM,
-    WAITING,
+    Random,
+    Waiting,
     SearchingForCharger,
     Charging,
     Broken,
@@ -29,16 +30,16 @@ pub enum VehicleStatus {
 /// The `VehicleAlgorithm` enum defines the different algorithms that can be used to determine the vehicle's behavior when searching for a charger.
 /// 
 /// # Variants
-/// - `BEST`: The vehicle will choose the best charger, based on cheapest overall cost.
-/// - `RANDOM`: The vehicle will choose a charger randomly.
-/// - `NEAREST`: The vehicle will choose the nearest charger.
-/// - `CHEAPEST`: The vehicle will choose the cheapest charger, based on price per kWh.
+/// - `Best`: The vehicle will choose the best charger, based on cheapest overall cost.
+/// - `Random`: The vehicle will choose a charger randomly.
+/// - `Closest`: The vehicle will choose the closest charger.
+/// - `Cheapest`: The vehicle will choose the cheapest charger, based on price per kWh.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum VehicleAlgorithm {
-    BEST,
-    RANDOM,
-    NEAREST,
-    CHEAPEST,
+    Best,
+    Random,
+    Closest,
+    Cheapest,
 }
 
 /// # Description
@@ -48,14 +49,14 @@ pub enum VehicleAlgorithm {
 /// # Fields
 /// - `name`: The name of the vehicle.
 /// - `model`: The model of the vehicle.
-/// - `status`: The current status of the vehicle.
+/// - `status`: The current status of the vehicle, default is `VehicleStatus::Random`.
 /// - `location`: The current geographical position of the vehicle.
 /// - `destination`: The destination position of the vehicle.
 /// - `consumption`: The consumption of the vehicle in kWh per 100 km.
 /// - `scale`: A scale factor for the vehicle's consumption, default is 1.0.
 /// - `speed`: The speed of the vehicle in km/h, default is 50 km/h.
 /// - `algorithm`: The algorithm used by the vehicle to determine its behavior when searching for a charger.
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Vehicle {
     name: String,
     model: String,
@@ -89,14 +90,14 @@ impl Vehicle {
         Vehicle {
             name,
             model: model.to_owned(),
-            status: VehicleStatus::RANDOM,
+            status: VehicleStatus::Random,
             location,
             destination: location,// Initially, the destination is the same as the location
             consumption,
             scale: 1.0,
             speed: 50,
             battery,
-            algorithm: VehicleAlgorithm::BEST,
+            algorithm: VehicleAlgorithm::Best,
         }
     }
 

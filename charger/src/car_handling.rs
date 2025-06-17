@@ -43,7 +43,6 @@ pub async fn receive_request(charger: SharedCharger, payload: Bytes) {
         handler.charger.get_name().clone(),
         charge_request.vehicle_name.clone(),// TODO: why no gray name, like other fields have?
         handler.charger.get_current_price(),
-        charge_request.vehicle_position.distance_to(handler.charger.get_position()),
         reservable_charge,
         handler.charger.get_position(),
     );

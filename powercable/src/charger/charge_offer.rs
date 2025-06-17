@@ -9,7 +9,6 @@ use crate ::Position;
 /// - `charger_name`: The name of the charger making the offer.
 /// - `vehicle_name`: The name of the vehicle for which the offer is made.
 /// - `charge_price`: The price per unit of charge offered by the charger.
-/// - `way`: The distance to the charger from the vehicle's current position, in kilometers.
 /// - `charge_amount`: The amount of charge offered by the charger, in kWh.
 /// - `charger_position`: The position of the charger in the world map, represented as a `Position` struct.
 #[derive(Debug, Clone, Encode, Decode)]
@@ -17,7 +16,6 @@ pub struct ChargeOffer {
     pub charger_name: String,
     pub vehicle_name: String,
     pub charge_price: f64,
-    pub way: f64,
     pub charge_amount: usize,
     pub charger_position: Position,
 }
@@ -30,7 +28,6 @@ impl ChargeOffer {
     /// - `charger_name`: The name of the charger making the offer.
     /// - `vehicle_name`: The name of the vehicle for which the offer is made.
     /// - `charge_price`: The price per unit of charge offered by the charger.
-    /// - `way`: The distance to the charger from the vehicle's current position, in kilometers.
     /// - `charge_amount`: The amount of charge offered by the charger, in kWh.
     /// - `charger_position`: The position of the charger in the world map, represented as a `Position` struct.
     /// 
@@ -40,7 +37,6 @@ impl ChargeOffer {
         charger_name: String,
         vehicle_name: String,
         charge_price: f64,
-        way: f64,
         charge_amount: usize,
         charger_position: Position,
     ) -> Self {
@@ -48,7 +44,6 @@ impl ChargeOffer {
             charger_name,
             vehicle_name,
             charge_price,
-            way,
             charge_amount,
             charger_position,
         }

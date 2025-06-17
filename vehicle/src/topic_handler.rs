@@ -39,7 +39,7 @@ pub async fn tick_handler(handler: SharedVehicle, payload: Bytes) {
     // do these actions on all ticks (every 5 minutes)
     {
         let mut l_handler = handler.lock().await;
-        if l_handler.vehicle.get_status() == VehicleStatus::RANDOM
+        if l_handler.vehicle.get_status() == VehicleStatus::Random
             || l_handler.vehicle.get_status() == VehicleStatus::SearchingForCharger
         {
             l_handler.vehicle.drive();
@@ -157,13 +157,13 @@ pub async fn algorithm_handler(handler: SharedVehicle, payload: Bytes) {
     trace!("Received algorithm: {:?}", payload);
     let algo_num = serde_json::from_slice(&payload).unwrap();
     let algorithm = match algo_num {// TODO: isn´t enum equal to int --> optimize
-        0 => VehicleAlgorithm::BEST,
-        1 => VehicleAlgorithm::RANDOM,
-        2 => VehicleAlgorithm::NEAREST,
-        3 => VehicleAlgorithm::CHEAPEST,
+        0 => VehicleAlgorithm::Best,
+        1 => VehicleAlgorithm::Random,
+        2 => VehicleAlgorithm::Closest,
+        3 => VehicleAlgorithm::Cheapest,
         _ => {
             warn!("Unknown algorithm number: {}, defaulting to Best", algo_num);
-            VehicleAlgorithm::BEST
+            VehicleAlgorithm::Best
         }
     };
     handler.vehicle.set_algorithm(algorithm);
