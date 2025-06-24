@@ -36,6 +36,13 @@ async fn main() {
     let _log2 = log2::open(log_path.as_str()).level("info").start();
     info!("Turbine simulation started with name: {}", name);
 
+    // If we have the DUMP_TURBINE_DATA environment variable set, we will dump the turbine data to a file
+    if std::env::var("DUMP_TURBINE_DATA").is_ok() {
+        let dump_path = format!("turbine_data_{}.json", name.replace(" ", "_"));
+        info!("Dumping turbine data to {}", dump_path);
+        handler.lock().await.turbine.dump_to_file(dump_path).await;
+    }
+
     init::subscribe(handler.clone()).await;
 
     info!("Turbine simulation started. Waiting for messages...");

@@ -2,6 +2,8 @@ use crate::turbine::Turbine;
 
 const CACHED_ENTRIES: usize = 70000;
 
+mod dump;
+
 pub struct PrecalculatedTurbine {
     name: String,
     latitude: f64,  // in degrees
