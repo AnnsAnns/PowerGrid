@@ -1,10 +1,11 @@
-use crate::vehicle::VehicleStatus;
+use crate::vehicle::{Vehicle, VehicleAlgorithm, VehicleStatus};
 use crate::SharedVehicle;
 use bytes::Bytes;
-use log::{debug, info, warn};
+use log::{debug, info};
 use powercable::{
-    charger::{ChargeAccept, ChargeOffer, ChargeRequest, Get}, generate_rnd_pos, CHARGER_ACCEPT, CHARGER_CHARGING_GET, CHARGER_CHARGING_RELEASE, CHARGER_REQUEST
+    charger::*, generate_rnd_pos, CHARGER_ACCEPT, CHARGER_CHARGING_GET, CHARGER_CHARGING_RELEASE, CHARGER_REQUEST
 };
+use rand::Rng;
 use rumqttc::QoS;
 
 /**
@@ -38,7 +39,7 @@ pub async fn create_charger_request(handler: SharedVehicle) {
 
 /**
  * # Description
- * Receives a charge offer from a charger and stores it in the vehicle's state.
+ * Receives a charge offer from a charger and stores it.
  *
  * # Parameters
  * - `handler`: The shared vehicle handler containing the vehicle and its state.
@@ -50,7 +51,6 @@ pub async fn receive_offer(handler: SharedVehicle, payload: Bytes) {
     // Deserialize the ChargeOffer message
     let charge_offer = ChargeOffer::from_bytes(payload).unwrap();
     
-
     // Check if the offer is for the current vehicle
     if charge_offer.vehicle_name.eq(&handler.vehicle.get_name()) {
         debug!("Received charge offer: {:?}", charge_offer);
@@ -72,54 +72,17 @@ pub async fn accept_offer(handler: SharedVehicle) {
         info!("No charge offers available to accept.");
         return;
     }
-    
-    let mut best_satisfiable_offer = (None, f64::MAX);// If satisfied, the lower the cost, the better
-    let mut best_unsatisfiable_offer = (None, usize::MIN);// If not satisfied, the higher the amount, the better
-    info!("Evaluating charge offers...");
-    for offer in handler.charge_offers.iter() {
-        if handler.vehicle.distance_to(offer.charger_position) > handler.vehicle.get_range() {
-            debug!("Offer from {} is too far away: {} km, vehicle range: {} km",
-                offer.charger_name, handler.vehicle.distance_to(offer.charger_position), handler.vehicle.get_range());
-            continue;
-        }
 
-        let energy_for_way = (handler.vehicle.distance_to(offer.charger_position) * (handler.vehicle.get_consumption()/ 100.0)) as usize;// km * kWh/km = kWh
-        debug!("energy needed for way to {}: {} kWh", offer.charger_name, energy_for_way);
-        let needed_amount = handler.vehicle.battery_non_mut().get_free_capacity() as usize + energy_for_way;// including the energy for the way
-        debug!("needed amount for charging: {} kWh", needed_amount);
-        if offer.charge_amount < needed_amount {// Offer is not enough to fully charge
-            debug!("Offer from {} is not enough to fully charge", offer.charger_name);
-            if best_unsatisfiable_offer.0.is_none() || offer.charge_amount > best_unsatisfiable_offer.1 {// If not satisfied, the higher the amount, the better
-                best_unsatisfiable_offer = (Some(offer.clone()), offer.charge_amount);
-                debug!("Amount is {}", offer.charge_amount);
-            }
-        } else {// Offer is enough to fully charge
-            debug!("Offer from {} is enough to fully charge", offer.charger_name);
-            let costs = offer.charge_amount as f64 * offer.charge_price;
-            debug!("Cost is {}", costs);
-            if best_satisfiable_offer.0.is_none() || costs < best_satisfiable_offer.1 {
-                best_satisfiable_offer = (Some(offer.clone()), costs);
-            }
-        }
-    }
-
-    let best_offer = if best_satisfiable_offer.0.is_some() {
-        debug!("Found satisfiable offer");
-        best_satisfiable_offer.0.unwrap()
-    } else {
-        if best_unsatisfiable_offer.0.is_some() {
-            debug!("Found unsatisfiable offer");
-            best_unsatisfiable_offer.0.unwrap()
-        } else {
-            warn!("No suitable charge offers found, take first offer.");
-            handler.charge_offers[0].clone()// Fallback to the first offer if no suitable offer was found
-        }
-    };
+    // Determine the best offer based on the vehicle's algorithm
+    let best_offer = match handler.vehicle.get_algorithm() {
+        VehicleAlgorithm::Best => get_best_offer(&handler.charge_offers, handler.vehicle.clone()),
+        VehicleAlgorithm::Random => get_random_offer(&handler.charge_offers),
+        VehicleAlgorithm::Cheapest => get_cheapest_offer(&handler.charge_offers),
+        VehicleAlgorithm::Closest => get_closest_offer(&handler.charge_offers, handler.vehicle.clone()),
+    }.unwrap();
 
     // drive to the charger
-    handler
-        .vehicle
-        .set_status(VehicleStatus::SearchingForCharger);
+    handler.vehicle.set_status(VehicleStatus::SearchingForCharger);
     handler.vehicle.set_destination(best_offer.charger_position.clone());
 
     info!(
@@ -142,9 +105,104 @@ pub async fn accept_offer(handler: SharedVehicle) {
             QoS::ExactlyOnce,
             false,
             acceptance.to_bytes(),
-        )
-        .await
-        .unwrap()
+        ).await.unwrap();
+}
+
+/// # Description
+/// Selects the best charge offer based the cost.
+/// It is calculated by multiplying the charge price with the charge amount.<br>
+/// Bcause every charge offer has a different distance to the vehicle, the energy needed to drive to the charger is also considered.<br>
+/// If no offer is found that satisfies the vehicle's needs, the best available offer is returned.
+/// 
+/// # Parameters
+/// - `offers`: A slice of `ChargeOffer` instances representing the available charge offers.
+/// - `vehicle`: The vehicle for which the best charge offer is being selected.
+/// 
+/// # Returns
+/// An `Option<ChargeOffer>` containing the best charge offer, or `None` if no offers are available.
+fn get_best_offer(offers: &[ChargeOffer], vehicle: Vehicle) -> Option<ChargeOffer> {
+    debug!("Selecting the best charge offer.");
+    if offers.is_empty() {
+        return None;
+    }
+    
+    // Create a sorted vector by cost (charge_price * charge_amount)
+    let mut sorted_offers: Vec<ChargeOffer> = offers.to_vec();
+    sorted_offers.sort_by(|a, b| {
+        let costs = a.charge_price * a.charge_amount as f64;
+        let costs_b = b.charge_price * b.charge_amount as f64;
+        costs.partial_cmp(&costs_b).unwrap()
+    });
+    debug!("Sorted offers by cost: {:?}", sorted_offers);
+
+    // Return the first offer that is enough to fully charge the vehicle
+    for offer in &sorted_offers {
+        let energy_for_way = (vehicle.distance_to(offer.charger_position) * (vehicle.get_consumption()/ 100.0)) as usize;// km * kWh/km = kWh
+        let needed_amount = vehicle.battery_non_mut().get_free_capacity() as usize + energy_for_way;// including the energy for the way
+        debug!("needed amount: {} kWh, offer from {}: {} kWh, costs: {}", needed_amount, offer.charger_name, offer.charge_amount, offer.charge_price * offer.charge_amount as f64);
+        if offer.charge_amount >= needed_amount {
+            return Some(offer.clone());
+        }
+    };
+    debug!("No satisfying offer found, returning best unsatisfying offer: {:?}", sorted_offers.first());
+    return sorted_offers.first().cloned();// If no satifiable offer was found, return the best offer that doesn't satisfy
+}
+
+/// # Description
+/// Selects a random charge offer from the list of available offers.
+/// 
+/// # Parameters
+/// - `offers`: A slice of `ChargeOffer` instances representing the available charge offers.
+/// 
+/// # Returns
+/// An `Option<ChargeOffer>` containing a randomly selected charge offer, or `None` if no offers are available.
+fn get_random_offer(offers: &[ChargeOffer]) -> Option<ChargeOffer> {
+    debug!("Selecting a random charge offer.");
+    if offers.is_empty() {
+        return None;
+    }
+    
+    let mut rng = rand::rng();// TODO: use seed for reproducibility
+    Some(offers[rng.random_range(0..offers.len())].clone())
+}
+
+/// # Description
+/// Selects the cheapest charge offer from the list of available offers.
+/// 
+/// # Parameters
+/// - `offers`: A slice of `ChargeOffer` instances representing the available charge offers.
+/// 
+/// # Returns
+/// An `Option<ChargeOffer>` containing the cheapest charge offer, or `None` if no offers are available.
+fn get_cheapest_offer(offers: &[ChargeOffer]) -> Option<ChargeOffer> {
+    debug!("Selecting the cheapest charge offer.");
+    if offers.is_empty() {
+        return None;
+    }
+    debug!("Offers: {:?}", offers);
+    let res = offers.iter().min_by(|a, b| a.charge_price.partial_cmp(&b.charge_price).unwrap()).cloned();
+    debug!("Cheapest offer: {:?}", res);
+    res
+}
+
+/// # Description
+/// Selects the closest charge offer based on the vehicle's current position.
+/// 
+/// # Parameters
+/// - `offers`: A slice of `ChargeOffer` instances representing the available charge offers.
+/// - `vehicle`: The vehicle for which the closest charge offer is being selected.
+/// 
+/// # Returns
+/// An `Option<ChargeOffer>` containing the closest charge offer, or `None` if no offers are available.
+fn get_closest_offer(offers: &[ChargeOffer], vehicle: Vehicle) -> Option<ChargeOffer> {
+    debug!("Selecting the closest charge offer.");
+    if offers.is_empty() {
+        return None;
+    }
+    debug!("Offers: {:?}", offers);
+    let res = offers.iter().min_by(|a, b| vehicle.distance_to(a.charger_position).partial_cmp(&vehicle.distance_to(b.charger_position)).unwrap()).cloned();
+    debug!("Closest offer: {:?}", res);
+    res
 }
 
 /// # Description
@@ -174,9 +232,7 @@ pub async fn create_get(handler: SharedVehicle) {
             QoS::ExactlyOnce,
             false,
             get.to_bytes(),
-        )
-        .await
-        .unwrap();
+        ).await.unwrap();
 }
 
 pub async fn get_ack_handling(handler: SharedVehicle, payload: Bytes) {
@@ -211,11 +267,9 @@ pub async fn get_ack_handling(handler: SharedVehicle, payload: Bytes) {
                     QoS::ExactlyOnce,
                     false,
                     get.to_bytes(),
-                )
-                .await
-                .unwrap();
+                ).await.unwrap();
 
-            handler.vehicle.set_status(VehicleStatus::RANDOM);
+            handler.vehicle.set_status(VehicleStatus::Random);
             handler.target_charger = None;
             handler.vehicle.set_destination(generate_rnd_pos());
         }
