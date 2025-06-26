@@ -144,6 +144,14 @@ pub async fn publish_location(handler: SharedVehicle) {
         .unwrap();
 }
 
+/// # Description
+/// The `scale_handler` function processes incoming scale configuration messages for the vehicle.<br>
+/// It updates the vehicle's consumption scale based on the received payload.<br>
+/// It is called when a message is received on the `CONFIG_VEHICLE_SCALE` topic.<br>
+/// 
+/// # Arguments
+/// - `handler`: A shared reference to the vehicle handler, which contains the vehicle instance.
+/// - `payload`: The incoming payload containing the scale configuration in JSON format.
 pub async fn scale_handler(handler: SharedVehicle, payload: Bytes) {
     let mut handler = handler.lock().await;
     trace!("Received scale: {:?}", payload);
@@ -152,6 +160,14 @@ pub async fn scale_handler(handler: SharedVehicle, payload: Bytes) {
     debug!("Consumption Scale set to: {}", scale);
 }
 
+/// # Description
+/// The `algorithm_handler` function processes incoming algorithm configuration messages for the vehicle.<br>
+/// It updates the vehicle's algorithm based on the received payload.<br>
+/// It is called when a message is received on the `CONFIG_VEHICLE_ALGORITHM` topic.<br>
+/// 
+/// # Arguments
+/// - `handler`: A shared reference to the vehicle handler, which contains the vehicle instance.
+/// - `payload`: The incoming payload containing the algorithm configuration in JSON format.
 pub async fn algorithm_handler(handler: SharedVehicle, payload: Bytes) {
     let mut handler = handler.lock().await;
     trace!("Received algorithm: {:?}", payload);

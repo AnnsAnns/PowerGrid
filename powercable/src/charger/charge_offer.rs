@@ -24,7 +24,7 @@ impl ChargeOffer {
     /// # Description
     /// Creates a new `ChargeOffer` instance with the specified parameters.
     /// 
-    /// # Parameters
+    /// # Arguments
     /// - `charger_name`: The name of the charger making the offer.
     /// - `vehicle_name`: The name of the vehicle for which the offer is made.
     /// - `charge_price`: The price per unit of charge offered by the charger.
@@ -52,7 +52,7 @@ impl ChargeOffer {
     /// # Description
     /// Creates a new `ChargeOffer` instance from a byte array.
     /// 
-    /// # Parameters
+    /// # Arguments
     /// - `bytes`: A `Bytes` object containing the encoded `ChargeOffer`.
     /// 
     /// # Returns

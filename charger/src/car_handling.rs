@@ -9,7 +9,7 @@ use crate::{offer_handling::ReservedOffer, SharedCharger};
 /// Every charge request is answered with a charge offer, if the charger has at least one free port.<br>
 /// The charger reserves the requested charge amount and sends a `ChargeOffer` to the vehicle.
 /// 
-/// # Parameters
+/// # Arguments
 /// - `charger`: The shared charger handler containing the charger and its state.
 /// - `payload`: The payload containing the charge request data.
 pub async fn receive_request(charger: SharedCharger, payload: Bytes) {
@@ -65,7 +65,7 @@ pub async fn receive_request(charger: SharedCharger, payload: Bytes) {
 /// If it is, it checks if the charger name matches the one in the accept message.
 /// If it does, it accepts the reservation; otherwise, it releases the reservation offer.
 /// 
-/// # Parameters
+/// # Arguments
 /// - `charger`: The shared charger handler containing the charger and its state.
 /// - `payload`: The payload containing the charge accept data.
 pub async fn accept_handler(charger: SharedCharger, payload: Bytes) {

@@ -1,4 +1,5 @@
 use log::info;
+use powercable::tickgen::TICK_AS_MIN;
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task, time};
@@ -62,7 +63,7 @@ async fn main() {
                     .unwrap();
                 // Each tick is 15 minutes
                 config.timestamp = (start_date
-                    + chrono::Duration::minutes((config.tick * 15).try_into().unwrap()))
+                    + chrono::Duration::minutes((config.tick * TICK_AS_MIN as u64).try_into().unwrap()))
                 .timestamp_millis() as usize;
                 client
                     .publish(
