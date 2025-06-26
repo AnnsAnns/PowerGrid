@@ -71,7 +71,6 @@ pub struct Deadline {
 /// - `speed`: The speed of the vehicle in km/h, default is 50 km/h.
 /// - `battery`: The battery of the vehicle, which contains information about its capacity, current charge level, and maximum charge rate.
 /// - `algorithm`: The algorithm used by the vehicle to determine its behavior when searching for a charger.
-/// - `deadline`: An optional deadline for the vehicle to reach a certain level of charge by a certain tick.
 #[derive(Clone, Debug, Serialize)]
 pub struct Vehicle {
     name: String,
@@ -84,7 +83,6 @@ pub struct Vehicle {
     speed: usize,
     battery: Battery,
     algorithm: VehicleAlgorithm,
-    deadline: Option<Deadline>,
 }
 
 impl Vehicle {
@@ -115,7 +113,6 @@ impl Vehicle {
             speed: 50,
             battery,
             algorithm: VehicleAlgorithm::Best,
-            deadline: None,
         }
     }
 
@@ -245,27 +242,6 @@ impl Vehicle {
     /// The algorithm used by the vehicle to determine its behavior when searching for a charger.
     pub fn get_algorithm(&self) -> VehicleAlgorithm {
         self.algorithm
-    }
-
-    /// # Sets
-    /// The deadline for the vehicle to reach a certain level of charge by a certain tick.
-    /// 
-    /// # Arguments
-    /// - `deadline`: A `Deadline` to set for the vehicle.
-    pub fn set_deadline(&mut self, deadline: Deadline) {
-        self.deadline = Some(deadline);
-    }
-
-    /// # Description
-    /// Clears the deadline for the vehicle.
-    pub fn clear_deadline(&mut self) {
-        self.deadline = None;
-    }
-
-    /// # Returns
-    /// The deadline for the vehicle to reach a certain level of charge by a certain tick. Or `None` if no deadline is set.
-    pub fn get_deadline(&self) -> Option<Deadline> {
-        self.deadline
     }
 
     /// # Description
