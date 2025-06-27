@@ -1,4 +1,4 @@
-use log::{debug, info, warn};
+use tracing::{debug, info, warn};
 use powercable::{tickgen::{Phase, TickPayload, TICK_AS_SEC}, ChartEntry, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, POWER_TRANSFORMER_PRICE_TOPIC};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::time::Duration;
@@ -8,10 +8,7 @@ mod transformer;
 
 const OWN_TOPIC: &str = "Total";
 
-#[tokio::main]
-async fn main() {
-    let log_path = format!("logs/transformer.log");
-    let _log2 = log2::open(log_path.as_str()).level("debug").start();
+pub async fn start_transformer() {
     info!("Starting turbine simulation...");
     
     let mut transformer = Transformer::new();

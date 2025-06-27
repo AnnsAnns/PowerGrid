@@ -1,4 +1,4 @@
-use log::{debug, info};
+use tracing::{debug, info};
 use powercable::{charger::ChargeOffer, CHARGER_CHARGING_ACK, CHARGER_OFFER, CONFIG_VEHICLE_SCALE, MQTT_BROKER, MQTT_BROKER_PORT, TICK_TOPIC, CONFIG_VEHICLE_ALGORITHM, WORLDMAP_EVENT_TOPIC};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
@@ -24,21 +24,10 @@ struct VehicleHandler {
     pub client: AsyncClient,
 }
 
-#[tokio::main]
-async fn main() {
+pub async fn start_vehicle() {
     // init vehicle
     let vehicle_name: String = powercable::generate_unique_name();
     let vehicle = Vehicle::new(vehicle_name.clone(), powercable::generate_rnd_pos());
-    
-    let log_path = format!(
-        "logs/vehicle_{}.log",
-        vehicle_name.clone().replace(" ", "_")
-    );
-    let _log2 = log2::open(log_path.as_str())
-        .level("info")
-        .module_filter(|module| !module.starts_with("rumqttc"))
-        .start();
-    
     info!("{:#?}", vehicle);
 
     let mut mqttoptions = MqttOptions::new(

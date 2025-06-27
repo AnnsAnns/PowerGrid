@@ -1,6 +1,6 @@
 use car_handling::{accept_handler, answer_get, receive_request};
 use charger::Charger;
-use log::{debug, info};
+use tracing::{debug, info};
 use offer_handling::ReservedOffer;
 use powercable::{
     generate_rnd_pos, generate_unique_name, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CHARGER_ACCEPT,
@@ -28,14 +28,8 @@ struct ChargerHandler {
     pub consumed_last_tick: f64,
 }
 
-#[tokio::main]
-async fn main() {
+pub async fn start_charger() {
     let charger_name: String = format!("Charger {}", generate_unique_name());
-    let log_path = format!(
-        "logs/charger_{}.log",
-        charger_name.clone().replace(" ", "_")
-    );
-    let _log2 = log2::open(log_path.as_str()).level("info").start();
     info!("Starting charger simulation...");
 
     let charger = Charger::new(charger_name.clone(), generate_rnd_pos(), 100, 300, 5);

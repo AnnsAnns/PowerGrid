@@ -1,6 +1,6 @@
 use std::{path::PathBuf, time::Duration};
 
-use log::debug;
+use tracing::debug;
 
 use crate::meta_data::MetaDataType;
 

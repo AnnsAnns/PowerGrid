@@ -1,7 +1,7 @@
 use std::fs::File;
 
 use csv::Reader;
-use log::debug;
+use tracing::debug;
 
 use crate::meta_data::MetaDataType;
 

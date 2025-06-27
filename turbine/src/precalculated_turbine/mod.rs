@@ -4,11 +4,12 @@ const CACHED_ENTRIES: usize = 70000;
 
 mod dump;
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct PrecalculatedTurbine {
     name: String,
     latitude: f64,  // in degrees
     longitude: f64, // in degrees
-    cached_power_output: [f64; CACHED_ENTRIES],
+    cached_power_output: Vec<f64>,
     ticker: usize,
 }
 
@@ -24,7 +25,7 @@ impl PrecalculatedTurbine {
         );
         let latitude = turbine.get_latitude();
         let longitude = turbine.get_longitude();
-        let mut cached_power_output = [0.0; CACHED_ENTRIES];
+        let mut cached_power_output = vec![0.0; CACHED_ENTRIES];
 
         for i in 0..CACHED_ENTRIES {
             turbine.tick();

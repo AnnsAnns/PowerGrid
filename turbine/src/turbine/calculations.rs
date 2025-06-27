@@ -1,4 +1,4 @@
-use log::debug;
+use tracing::debug;
 
 
 use super::{power_coefficient::find_closest_coefficient_for_wind, Turbine};

@@ -1,12 +1,9 @@
-use log::info;
+use tracing::info;
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task, time};
 
-#[tokio::main]
-async fn main() {
-    let log_path = format!("logs/tickgen.log");
-    let _log2 = log2::open(log_path.as_str()).level("info").start();
+pub async fn start_tickgen() {
     info!("Starting TickGen simulation...");
 
     let mut mqttoptions = MqttOptions::new(

@@ -1,4 +1,4 @@
-use log::{debug, info, trace, warn};
+use tracing::{debug, info, trace, warn};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration, env};
 use tokio::{sync::Mutex, task};
@@ -6,7 +6,7 @@ use powercable::{OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CONFIG_SCALE_CONSUMER, TI
 use consumer::{Consumer, ConsumerType};
 use topic_handler::{accept_offer_handler, tick_handler, scale_handler};
 
-mod consumer;
+pub mod consumer;
 mod topic_handler;
 mod map_handler;
 
@@ -18,15 +18,11 @@ struct ConsumerHandler {
     pub offer_handler: OfferHandler,
 }
 
-#[tokio::main]
-async fn main() {
-    let consumer_type_str= env::var("CONSUMER_TYPE").unwrap_or(ConsumerType::H.to_string());
-    let consumer_type = ConsumerType::from_str(&consumer_type_str);
+pub async fn start_consumer(consumer_type: ConsumerType) {
+    let consumer_type_str = consumer_type.to_string();
     let mut consumer =
         Consumer::new(powercable::generate_rnd_pos(), consumer_type);
 
-    let log_path = format!("logs/consumer_{}.log", consumer_type_str.replace(" ", "_"));
-    let _log2 = log2::open(log_path.as_str()).level("info").start();
     debug!("Created {}", consumer_type_str);
 
     let mut mqttoptions = MqttOptions::new(

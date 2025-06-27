@@ -1,5 +1,5 @@
 use crate::ChargerHandler;
-use log::debug;
+use tracing::debug;
 
 /// # Description
 /// The `ReservedOffer` struct represents an offer that the charger has reserved for a vehicle.

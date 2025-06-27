@@ -1,4 +1,4 @@
-use log::debug;
+use tracing::debug;
 use powercable::{tickgen::PHASE_AS_HOUR, Position};
 use rand::Rng;
 use serde::{Serialize, Deserialize};

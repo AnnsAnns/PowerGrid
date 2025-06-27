@@ -1,4 +1,4 @@
-use log::{debug, info, warn};
+use tracing::{debug, info, warn};
 
 use crate::parsing::{TemperatureData, WindData};
 

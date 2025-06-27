@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use log::debug;
+use tracing::debug;
 use powercable::{MAP_UPDATE_SPEED_IN_SECS, POWER_LOCATION_TOPIC};
 use serde_json::json;
 use tokio::time::sleep;
