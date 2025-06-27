@@ -33,8 +33,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - RUST_LOG=debug
-      - RUST_BACKTRACE=full
+      - RUST_LOG=warn
     volumes:
       - ./.docker_data/logs:/app/logs
     networks:

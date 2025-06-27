@@ -26,7 +26,10 @@ async fn main() {
         .with_file(true)
         .with_line_number(true)
         // Set debug level for file output
-        .with_max_level(tracing::Level::DEBUG)
+        .with_max_level(std::env::var("RUST_LOG")
+            .unwrap_or_else(|_| "warn".to_string())
+            .parse()
+            .unwrap_or(tracing::Level::WARN))
         // Add file output in addition to stdout
         .with_writer(std::io::stdout.and(non_blocking))
         // Build the subscriber
