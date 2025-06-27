@@ -1,4 +1,4 @@
-use log::debug;
+use tracing::debug;
 use powercable::{offer::structure::OFFER_PACKAGE_SIZE, Position};
 
 /**

@@ -1,5 +1,5 @@
 use bytes::Bytes;
-use log::{debug, warn};
+use tracing::{debug, warn};
 use powercable::Offer;
 use tokio::task;
 

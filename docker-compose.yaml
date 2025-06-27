@@ -34,6 +34,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - RUST_LOG=debug
+      - RUST_BACKTRACE=full
     volumes:
       - ./.docker_data/logs:/app/logs
     networks:

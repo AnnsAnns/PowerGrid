@@ -1,5 +1,5 @@
 use bytes::Bytes;
-use log::{debug, info, trace, warn};
+use tracing::{debug, info, trace, warn};
 use powercable::{generate_rnd_pos, tickgen::{Phase, TickPayload}, POWER_LOCATION_TOPIC, VEHICLE_TOPIC};
 use rumqttc::QoS;
 use serde::{Deserialize, Serialize};

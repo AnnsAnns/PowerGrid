@@ -1,4 +1,4 @@
-use log::{debug, info, warn};
+use tracing::{debug, info, warn};
 use powercable::{tickgen::{Phase, TickPayload, TICK_AS_SEC}, ChartEntry, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, POWER_TRANSFORMER_PRICE_TOPIC};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::time::Duration;

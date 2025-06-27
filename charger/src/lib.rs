@@ -1,6 +1,6 @@
 use car_handling::{accept_handler, answer_get, receive_request};
 use charger::Charger;
-use log::{debug, info};
+use tracing::{debug, info};
 use offer_handling::ReservedOffer;
 use powercable::{
     generate_rnd_pos, generate_unique_name, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CHARGER_ACCEPT,

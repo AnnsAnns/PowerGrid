@@ -1,4 +1,4 @@
-use log::info;
+use tracing::info;
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task, time};

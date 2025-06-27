@@ -1,5 +1,5 @@
 use bytes::Bytes;
-use log::{debug, info, trace};
+use tracing::{debug, info, trace};
 use powercable::{charger::{Get, ChargeAccept, ChargeOffer, ChargeRequest}, CHARGER_OFFER, CHARGER_CHARGING_ACK};
 use rumqttc::QoS;
 

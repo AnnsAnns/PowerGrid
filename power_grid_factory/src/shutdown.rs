@@ -19,7 +19,7 @@ impl PowerGrid {
         let _ = self.tickgen.abort();
         let _ = self.fusion_charger.abort();
 
-        log::info!("PowerGrid has been shut down gracefully.");
+        tracing::info!("PowerGrid has been shut down gracefully.");
     }
 }
 
@@ -27,6 +27,6 @@ impl Drop for PowerGrid {
     fn drop(&mut self) {
         // Ensure that the shutdown method is called when the PowerGrid instance is dropped
         let _ = self.shutdown();
-        log::info!("PowerGrid instance is being dropped.");   
+        tracing::info!("PowerGrid instance is being dropped.");   
     }
 }

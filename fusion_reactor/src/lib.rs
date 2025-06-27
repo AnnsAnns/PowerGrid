@@ -1,4 +1,4 @@
-use log::{debug, info, warn};
+use tracing::{debug, info, warn};
 use powercable::{
     tickgen::{Phase, TickPayload, TICK_AS_SEC}, ChartEntry, Offer, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, MAP_UPDATE_SPEED_IN_SECS, POWER_LOCATION_TOPIC, POWER_TRANSFORMER_EARNED_TOPIC, POWER_TRANSFORMER_GENERATION_TOPIC
 };

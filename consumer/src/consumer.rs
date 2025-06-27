@@ -1,4 +1,4 @@
-use log::{debug, trace};
+use tracing::{debug, trace};
 use powercable::Position;
 use tokio::{
     fs::File,

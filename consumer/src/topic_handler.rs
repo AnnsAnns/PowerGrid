@@ -1,5 +1,5 @@
 use bytes::Bytes;
-use log::{debug, info, trace, warn};
+use tracing::{debug, info, trace, warn};
 use powercable::{
     offer::structure::OFFER_PACKAGE_SIZE,
     tickgen::{Phase, TickPayload},

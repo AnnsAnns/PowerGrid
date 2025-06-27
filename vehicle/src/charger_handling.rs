@@ -1,7 +1,7 @@
 use crate::vehicle::{Vehicle, VehicleAlgorithm, VehicleStatus};
 use crate::SharedVehicle;
 use bytes::Bytes;
-use log::{debug, info};
+use tracing::{debug, info};
 use powercable::{
     charger::*, generate_rnd_pos, CHARGER_ACCEPT, CHARGER_CHARGING_GET, CHARGER_CHARGING_RELEASE, CHARGER_REQUEST
 };

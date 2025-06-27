@@ -1,6 +1,6 @@
 use std::{sync::Arc, time::Duration};
 
-use log::{info, trace};
+use tracing::{info, trace};
 use powercable::*;
 use rumqttc::{AsyncClient, EventLoop, MqttOptions, QoS};
 use serde_json::json;

@@ -1,5 +1,5 @@
 use handler::{ack_buy_offer, handle_buy_offer, handle_tick};
-use log::{debug, info};
+use tracing::{debug, info};
 use powercable::*;
 use precalculated_turbine::PrecalculatedTurbine;
 use rumqttc::AsyncClient;

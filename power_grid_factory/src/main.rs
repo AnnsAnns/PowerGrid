@@ -1,8 +1,9 @@
 use consumer::consumer::ConsumerType;
 use tokio::task::{self, JoinHandle};
+use tracing_subscriber::{field::debug, fmt::writer::MakeWriterExt};
 
-mod spawn_tasks;
 mod shutdown;
+mod spawn_tasks;
 mod watchdog;
 
 struct PowerGrid {
@@ -17,10 +18,30 @@ struct PowerGrid {
 
 #[tokio::main]
 async fn main() {
-    let subscriber = tracing_subscriber::FmtSubscriber::new();
+    let file_appender = tracing_appender::rolling::daily("logs", "power_grid.log");
+    let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
+
+    let subscriber = tracing_subscriber::fmt()
+        .with_ansi(true)
+        .with_file(true)
+        .with_line_number(true)
+        // Set debug level for file output
+        .with_max_level(tracing::Level::DEBUG)
+        // Add file output in addition to stdout
+        .with_writer(std::io::stdout.and(non_blocking))
+        // Build the subscriber
+        .finish();
+
     tracing::subscriber::set_global_default(subscriber).unwrap();
 
+    tracing::debug!("PowerGrid starting up...");
+
     let mut power_grid = PowerGrid::spawn_new(5, 3, 10).await;
+
+    tracing::debug!("PowerGrid spawned with {} turbines, {} chargers, and {} consumers.", 
+        power_grid.turbine.len(), 
+        power_grid.charger.len(), 
+        power_grid.consumer.len());
 
     loop {
         // Sleep for a while before the next check

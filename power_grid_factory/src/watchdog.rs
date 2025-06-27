@@ -7,20 +7,20 @@ impl PowerGrid {
     pub async fn check_health_and_restart(&mut self) {
         // Check if the transformer task is still running
         if self.transformer.is_finished() {
-            log::warn!("Transformer task has stopped. Restarting...");
+            tracing::warn!("Transformer task has stopped. Restarting...");
             self.transformer = tokio::task::spawn(transformer::start_transformer());
         }
 
         // Check if the tickgen task is still running
         if self.tickgen.is_finished() {
-            log::warn!("Tickgen task has stopped. Restarting...");
+            tracing::warn!("Tickgen task has stopped. Restarting...");
             self.tickgen = tokio::task::spawn(tickgen::start_tickgen());
         }
 
         // Check each turbine task
         for (i, turbine) in self.turbine.iter_mut().enumerate() {
             if turbine.is_finished() {
-                log::warn!("Turbine {} task has stopped. Restarting...", i);
+                tracing::warn!("Turbine {} task has stopped. Restarting...", i);
                 *turbine = tokio::task::spawn(turbine::start_turbine());
             }
         }
@@ -28,21 +28,21 @@ impl PowerGrid {
         // Check each charger task
         for (i, charger) in self.charger.iter_mut().enumerate() {
             if charger.is_finished() {
-                log::warn!("Charger {} task has stopped. Restarting...", i);
+                tracing::warn!("Charger {} task has stopped. Restarting...", i);
                 *charger = tokio::task::spawn(charger::start_charger());
             }
         }
 
         // Check the fusion charger task
         if self.fusion_charger.is_finished() {
-            log::warn!("Fusion charger task has stopped. Restarting...");
+            tracing::warn!("Fusion charger task has stopped. Restarting...");
             self.fusion_charger = tokio::task::spawn(fusion_reactor::start_fusion_gen());
         }
 
         // Check each consumer task
         for (i, (consumer_task, consumer_type)) in self.consumer.iter_mut().enumerate() {
             if consumer_task.is_finished() {
-                log::warn!("Consumer {} of type {:?} has stopped. Restarting...", i, consumer_type);
+                tracing::warn!("Consumer {} of type {:?} has stopped. Restarting...", i, consumer_type);
                 *consumer_task = tokio::task::spawn(consumer::start_consumer(*consumer_type));
             }
         }
@@ -50,7 +50,7 @@ impl PowerGrid {
         // Check each vehicle task
         for (i, vehicle) in self.vehicle.iter_mut().enumerate() {
             if vehicle.is_finished() {
-                log::warn!("Vehicle {} task has stopped. Restarting...", i);
+                tracing::warn!("Vehicle {} task has stopped. Restarting...", i);
                 *vehicle = tokio::task::spawn(vehicle::start_vehicle());
             }
         }
