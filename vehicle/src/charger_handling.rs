@@ -1,11 +1,12 @@
 use crate::vehicle::{Vehicle, VehicleAlgorithm, VehicleStatus};
 use crate::SharedVehicle;
 use bytes::Bytes;
+use rand::rngs::StdRng;
 use tracing::{debug, info};
 use powercable::{
     charger::*, CHARGER_ACCEPT, CHARGER_CHARGING_GET, CHARGER_CHARGING_RELEASE, CHARGER_REQUEST
 };
-use rand::Rng;
+use rand::{Rng, SeedableRng};
 use rumqttc::QoS;
 
 /// # Description
@@ -72,7 +73,7 @@ pub async fn accept_offer(handler: SharedVehicle) {
     // Determine the best offer based on the vehicle's algorithm
     let accepted_offer = match handler.vehicle.get_algorithm() {
         VehicleAlgorithm::Best => get_best_offer(&handler.charge_offers, handler.vehicle.clone()),
-        VehicleAlgorithm::Random => get_random_offer(&handler.charge_offers),
+        VehicleAlgorithm::Random => get_random_offer(&handler.charge_offers, handler.seed),
         VehicleAlgorithm::Cheapest => get_cheapest_offer(&handler.charge_offers),
         VehicleAlgorithm::Closest => get_closest_offer(&handler.charge_offers, handler.vehicle.clone()),
     }.unwrap();
@@ -152,13 +153,13 @@ fn get_best_offer(offers: &[ChargeOffer], vehicle: Vehicle) -> Option<ChargeOffe
 /// 
 /// # Returns
 /// An `Option<ChargeOffer>` containing a randomly selected charge offer, or `None` if no offers are available.
-fn get_random_offer(offers: &[ChargeOffer]) -> Option<ChargeOffer> {
+fn get_random_offer(offers: &[ChargeOffer], seed: u64) -> Option<ChargeOffer> {
     debug!("Selecting a random charge offer.");
     if offers.is_empty() {
         return None;
     }
     
-    let mut rng = rand::rng();// TODO: use seed for reproducibility
+    let mut rng = StdRng::seed_from_u64(seed);
     Some(offers[rng.random_range(0..offers.len())].clone())
 }
 
@@ -268,6 +269,7 @@ pub async fn get_ack_handling(handler: SharedVehicle, payload: Bytes) {
             handler.vehicle.set_status(VehicleStatus::Random);
             handler.target_charger = None;
             let destination = handler.vehicle.get_destination();
+            let seed = handler.seed.clone();
             handler.vehicle.set_next_stop(destination);
         }
     }

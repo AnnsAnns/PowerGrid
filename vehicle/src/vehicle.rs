@@ -1,6 +1,6 @@
 use tracing::debug;
-use powercable::{tickgen::PHASE_AS_HOUR, Position};
-use rand::Rng;
+use powercable::{tickgen::PHASE_AS_HOUR, Position, RANDOM_SEED};
+use rand::{rngs::StdRng, Rng, SeedableRng};
 use serde::{Serialize, Deserialize};
 
 use crate::{battery::Battery, database::random_ev};
@@ -101,9 +101,10 @@ impl Vehicle {
     pub fn new(
         name: String,
         location: Position,
+        seed: u64,
     ) -> Self {
-        let mut rng = rand::rng();
-        let (model, consumption, capacity, max_charge) = random_ev();
+        let mut rng = StdRng::seed_from_u64(seed);
+        let (model, consumption, capacity, max_charge) = random_ev(seed);
         let battery = Battery::new(capacity, rng.random_range(0.4..1.0), max_charge);
         Vehicle {
             name,

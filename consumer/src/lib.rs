@@ -2,7 +2,7 @@ use tracing::{debug, info, trace, warn};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration, env};
 use tokio::{sync::Mutex, task};
-use powercable::{OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CONFIG_SCALE_CONSUMER, TICK_TOPIC,};
+use powercable::{generate_seed, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CONFIG_SCALE_CONSUMER, TICK_TOPIC};
 use consumer::{Consumer, ConsumerType};
 use topic_handler::{accept_offer_handler, tick_handler, scale_handler};
 
@@ -18,10 +18,11 @@ struct ConsumerHandler {
     pub offer_handler: OfferHandler,
 }
 
-pub async fn start_consumer(consumer_type: ConsumerType) {
+pub async fn start_consumer(consumer_type: ConsumerType, i: u64) {
     let consumer_type_str = consumer_type.to_string();
+    let seed = generate_seed(i, powercable::OwnType::Consumer);
     let mut consumer =
-        Consumer::new(powercable::generate_rnd_pos(), consumer_type);
+        Consumer::new(powercable::generate_rnd_pos(seed), consumer_type);
 
     debug!("Created {}", consumer_type_str);
 

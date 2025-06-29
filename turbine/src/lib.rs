@@ -28,7 +28,8 @@ pub async fn start_turbine(location: usize) {
     // Print working directory
     //println!("Current working directory: {:?}", std::env::current_dir());
 
-    let (handler, mut eventloop) = init::init(location, true).await;
+    let seed = generate_seed(location as u64, OwnType::Turbine);
+    let (handler, mut eventloop) = init::init(location, true, seed).await;
 
     let name = handler.lock().await.name.clone();
     info!("Turbine simulation started with name: {}", name);

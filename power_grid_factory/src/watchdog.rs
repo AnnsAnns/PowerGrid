@@ -29,7 +29,7 @@ impl PowerGrid {
         for (i, charger) in self.charger.iter_mut().enumerate() {
             if charger.is_finished() {
                 tracing::warn!("Charger {} task has stopped. Restarting...", i);
-                *charger = tokio::task::spawn(charger::start_charger());
+                *charger = tokio::task::spawn(charger::start_charger(i as u64));
             }
         }
 
@@ -43,7 +43,7 @@ impl PowerGrid {
         for (i, (consumer_task, consumer_type)) in self.consumer.iter_mut().enumerate() {
             if consumer_task.is_finished() {
                 tracing::warn!("Consumer {} of type {:?} has stopped. Restarting...", i, consumer_type);
-                *consumer_task = tokio::task::spawn(consumer::start_consumer(*consumer_type));
+                *consumer_task = tokio::task::spawn(consumer::start_consumer(*consumer_type, i as u64));
             }
         }
 
@@ -51,7 +51,7 @@ impl PowerGrid {
         for (i, vehicle) in self.vehicle.iter_mut().enumerate() {
             if vehicle.is_finished() {
                 tracing::warn!("Vehicle {} task has stopped. Restarting...", i);
-                *vehicle = tokio::task::spawn(vehicle::start_vehicle());
+                *vehicle = tokio::task::spawn(vehicle::start_vehicle(i as u64));
             }
         }
     }

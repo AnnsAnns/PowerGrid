@@ -27,15 +27,15 @@ impl PowerGrid {
         let mut consumers: Vec<(JoinHandle<()>, ConsumerType)> = Vec::new();
 
         consumers.push((
-            task::spawn(consumer::start_consumer(ConsumerType::H)),
+            task::spawn(consumer::start_consumer(ConsumerType::H, 0)),
             ConsumerType::H,
         ));
         consumers.push((
-            task::spawn(consumer::start_consumer(ConsumerType::G)),
+            task::spawn(consumer::start_consumer(ConsumerType::G, 1)),
             ConsumerType::G,
         ));
         consumers.push((
-            task::spawn(consumer::start_consumer(ConsumerType::L)),
+            task::spawn(consumer::start_consumer(ConsumerType::L, 2)),
             ConsumerType::L,
         ));
 
@@ -46,12 +46,12 @@ impl PowerGrid {
                 .map(|i| task::spawn(turbine::start_turbine(i)))
                 .collect(),
             charger: (0..amount_of_chargers)
-                .map(|_| task::spawn(charger::start_charger()))
+                .map(|i| task::spawn(charger::start_charger(i as u64)))
                 .collect(),
             fusion_charger: task::spawn(fusion_reactor::start_fusion_gen()),
             consumer: consumers,
             vehicle: (0..amount_of_cars)
-                .map(|_| task::spawn(vehicle::start_vehicle()))
+                .map(|i| task::spawn(vehicle::start_vehicle(i as u64)))
                 .collect(),
         }
     }

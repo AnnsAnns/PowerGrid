@@ -3,8 +3,7 @@ use charger::Charger;
 use tracing::{debug, info};
 use offer_handling::ReservedOffer;
 use powercable::{
-    generate_rnd_pos, generate_unique_name, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CHARGER_ACCEPT,
-    CHARGER_CHARGING_GET, CHARGER_CHARGING_RELEASE, CHARGER_REQUEST, TICK_TOPIC,
+    generate_rnd_pos, generate_seed, generate_unique_name, OfferHandler, OwnType, ACCEPT_BUY_OFFER_TOPIC, CHARGER_ACCEPT, CHARGER_CHARGING_GET, CHARGER_CHARGING_RELEASE, CHARGER_REQUEST, TICK_TOPIC
 };
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
@@ -28,11 +27,13 @@ struct ChargerHandler {
     pub consumed_last_tick: f64,
 }
 
-pub async fn start_charger() {
-    let charger_name: String = format!("Charger {}", generate_unique_name());
+pub async fn start_charger(i: u64) {
+    let seed = generate_seed(i, OwnType::Charger);
+
+    let charger_name: String = format!("Charger {}", generate_unique_name(seed));
     info!("Starting charger simulation...");
 
-    let charger = Charger::new(charger_name.clone(), generate_rnd_pos(), 100, 300, 5);
+    let charger = Charger::new(charger_name.clone(), generate_rnd_pos(seed), 100, 300, 5);
     info!("{:#?}", charger);
 
     let mut mqttoptions = MqttOptions::new(
