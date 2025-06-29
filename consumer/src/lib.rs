@@ -1,6 +1,6 @@
 use tracing::{debug, info, trace, warn};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
-use std::{sync::Arc, time::Duration, env};
+use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task};
 use powercable::{generate_seed, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CONFIG_SCALE_CONSUMER, TICK_TOPIC};
 use consumer::{Consumer, ConsumerType};

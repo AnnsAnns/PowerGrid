@@ -35,7 +35,7 @@ impl Battery {
     ) -> Self {
         Battery {
             max_capacity,
-            level: max_capacity as f64 * soc,
+            level: max_capacity * soc,
             max_charge_rate,
         }
     }
@@ -95,25 +95,25 @@ impl Battery {
         // apply scaling
         let energy_added = self.max_addable_charge(Some(charge));
 
-        self.level = (self.level + energy_added as f64).min(self.get_max_capacity() as f64);
-        energy_added as usize
+        self.level = (self.level + energy_added as f64).min(self.get_max_capacity());
+        energy_added
     }
     
     pub fn remove_charge(&mut self, charge: f64) -> f64 {
         let energy_demand = charge * DISCHARGE_EFFICIENCY;
-        let energy_delivered = if self.level >= energy_demand {
+        
+        if self.level >= energy_demand {
             self.level -= energy_demand;
             energy_demand
         } else {
-            let actual_energy = self.level as f64 * DISCHARGE_EFFICIENCY;
+            let actual_energy = self.level * DISCHARGE_EFFICIENCY;
             self.level = 0.0;
             if actual_energy > 0.0 {
                 actual_energy
             } else {
                 1.0
             }
-        };
-        energy_delivered
+        }
     }
 
     fn charge_scaling(&self) -> f64 {

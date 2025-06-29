@@ -66,7 +66,7 @@ pub async fn tick_handler(handler: SharedVehicle, payload: Bytes) {
 /// - `handler`: A shared reference to the vehicle handler, which contains the vehicle instance and the MQTT client.
 pub async fn process_tick(handler: SharedVehicle) { // TODO: rework this function cause its chaos
     let mut locked_handler = handler.lock().await;
-    let seed = locked_handler.seed.clone();
+    let seed = locked_handler.seed;
 
     if locked_handler.target_charger.is_none() {
         if locked_handler.vehicle.battery().get_soc() <= FIND_CHARGER_AT_LEAST { // If the vehicle low on battery, search for a charger
@@ -88,19 +88,17 @@ pub async fn process_tick(handler: SharedVehicle) { // TODO: rework this functio
                 locked_handler.vehicle.set_status(VehicleStatus::SearchingForCharger);
                 task::spawn(create_charger_request(handler.clone()));
             }
-        } else {
-            if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination() {
-                let mut rng = rand::rng();
-                match rng.random_range(0..11) { // Average parking time is 3 hours (made up)
-                    0 => {
-                        locked_handler.vehicle.set_status(VehicleStatus::Random); // Generate new destination
-                        locked_handler.vehicle.set_destination(generate_rnd_pos(seed));
-                    },
-                    _ => locked_handler.vehicle.set_status(VehicleStatus::Parked), // Usually the car is parked after reaching its destination
-                }
-            } else { // continue after it parked for deadline
-                locked_handler.vehicle.set_status(VehicleStatus::Random);
+        } else if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination() {
+            let mut rng = rand::rng();
+            match rng.random_range(0..11) { // Average parking time is 3 hours (made up)
+                0 => {
+                    locked_handler.vehicle.set_status(VehicleStatus::Random); // Generate new destination
+                    locked_handler.vehicle.set_destination(generate_rnd_pos(seed));
+                },
+                _ => locked_handler.vehicle.set_status(VehicleStatus::Parked), // Usually the car is parked after reaching its destination
             }
+        } else { // continue after it parked for deadline
+            locked_handler.vehicle.set_status(VehicleStatus::Random);
         }
     } else { // Driving to a charger
         if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_next_stop() {

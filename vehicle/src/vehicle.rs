@@ -1,5 +1,5 @@
 use tracing::debug;
-use powercable::{tickgen::PHASE_AS_HOUR, Position, RANDOM_SEED};
+use powercable::{tickgen::PHASE_AS_HOUR, Position};
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use serde::{Serialize, Deserialize};
 

@@ -108,11 +108,11 @@ pub async fn accept_offer_handler(handler: SharedConsumer, payload: Bytes) {
 
     let mut handler = handler.lock().await;
 
-    if !handler.offer_handler.has_offer(&offer.get_id()) {
+    if !handler.offer_handler.has_offer(offer.get_id()) {
         return; // Not an offer we know about
     }
 
-    if !handler.offer_handler.has_sent_offer(&offer.get_id()) {
+    if !handler.offer_handler.has_sent_offer(offer.get_id()) {
         offer.set_ack_for(offer.get_accepted_by().unwrap().clone());
 
         handler.offer_handler.add_sent_offer(offer.clone());

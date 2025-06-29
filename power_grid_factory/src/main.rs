@@ -1,6 +1,6 @@
 use consumer::consumer::ConsumerType;
-use tokio::task::{self, JoinHandle};
-use tracing_subscriber::{field::debug, fmt::writer::MakeWriterExt};
+use tokio::task::{JoinHandle};
+use tracing_subscriber::fmt::writer::MakeWriterExt;
 
 mod shutdown;
 mod spawn_tasks;
@@ -39,7 +39,7 @@ async fn main() {
 
     tracing::debug!("PowerGrid starting up...");
   
-    let mut power_grid = PowerGrid::spawn_new(5, 5, 10).await;
+    let power_grid = PowerGrid::spawn_new(5, 5, 10).await;
 
     tracing::debug!("PowerGrid spawned with {} turbines, {} chargers, and {} consumers.", 
         power_grid.turbine.len(), 
