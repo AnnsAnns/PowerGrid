@@ -5,8 +5,10 @@ use serde::{Serialize, Deserialize};
 
 use crate::{battery::Battery, database::random_ev};
 
-const ROLLING_RESISTANCE: f64 = 0.0005; // approximate coefficient
-const AERODYNAMIC_DRAG: f64 = 0.00003; // approximate drag factor
+/// Rolling resistance coefficient is used to calculate consumption based on speed
+const ROLLING_RESISTANCE: f64 = 0.0005;
+/// Aerodynamic drag coefficient is used to calculate consumption based on speed
+const AERODYNAMIC_DRAG: f64 = 0.00003;
 
 /// # Description
 /// The `VehicleStatus` enum represents the different states a vehicle can be in.
@@ -43,6 +45,18 @@ pub enum VehicleAlgorithm {
 }
 
 /// # Description
+/// The `Deadline` struct represents a deadline for a vehicle to reach a certain level of charge by a certain tick.
+/// 
+/// # Fields
+/// - `tick`: The tick at which the deadline is set.
+/// - `level`: The level of charge that the vehicle must reach by the deadline, in kWh.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct Deadline {
+    pub tick: u64,
+    pub level: f64,
+}
+
+/// # Description
 /// The `Vehicle` struct represents an electric vehicle in our simulation.
 /// It can drive and charge on a `charger::Charger`.
 /// 
@@ -56,6 +70,7 @@ pub enum VehicleAlgorithm {
 /// - `consumption`: The consumption of the vehicle in kWh per 100 km.
 /// - `scale`: A scale factor for the vehicle's consumption, default is 1.0.
 /// - `speed`: The speed of the vehicle in km/h.
+/// - `battery`: The battery of the vehicle, which contains information about its capacity, current charge level, and maximum charge rate.
 /// - `algorithm`: The algorithm used by the vehicle to determine its behavior when searching for a charger.
 #[derive(Clone, Debug, Serialize)]
 pub struct Vehicle {
@@ -283,6 +298,5 @@ impl Vehicle {
                 self.location = self.next_stop;
             }
         }
-        
     }
 }

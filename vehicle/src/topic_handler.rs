@@ -10,10 +10,17 @@ use crate::{charger_handling::{accept_offer, create_charger_request, create_get}
 
 const FIND_CHARGER_AT_LEAST: f64 = 0.3; // 30% charge left
 
+/// # Description
+/// The `LocationPayload` struct represents the payload for location updates in the world map.<br>
+/// 
+/// # Fields
+/// - `name`: The name of the vehicle.
+/// - `lat`: The latitude of the vehicle's current location.
+/// - `lon`: The longitude of the vehicle's current location.
+/// - `icon`: The icon representing the vehicle on the world map.
+/// - `label`: The label to be displayed on the world map, typically showing the vehicle's state of charge (SoC).
+/// - `action`: The action to be performed when the vehicle is clicked on the world map.
 #[derive(Serialize, Deserialize, Debug)]
-/**
- * LocationPayload represents the payload for the worldmap event.
- */
 pub struct LocationPayload {
     pub name: String,
     pub lat: f64,
@@ -23,6 +30,15 @@ pub struct LocationPayload {
     pub action: String,
 }
 
+/// # Description
+/// Called when a tick is received on the `TICK_TOPIC` topic.<br>
+/// It processes the tick based on the current phase and delegates the handling to the appropriate function.<br>
+/// For the `Process` phase, it calls `process_tick`, and for the `Commerce` phase, it calls `commerce_tick`.<br>
+/// For the `PowerImport` phase, no action is needed.<br>
+/// 
+/// # Arguments
+/// - `handler`: A shared reference to the vehicle handler, which contains the vehicle instance and the MQTT client.
+/// - `payload`: The incoming payload containing the tick information in JSON format.
 pub async fn tick_handler(handler: SharedVehicle, payload: Bytes) {
     let payload: TickPayload = serde_json::from_slice(&payload).unwrap();
     match payload.phase {
@@ -43,15 +59,12 @@ pub async fn tick_handler(handler: SharedVehicle, payload: Bytes) {
     publish_location(handler.clone()).await;
 }
 
-pub async fn worldmap_event_handler(handler: SharedVehicle, payload: Bytes) {
-    let payload: LocationPayload = serde_json::from_slice(&payload).unwrap();
-
-    if payload.icon == ":car:" {
-        publish_vehicle(handler.clone()).await;
-    }
-}
-
-pub async fn process_tick(handler: SharedVehicle) {// TODO: rework this function cause its chaos
+/// # Description
+/// The `process_tick` function is called during the process phase of the tick.<br>
+/// 
+/// # Arguments
+/// - `handler`: A shared reference to the vehicle handler, which contains the vehicle instance and the MQTT client.
+pub async fn process_tick(handler: SharedVehicle) { // TODO: rework this function cause its chaos
     let mut locked_handler = handler.lock().await;
   
     if locked_handler.target_charger.is_none() {
@@ -84,6 +97,11 @@ pub async fn process_tick(handler: SharedVehicle) {// TODO: rework this function
     }
 }
 
+/// # Description
+/// The `commerce_tick` function is called during the commerce phase of the tick.<br>
+/// 
+/// # Arguments
+/// - `handler`: A shared reference to the vehicle handler, which contains the vehicle instance and the MQTT client.
 pub async fn commerce_tick(handler: SharedVehicle) {
     {
         let l_handler = handler.lock().await;
@@ -95,6 +113,11 @@ pub async fn commerce_tick(handler: SharedVehicle) {
     accept_offer(handler.clone()).await;
 }
 
+/// # Description
+/// Publishes on the `VEHICLE_TOPIC/vehicle_name` the current `vehicle_speed` and battery `soc` as a percentage to the MQTT broker.<br>
+/// 
+/// # Arguments
+/// - `handler`: A shared reference to the vehicle handler, which contains the vehicle instance and the MQTT client.
 pub async fn publish_vehicle(handler: SharedVehicle) {
     let mut handler = handler.lock().await;
     // Extract all values before mutably borrowing client
@@ -104,17 +127,20 @@ pub async fn publish_vehicle(handler: SharedVehicle) {
     vehicle_payload["soc"] = json!((handler.vehicle.battery().get_soc_percentage()) as u32);
 
     let client = &mut handler.client;
-    client
-        .publish(
-            format!("{}/{}", VEHICLE_TOPIC, name),
-            QoS::ExactlyOnce,
-            true,
-            serde_json::to_string(&vehicle_payload).unwrap(),
-        )
-        .await
-        .unwrap();
+    client.publish(
+        format!("{}/{}", VEHICLE_TOPIC, name),
+        QoS::ExactlyOnce,
+        true,
+        serde_json::to_string(&vehicle_payload).unwrap(),
+    ).await.unwrap();
 }
 
+/// # Description
+/// Publishes on the `POWER_LOCATION_TOPIC` the current location and state of the vehicle to the MQTT broker.<br>
+/// Its used to display the vehicle on the world map in the frontend.<br>
+/// 
+/// # Arguments
+/// - `handler`: A shared reference to the vehicle handler, which contains the vehicle instance and the MQTT client.
 pub async fn publish_location(handler: SharedVehicle) {
     let mut handler = handler.lock().await;
     // Extract all values before mutably borrowing client
@@ -142,8 +168,7 @@ pub async fn publish_location(handler: SharedVehicle) {
         "color": "#B07070",
         "icon": ":car:",
         "label": format!("{:.1}%", percentage),
-    })
-    .to_string();
+    }).to_string();
 
     client.publish(
         POWER_LOCATION_TOPIC,
@@ -159,6 +184,30 @@ pub async fn publish_location(handler: SharedVehicle) {
     ).await.unwrap();
 }
 
+/// # Description
+/// If the vehicle is clicked on the world map, this function is called.<br>
+/// It publishes the vehicle's information to the MQTT broker to update the world map.<br>
+/// It is called when a message is received on the `WORLDMAP_EVENT_TOPIC` topic.<br>
+/// 
+/// # Arguments
+/// - `handler`: A shared reference to the vehicle handler, which contains the vehicle instance and the MQTT client.
+/// - `payload`: The incoming payload containing the event information in JSON format.
+pub async fn worldmap_event_handler(handler: SharedVehicle, payload: Bytes) {
+    let payload: LocationPayload = serde_json::from_slice(&payload).unwrap();
+
+    if payload.icon == ":car:" {
+        publish_vehicle(handler.clone()).await;
+    }
+}
+
+/// # Description
+/// The `scale_handler` function processes incoming scale configuration messages for the vehicle.<br>
+/// It updates the vehicle's consumption scale based on the received payload.<br>
+/// It is called when a message is received on the `CONFIG_VEHICLE_SCALE` topic.<br>
+/// 
+/// # Arguments
+/// - `handler`: A shared reference to the vehicle handler, which contains the vehicle instance.
+/// - `payload`: The incoming payload containing the scale configuration in JSON format.
 pub async fn scale_handler(handler: SharedVehicle, payload: Bytes) {
     let mut handler = handler.lock().await;
     trace!("Received scale: {:?}", payload);
@@ -167,6 +216,14 @@ pub async fn scale_handler(handler: SharedVehicle, payload: Bytes) {
     debug!("Consumption Scale set to: {}", scale);
 }
 
+/// # Description
+/// The `algorithm_handler` function processes incoming algorithm configuration messages for the vehicle.<br>
+/// It updates the vehicle's algorithm based on the received payload.<br>
+/// It is called when a message is received on the `CONFIG_VEHICLE_ALGORITHM` topic.<br>
+/// 
+/// # Arguments
+/// - `handler`: A shared reference to the vehicle handler, which contains the vehicle instance.
+/// - `payload`: The incoming payload containing the algorithm configuration in JSON format.
 pub async fn algorithm_handler(handler: SharedVehicle, payload: Bytes) {
     let mut handler = handler.lock().await;
     trace!("Received algorithm: {:?}", payload);
