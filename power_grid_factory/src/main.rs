@@ -39,7 +39,7 @@ async fn main() {
 
     tracing::debug!("PowerGrid starting up...");
   
-    let mut power_grid = PowerGrid::spawn_new(10, 5, 15).await;
+    let power_grid = PowerGrid::spawn_new(10, 5, 15).await;
 
     tracing::debug!("PowerGrid spawned with {} turbines, {} chargers, and {} consumers.", 
         power_grid.turbine.len(), 
