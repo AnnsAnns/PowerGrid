@@ -51,7 +51,8 @@ pub enum VehicleAlgorithm {
 /// - `model`: The model of the vehicle.
 /// - `status`: The current status of the vehicle, default is `VehicleStatus::Random`.
 /// - `location`: The current geographical position of the vehicle.
-/// - `destination`: The destination position of the vehicle.
+/// - `next_stop`: The next destination position of the vehicle (for charging).
+/// - `destination`: The final destination position of the vehicle.
 /// - `consumption`: The consumption of the vehicle in kWh per 100 km.
 /// - `scale`: A scale factor for the vehicle's consumption, default is 1.0.
 /// - `speed`: The speed of the vehicle in km/h.
@@ -62,6 +63,7 @@ pub struct Vehicle {
     model: String,
     status: VehicleStatus,
     location: Position,
+    next_stop: Position,
     destination: Position,
     consumption: f64,
     scale: f64,
@@ -92,6 +94,7 @@ impl Vehicle {
             model: model.to_owned(),
             status: VehicleStatus::Parked,
             location,
+            next_stop: location,
             destination: location,// Initially, the destination is the same as the location
             consumption,
             scale: 1.0,
@@ -135,8 +138,21 @@ impl Vehicle {
     }
 
     /// # Sets
+    /// The next-stop-destination of the vehicle.
+    pub fn set_next_stop(&mut self, next_stop: Position) {
+        self.next_stop = next_stop;
+    }
+
+    /// # Returns
+    /// The next-stop-destination of the vehicle as a `Position`.
+    pub fn get_next_stop(&self) -> Position {
+        self.next_stop
+    } 
+
+    /// # Sets
     /// The destination of the vehicle.
     pub fn set_destination(&mut self, destination: Position) {
+        self.next_stop = destination;
         self.destination = destination;
     }
 
@@ -255,16 +271,16 @@ impl Vehicle {
         let charge_factor = wanted_energy / used_energy;
 
         // drive
-        let total_distance = self.distance_to(self.get_destination()) * charge_factor;
+        let total_distance = self.distance_to(self.get_next_stop()) * charge_factor;
         debug!("Total distance: {}", total_distance);
         if total_distance > 0.0 {
             let step_ratio = wanted_distance/ total_distance;
-            self.location.latitude += step_ratio * (self.destination.latitude - self.location.latitude);
-            self.location.longitude += step_ratio * (self.destination.longitude - self.location.longitude);
+            self.location.latitude += step_ratio * (self.next_stop.latitude - self.location.latitude);
+            self.location.longitude += step_ratio * (self.next_stop.longitude - self.location.longitude);
 
             // do the rest for free :)
             if total_distance <= wanted_distance {
-                self.location = self.destination;
+                self.location = self.next_stop;
             }
         }
         

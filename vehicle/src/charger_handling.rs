@@ -83,7 +83,7 @@ pub async fn accept_offer(handler: SharedVehicle) {
 
     // drive to the charger
     handler.vehicle.set_status(VehicleStatus::SearchingForCharger);
-    handler.vehicle.set_destination(accepted_offer.charger_position.clone());
+    handler.vehicle.set_next_stop(accepted_offer.charger_position.clone());
 
     info!(
         "Accepting best offer from {}: {} kWh at {}€",
@@ -271,7 +271,8 @@ pub async fn get_ack_handling(handler: SharedVehicle, payload: Bytes) {
 
             handler.vehicle.set_status(VehicleStatus::Random);
             handler.target_charger = None;
-            handler.vehicle.set_destination(generate_rnd_pos());
+            let destination = handler.vehicle.get_destination();
+            handler.vehicle.set_next_stop(destination);
         }
     }
 }

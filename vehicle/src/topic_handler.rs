@@ -72,14 +72,14 @@ pub async fn process_tick(handler: SharedVehicle) {// TODO: rework this function
             }
         }
     } else { // Driving to a charger
-        if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination()
-            && locked_handler.vehicle.get_status().eq(&VehicleStatus::SearchingForCharger) {
-            info!("{} has arrived at the destination, requesting charge", locked_handler.vehicle.get_name());
-            locked_handler.vehicle.set_status(VehicleStatus::Charging);
-        }
-        if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination()
-            && locked_handler.vehicle.get_status().eq(&VehicleStatus::Charging) {
-            task::spawn(create_get(handler.clone()));
+        if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_next_stop() {
+            if locked_handler.vehicle.get_status().eq(&VehicleStatus::SearchingForCharger) {
+                info!("{} has arrived at the destination, requesting charge", locked_handler.vehicle.get_name());
+                locked_handler.vehicle.set_status(VehicleStatus::Charging);
+            }
+            if locked_handler.vehicle.get_status().eq(&VehicleStatus::Charging) {
+                task::spawn(create_get(handler.clone()));
+            }
         }
     }
 }
@@ -120,6 +120,7 @@ pub async fn publish_location(handler: SharedVehicle) {
     // Extract all values before mutably borrowing client
     let name = handler.vehicle.get_name().clone();
     let location = handler.vehicle.get_location();
+    let next_stop = handler.vehicle.get_next_stop();
     let destination = handler.vehicle.get_destination();
     let percentage = handler.vehicle.battery().get_soc_percentage();// TODO: why still warning about speed?
     let client = &mut handler.client;
@@ -127,22 +128,34 @@ pub async fn publish_location(handler: SharedVehicle) {
         "name" : name,
         "lat": location.latitude,
         "lon": location.longitude,
-        "line": [[location.latitude, location.longitude], [destination.latitude, destination.longitude]],
-        "color": "grey",
+        "line": [[location.latitude, location.longitude], [next_stop.latitude, next_stop.longitude]],
+        "color": "red",
         "icon": ":car:",
         "label": format!("{:.1}%", percentage),
     })
     .to_string();
+    let destination_payload = json!({
+        "name" : format!("{}-destination", name),
+        "lat": destination.latitude,
+        "lon": destination.longitude,
+        "line": [[location.latitude, location.longitude], [destination.latitude, destination.longitude]],
+        "color": "grey",
+        "icon": ":triangular_flag_on_post:",
+    })
+    .to_string();
 
-    client
-        .publish(
-            POWER_LOCATION_TOPIC,
-            QoS::ExactlyOnce,
-            true,
-            location_payload,
-        )
-        .await
-        .unwrap();
+    client.publish(
+        POWER_LOCATION_TOPIC,
+        QoS::ExactlyOnce,
+        true,
+        location_payload,
+    ).await.unwrap();
+    client.publish(
+        POWER_LOCATION_TOPIC,
+        QoS::ExactlyOnce,
+        true,
+        destination_payload,
+    ).await.unwrap();
 }
 
 pub async fn scale_handler(handler: SharedVehicle, payload: Bytes) {
