@@ -1,4 +1,5 @@
-use rand::seq::IndexedRandom;
+use powercable::RANDOM_SEED;
+use rand::{rngs::StdRng, seq::IndexedRandom, SeedableRng};
 
 const EV_DATABASE: &[(&str, f64, f64, usize)] = &[
     ("Skoda Elroq 85", 17.1, 77.0, 120),
@@ -38,7 +39,7 @@ const EV_DATABASE: &[(&str, f64, f64, usize)] = &[
 /// - The consumption of the vehicle in kWh/100km.
 /// - The battery capacity of the vehicle in kWh.
 /// - The maximum charge rate of the vehicle in kW.
-pub fn random_ev() -> (&'static str, f64, f64, usize) {
-    let mut rng = rand::rng();
+pub fn random_ev(seed: u64) -> (&'static str, f64, f64, usize) {
+    let mut rng = StdRng::seed_from_u64(seed);
     *EV_DATABASE.choose(&mut rng).unwrap()
 }

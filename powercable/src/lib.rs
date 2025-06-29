@@ -1,4 +1,7 @@
 use bitcode::{Decode, Encode};
+use fake::faker::impls::name;
+use rand::rngs::StdRng;
+use rand::SeedableRng;
 use rand::{seq::IteratorRandom, Rng};
 use serde::Serialize;
 
@@ -40,6 +43,30 @@ pub const VEHICLE_TOPIC: &str = "vehicle";
 pub const MQTT_BROKER: &str = "mosquitto_broker";
 pub const MQTT_BROKER_PORT: u16 = 1883;
 pub const MAP_UPDATE_SPEED_IN_SECS: u64 = 1;
+pub const RANDOM_SEED: u64 = 29_06_25; // Seed for random number generation
+
+/// We use prime numbers to represent different types of entities in the system.
+/// This helps to ensure that the generated IDs are unique and can be easily distinguished.
+pub enum OwnType {
+    Charger = 7,
+    Vehicle = 3,
+    Consumer = 11,
+    Turbine = 5,
+}
+
+/// Generate a random seed based on the index and the type of entity.
+/// There is a low probability of collisions, but it is acceptable for our use case.
+pub fn generate_seed(i: u64, own_type: OwnType) -> u64 {
+    // Generate a seed based on the index and the type of entity
+    let prime = match own_type {
+        OwnType::Charger => OwnType::Charger as u64,
+        OwnType::Vehicle => OwnType::Vehicle as u64,
+        OwnType::Consumer => OwnType::Consumer as u64,
+        OwnType::Turbine => OwnType::Turbine as u64,
+    };
+    // Use a prime number to ensure uniqueness
+    (i+1) * prime + RANDOM_SEED
+}
 
 // Kiel
 const NORTH_LIMIT: (f64, f64) = (54.236555997661384, 9.828710882743488);
@@ -133,8 +160,8 @@ impl Position {
 /// 
 /// # Returns
 /// - A Position instance with a random latitude and longitude.
-pub fn generate_rnd_pos() -> Position {
-    let mut rng = rand::rng();
+pub fn generate_rnd_pos(seed: u64) -> Position {
+    let mut rng = StdRng::seed_from_u64(seed);
     let latitude = rng.random_range(SOUTH_LIMIT.0..NORTH_LIMIT.0);
     let longitude = rng.random_range(WEST_LIMIT.1..EAST_LIMIT.1);
     Position::new(latitude, longitude)
@@ -151,12 +178,12 @@ pub fn get_id_from_topic(topic: &str) -> String {
     "".to_string()
 }
 
-pub fn generate_unique_name() -> String {
-    let mut rng = rand::rng();
+pub fn generate_unique_name(seed: u64) -> String {
+    let mut rng = StdRng::seed_from_u64(seed);
     let vowels = "aeiou";
     let consonants = "bcdfghjklmnpqrstvwxyz";
-    let rand_vowel = |rng: &mut rand::rngs::ThreadRng| vowels.chars().choose(rng).unwrap();
-    let rand_consonant = |rng: &mut rand::rngs::ThreadRng| consonants.chars().choose(rng).unwrap();
+    let rand_vowel = |rng: &mut StdRng| vowels.chars().nth(rng.gen_range(0..vowels.len())).unwrap();
+    let rand_consonant = |rng: &mut StdRng| consonants.chars().nth(rng.gen_range(0..consonants.len())).unwrap();
 
     let mut word: String = "".to_owned();
     for _ in 2..5 {

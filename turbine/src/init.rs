@@ -18,15 +18,15 @@ const POSITIONS: [(f64, f64); 5] = [
     (48.34887278552995, 9.885435336999953),   // Ulm
 ];
 
-pub async fn init(location: usize, use_dump: bool) -> (SharedTurbine, EventLoop) {
+pub async fn init(location: usize, use_dump: bool, seed: u64) -> (SharedTurbine, EventLoop) {
     let (latitude, longitude, name) = {
         let pos = POSITIONS
             .get(location % POSITIONS.len())
             .unwrap_or(&POSITIONS[0]);
-        let name = format!("Turbine {}", generate_unique_name());
+        let name = format!("Turbine {}", generate_unique_name(seed));
         (pos.0, pos.1, name)
     };
-    let name = format!("{} {}", name, generate_unique_name()); // In cases where we have multiple turbines at the same location, we generate a unique name.
+    let name = format!("{} {}", name, generate_unique_name(seed)); // In cases where we have multiple turbines at the same location, we generate a unique name.
 
     let dump_file = format!("data/{}_turbine_dump.json", location);
 
@@ -37,7 +37,7 @@ pub async fn init(location: usize, use_dump: bool) -> (SharedTurbine, EventLoop)
             latitude, longitude
         );
         let turbine = turbine::Turbine::new(
-            turbine::random_rotor_dimension(),
+            turbine::random_rotor_dimension(seed),
             latitude,
             longitude,
             meta_data::MetaDataWrapper::new(meta_data::MetaDataType::AirTemperature)

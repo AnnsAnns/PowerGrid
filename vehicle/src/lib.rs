@@ -22,12 +22,14 @@ struct VehicleHandler {
     pub charge_offers: Vec<ChargeOffer>,
     pub target_charger: Option<ChargeOffer>,
     pub client: AsyncClient,
+    pub seed: u64,
 }
 
-pub async fn start_vehicle() {
+pub async fn start_vehicle(i: u64) {
     // init vehicle
-    let vehicle_name: String = powercable::generate_unique_name();
-    let vehicle = Vehicle::new(vehicle_name.clone(), powercable::generate_rnd_pos());
+    let seed = powercable::generate_seed(i, powercable::OwnType::Vehicle);
+    let vehicle_name: String = powercable::generate_unique_name(seed);
+    let vehicle = Vehicle::new(vehicle_name.clone(), powercable::generate_rnd_pos(seed), seed);
     info!("{:#?}", vehicle);
 
     let mut mqttoptions = MqttOptions::new(
@@ -61,6 +63,7 @@ pub async fn start_vehicle() {
         target_charger: None,
         charge_offers: Vec::new(),
         client: client.clone(),
+        seed,
     }));
 
     while let Ok(notification) = eventloop.poll().await {
