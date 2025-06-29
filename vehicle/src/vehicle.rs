@@ -72,6 +72,7 @@ pub struct VehicleDeadline {
 /// - `speed`: The speed of the vehicle in km/h.
 /// - `battery`: The battery of the vehicle, which contains information about its capacity, current charge level, and maximum charge rate.
 /// - `algorithm`: The algorithm used by the vehicle to determine its behavior when searching for a charger.
+/// - `seed`: To be used for randomness by this vehicle for deterministic but unique outcome.
 #[derive(Clone, Debug, Serialize)]
 pub struct Vehicle {
     name: String,
@@ -278,7 +279,7 @@ impl Vehicle {
     }
 
     /// # Returns
-    /// Current seed for deterministic randomness.
+    /// Current seed for deterministic randomness. Updates automatically.
     pub fn get_seed(&mut self) -> u64 {
         let mut rng = StdRng::seed_from_u64(self.seed);
         self.seed = rng.random();
