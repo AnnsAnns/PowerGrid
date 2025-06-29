@@ -3,21 +3,19 @@ use crate::SharedVehicle;
 use bytes::Bytes;
 use tracing::{debug, info};
 use powercable::{
-    charger::*, generate_rnd_pos, CHARGER_ACCEPT, CHARGER_CHARGING_GET, CHARGER_CHARGING_RELEASE, CHARGER_REQUEST
+    charger::*, CHARGER_ACCEPT, CHARGER_CHARGING_GET, CHARGER_CHARGING_RELEASE, CHARGER_REQUEST
 };
 use rand::Rng;
 use rumqttc::QoS;
 
-/**
- * # Description
- * Sends a charge request to all chargers.<br>
- * This function creates a ChargeRequest message containing the vehicle's name, the amount of charge needed,
- * and the vehicle's current position.<br>
- * Important is that the amount doesn´t contains the amount of energy needed to drive to the charger
- *
- * # Parameters
- * - `handler`: The shared vehicle handler containing the vehicle and its state.
- */
+/// # Description
+/// Sends a charge request to all chargers.<br>
+/// This function creates a ChargeRequest message containing the vehicle's name, the amount of charge needed,
+/// and the vehicle's current position.<br>
+/// Important is that the amount doesn´t contains the amount of energy needed to drive to the charger
+/// 
+/// # Arguments
+/// - `handler`: The shared vehicle handler containing the vehicle and its state.
 pub async fn create_charger_request(handler: SharedVehicle) {
     let handler = handler.lock().await;
 
@@ -37,14 +35,12 @@ pub async fn create_charger_request(handler: SharedVehicle) {
         .unwrap()
 }
 
-/**
- * # Description
- * Receives a charge offer from a charger and stores it.
- *
- * # Parameters
- * - `handler`: The shared vehicle handler containing the vehicle and its state.
- * - `payload`: The payload of the message received on the CHARGER_OFFER topic, containing the charge offer information.
- */
+/// # Description
+/// Receives a charge offer from a charger and stores it.
+/// 
+/// # Arguments
+/// - `handler`: The shared vehicle handler containing the vehicle and its state.
+/// - `payload`: The payload of the message received on the CHARGER_OFFER topic, containing the charge offer information.
 pub async fn receive_offer(handler: SharedVehicle, payload: Bytes) {
     let mut handler = handler.lock().await;
 
@@ -63,7 +59,7 @@ pub async fn receive_offer(handler: SharedVehicle, payload: Bytes) {
 /// This function calculates the best offer based on the distance to the charger and the charge price,<br>
 /// then drives the vehicle to the charger and publishes an acceptance message.
 /// 
-/// # Parameters
+/// # Arguments
 /// - `handler`: The shared vehicle handler containing the vehicle and its state.
 pub async fn accept_offer(handler: SharedVehicle) {
     let mut handler = handler.lock().await;
@@ -74,7 +70,7 @@ pub async fn accept_offer(handler: SharedVehicle) {
     }
 
     // Determine the best offer based on the vehicle's algorithm
-    let best_offer = match handler.vehicle.get_algorithm() {
+    let accepted_offer = match handler.vehicle.get_algorithm() {
         VehicleAlgorithm::Best => get_best_offer(&handler.charge_offers, handler.vehicle.clone()),
         VehicleAlgorithm::Random => get_random_offer(&handler.charge_offers),
         VehicleAlgorithm::Cheapest => get_cheapest_offer(&handler.charge_offers),
@@ -83,18 +79,18 @@ pub async fn accept_offer(handler: SharedVehicle) {
 
     // drive to the charger
     handler.vehicle.set_status(VehicleStatus::SearchingForCharger);
-    handler.vehicle.set_destination(best_offer.charger_position.clone());
+    handler.vehicle.set_next_stop(accepted_offer.charger_position.clone());
 
     info!(
         "Accepting best offer from {}: {} kWh at {}€",
-        best_offer.charger_name, best_offer.charge_amount, best_offer.charge_price
+        accepted_offer.charger_name, accepted_offer.charge_amount, accepted_offer.charge_price
     );
 
     handler.charge_offers.clear();
-    handler.target_charger = Some(best_offer.clone());
+    handler.target_charger = Some(accepted_offer.clone());
 
     let acceptance = ChargeAccept {
-        charger_name: best_offer.charger_name.clone(),
+        charger_name: accepted_offer.charger_name.clone(),
         vehicle_name: handler.vehicle.get_name().clone(),
     };
 
@@ -114,7 +110,7 @@ pub async fn accept_offer(handler: SharedVehicle) {
 /// Bcause every charge offer has a different distance to the vehicle, the energy needed to drive to the charger is also considered.<br>
 /// If no offer is found that satisfies the vehicle's needs, the best available offer is returned.
 /// 
-/// # Parameters
+/// # Arguments
 /// - `offers`: A slice of `ChargeOffer` instances representing the available charge offers.
 /// - `vehicle`: The vehicle for which the best charge offer is being selected.
 /// 
@@ -151,7 +147,7 @@ fn get_best_offer(offers: &[ChargeOffer], vehicle: Vehicle) -> Option<ChargeOffe
 /// # Description
 /// Selects a random charge offer from the list of available offers.
 /// 
-/// # Parameters
+/// # Arguments
 /// - `offers`: A slice of `ChargeOffer` instances representing the available charge offers.
 /// 
 /// # Returns
@@ -169,7 +165,7 @@ fn get_random_offer(offers: &[ChargeOffer]) -> Option<ChargeOffer> {
 /// # Description
 /// Selects the cheapest charge offer from the list of available offers.
 /// 
-/// # Parameters
+/// # Arguments
 /// - `offers`: A slice of `ChargeOffer` instances representing the available charge offers.
 /// 
 /// # Returns
@@ -188,7 +184,7 @@ fn get_cheapest_offer(offers: &[ChargeOffer]) -> Option<ChargeOffer> {
 /// # Description
 /// Selects the closest charge offer based on the vehicle's current position.
 /// 
-/// # Parameters
+/// # Arguments
 /// - `offers`: A slice of `ChargeOffer` instances representing the available charge offers.
 /// - `vehicle`: The vehicle for which the closest charge offer is being selected.
 /// 
@@ -208,7 +204,7 @@ fn get_closest_offer(offers: &[ChargeOffer], vehicle: Vehicle) -> Option<ChargeO
 /// # Description
 /// Creates a Get message to request charging from the target charger.
 /// 
-/// # Parameters
+/// # Arguments
 /// - `handler`: The shared vehicle handler containing the vehicle and its state.
 pub async fn create_get(handler: SharedVehicle) {
     let handler = handler.lock().await;
@@ -271,7 +267,8 @@ pub async fn get_ack_handling(handler: SharedVehicle, payload: Bytes) {
 
             handler.vehicle.set_status(VehicleStatus::Random);
             handler.target_charger = None;
-            handler.vehicle.set_destination(generate_rnd_pos());
+            let destination = handler.vehicle.get_destination();
+            handler.vehicle.set_next_stop(destination);
         }
     }
 }

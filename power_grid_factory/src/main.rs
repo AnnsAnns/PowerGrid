@@ -38,7 +38,7 @@ async fn main() {
     tracing::subscriber::set_global_default(subscriber).unwrap();
 
     tracing::debug!("PowerGrid starting up...");
-
+  
     let mut power_grid = PowerGrid::spawn_new(5, 5, 10).await;
 
     tracing::debug!("PowerGrid spawned with {} turbines, {} chargers, and {} consumers.", 

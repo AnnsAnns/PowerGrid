@@ -7,7 +7,7 @@ use topic_handler::{tick_handler, worldmap_event_handler};
 use charger_handling::{receive_offer};
 use vehicle::Vehicle;
 
-use crate::{charger_handling::get_ack_handling, topic_handler::{scale_handler, algorithm_handler}};
+use crate::{charger_handling::get_ack_handling, topic_handler::{algorithm_handler, scale_handler}};
 
 mod battery;
 mod charger_handling;
