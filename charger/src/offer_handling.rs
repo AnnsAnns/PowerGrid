@@ -22,7 +22,7 @@ impl ReservedOffer {
     /// # Description
     /// Creates a new `ReservedOffer` instance with the specified parameters.
     /// 
-    /// # Parameters
+    /// # Arguments
     /// - `vehicle_name`: The name of the vehicle for which the offer is reserved.
     /// - `quantity`: The amount of charge reserved for the offer, in kWh.
     /// - `price`: The price per unit of charge for the reserved offer.

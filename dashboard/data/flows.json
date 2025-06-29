@@ -179,7 +179,7 @@
         "type": "ui_group",
         "name": "Vehicle",
         "tab": "4c5728327e2ec2a9",
-        "order": 5,
+        "order": 1,
         "disp": true,
         "width": "24",
         "collapse": true,
@@ -201,7 +201,7 @@
         "type": "ui_group",
         "name": "Map",
         "tab": "4c5728327e2ec2a9",
-        "order": 3,
+        "order": 2,
         "disp": true,
         "width": "24",
         "collapse": true,
@@ -1164,7 +1164,8 @@
                 "c787251c75aa8351",
                 "4abfa670718f7685",
                 "c45c5252e7dca425",
-                "9f0a84086bcf7ec0"
+                "9f0a84086bcf7ec0",
+                "5876e76e72a6363f"
             ]
         ]
     },
@@ -1174,11 +1175,11 @@
         "z": "5992b366.f9457c",
         "group": "d54d87a82fb70f0c",
         "order": 5,
-        "width": "3",
+        "width": "5",
         "height": "1",
         "name": "",
         "label": "Consumption",
-        "format": "{{msg.payload.consumption}}",
+        "format": "{{msg.payload.consumption}} kWh / 100 km",
         "layout": "row-left",
         "className": "",
         "style": false,
@@ -1199,7 +1200,7 @@
         "height": "1",
         "name": "",
         "label": "Capacity",
-        "format": "{{msg.payload.battery.max_capacity}}",
+        "format": "{{msg.payload.battery.max_capacity}} kWh",
         "layout": "row-left",
         "className": "",
         "style": false,
@@ -1259,8 +1260,8 @@
         "name": "",
         "group": "d54d87a82fb70f0c",
         "order": 8,
-        "width": "4",
-        "height": "4",
+        "width": "2",
+        "height": "2",
         "gtype": "wave",
         "title": "SoC",
         "label": "%",
@@ -1294,7 +1295,7 @@
         "label": "kph",
         "format": "{{msg.payload.speed_kph}}",
         "min": 0,
-        "max": "150",
+        "max": "100",
         "colors": [
             "#00b500",
             "#e6e600",
@@ -1315,7 +1316,7 @@
         "name": "",
         "group": "d54d87a82fb70f0c",
         "order": 7,
-        "width": "14",
+        "width": "16",
         "height": "4",
         "label": "State of Charge",
         "chartType": "line",
@@ -1604,5 +1605,33 @@
                 "2a713f22cdb70cab"
             ]
         ]
+    },
+    {
+        "id": "5876e76e72a6363f",
+        "type": "ui_gauge",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "group": "d54d87a82fb70f0c",
+        "order": 8,
+        "width": "2",
+        "height": "2",
+        "gtype": "donut",
+        "title": "Deadline",
+        "label": "x5 min",
+        "format": "{{msg.payload.deadline}}",
+        "min": 0,
+        "max": "288",
+        "colors": [
+            "#e01b24",
+            "#e6e600",
+            "#00b500"
+        ],
+        "seg1": "12",
+        "seg2": "60",
+        "diff": false,
+        "className": "",
+        "x": 740,
+        "y": 2080,
+        "wires": []
     }
 ]
