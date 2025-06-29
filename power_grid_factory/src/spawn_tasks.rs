@@ -43,7 +43,7 @@ impl PowerGrid {
             transformer: task::spawn(transformer::start_transformer()),
             tickgen: task::spawn(tickgen::start_tickgen()),
             turbine: (0..amount_of_turbines)
-                .map(|_| task::spawn(turbine::start_turbine()))
+                .map(|i| task::spawn(turbine::start_turbine(i)))
                 .collect(),
             charger: (0..amount_of_chargers)
                 .map(|_| task::spawn(charger::start_charger()))

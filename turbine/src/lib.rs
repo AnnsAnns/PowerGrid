@@ -24,11 +24,11 @@ struct TurbineHandler {
     pub total_earned: f64,
 }
 
-pub async fn start_turbine() {
+pub async fn start_turbine(location: usize) {
     // Print working directory
     //println!("Current working directory: {:?}", std::env::current_dir());
 
-    let (handler, mut eventloop) = init::init().await;
+    let (handler, mut eventloop) = init::init(location, true).await;
 
     let name = handler.lock().await.name.clone();
     info!("Turbine simulation started with name: {}", name);

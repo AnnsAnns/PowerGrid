@@ -36,6 +36,7 @@ services:
       - RUST_LOG=warn
     volumes:
       - ./.docker_data/logs:/app/logs
+      - ./.docker_data/data:/app/data
     networks:
       - mqtt_network
     depends_on:
