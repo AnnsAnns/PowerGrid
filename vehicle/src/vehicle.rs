@@ -1,5 +1,5 @@
 use tracing::debug;
-use powercable::{tickgen::PHASE_AS_HOUR, Position, RANDOM_SEED};
+use powercable::{tickgen::PHASE_AS_HOUR, Position};
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use serde::{Serialize, Deserialize};
 
@@ -86,6 +86,7 @@ pub struct Vehicle {
     battery: Battery,
     algorithm: VehicleAlgorithm,
     deadline: VehicleDeadline,
+    seed: u64,
 }
 
 impl Vehicle {
@@ -118,7 +119,8 @@ impl Vehicle {
             speed: 0,
             battery,
             algorithm: VehicleAlgorithm::Best,
-            deadline: VehicleDeadline { ticks_remaining: 12 * 24, target_soc: 0.8 }
+            deadline: VehicleDeadline { ticks_remaining: 12 * 24, target_soc: 0.8 },
+            seed: seed,
         }
     }
 
@@ -273,6 +275,14 @@ impl Vehicle {
     /// The deadline to which a the battery must be charged.
     pub fn get_deadline(&self) -> VehicleDeadline {
         self.deadline
+    }
+
+    /// # Returns
+    /// Current seed for deterministic randomness.
+    pub fn get_seed(&mut self) -> u64 {
+        let mut rng = StdRng::seed_from_u64(self.seed);
+        self.seed = rng.random();
+        self.seed
     }
 
     /// # Description
