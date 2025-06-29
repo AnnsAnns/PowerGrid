@@ -79,7 +79,7 @@ impl MetaDataWrapper {
 
         // Return the nearest station
         if self.meta_data.len() < amount {
-            return None;
+            None
         } else {
             let nearest_stations: Vec<&MetaDataElement> = self
                 .meta_data

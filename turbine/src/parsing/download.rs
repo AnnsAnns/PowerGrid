@@ -63,7 +63,7 @@ pub async fn download_data_for(id: usize, data_type: MetaDataType) -> Result<Str
                             id
                         ))
                     }
-                    Err(e) => return Err(format!("Failed to extract zip file: {}", e)),
+                    Err(e) => Err(format!("Failed to extract zip file: {}", e)),
                 }
             } else {
                 Err(format!(

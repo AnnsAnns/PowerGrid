@@ -6,6 +6,12 @@ pub struct OfferHandler {
     sent_offers: HashMap<String, Offer>,
 }
 
+impl Default for OfferHandler {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl OfferHandler {
     pub fn new() -> Self {
         OfferHandler {

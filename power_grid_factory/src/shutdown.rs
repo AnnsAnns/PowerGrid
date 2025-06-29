@@ -4,20 +4,20 @@ impl PowerGrid {
     pub async fn shutdown(&mut self) {
         // Shutdown all tasks gracefully
         for turbine in &self.turbine {
-            let _ = turbine.abort();
+            turbine.abort();
         }
         for charger in &self.charger {
-            let _ = charger.abort();
+            charger.abort();
         }
         for consumer in &self.consumer {
-            let _ = consumer.0.abort();
+            consumer.0.abort();
         }
         for vehicle in &self.vehicle {
-            let _ = vehicle.abort();
+            vehicle.abort();
         }
-        let _ = self.transformer.abort();
-        let _ = self.tickgen.abort();
-        let _ = self.fusion_charger.abort();
+        self.transformer.abort();
+        self.tickgen.abort();
+        self.fusion_charger.abort();
 
         tracing::info!("PowerGrid has been shut down gracefully.");
     }

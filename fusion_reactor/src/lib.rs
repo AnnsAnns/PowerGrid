@@ -119,7 +119,7 @@ async fn process_accept_buy_offer(handler: Arc<Mutex<FusionReactor>>, offer: Off
         .lock()
         .await
         .offer_handler
-        .has_sent_offer(&offer.get_id())
+        .has_sent_offer(offer.get_id())
     {
         if offer.get_accepted_by().unwrap() != OWN_TOPIC {
             debug!(
@@ -137,7 +137,7 @@ async fn process_accept_buy_offer(handler: Arc<Mutex<FusionReactor>>, offer: Off
 
             let power_to_sell = offer.get_amount();
             handler.lock().await.power_sold_this_tick += power_to_sell;
-            handler.lock().await.cash_earned += power_to_sell as f64 * offer.get_price();
+            handler.lock().await.cash_earned += power_to_sell * offer.get_price();
             info!(
                 "Selling {} kWh for {} EUR",
                 power_to_sell,

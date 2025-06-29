@@ -78,7 +78,6 @@ pub async fn accept_handler(charger: SharedCharger, payload: Bytes) {
     // This is not something we care about
     if handler.get_reserved_offer(charge_accept.vehicle_name.clone()).is_none() {
         debug!("Received accept from {} but we didn`t reserve an offer", charge_accept.vehicle_name);
-        return;
     } else if &charge_accept.charger_name != handler.charger.get_name() {
         info!("We were not accepted by {}, removing from reserved list", charge_accept.vehicle_name);
         handler.release_offer(charge_accept.vehicle_name.clone(), true);

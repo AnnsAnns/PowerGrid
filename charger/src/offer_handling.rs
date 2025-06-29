@@ -47,7 +47,7 @@ impl ChargerHandler {
     /// This method will reserve the charge and port for the offer and add it to the list of currently reserved offers.
     pub fn reserve_offer(&mut self, offer: ReservedOffer) {
         debug!("Reserving offer {:?}", offer);
-        self.charger.reserve_charge(offer.quantity as usize);
+        self.charger.reserve_charge(offer.quantity);
         self.charger.reserve_port();
         self.currently_reserved_for.push(offer);
     }

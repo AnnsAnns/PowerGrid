@@ -132,7 +132,7 @@ impl Consumer {
                 debug!("Value: {:?}", value);
                 if let Ok(demand) = value.parse::<f32>() {
                     trace!("Parsed demand: {:?}", demand);
-                    self.timeline.push(demand as f32);
+                    self.timeline.push(demand);
                 }
             }
         }
@@ -146,7 +146,7 @@ impl Consumer {
     /// # Returns
     /// The current demand in kWh, adjusted by the scale factor.
     pub fn get_demand(&self) -> usize {
-        (self.timeline.get(self.current_pointer).unwrap().clone() * self.scale as f32)
+        (*self.timeline.get(self.current_pointer).unwrap() * self.scale as f32)
             as usize
     }
 
