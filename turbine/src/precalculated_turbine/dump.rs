@@ -5,6 +5,11 @@ impl PrecalculatedTurbine {
         // Serialize the turbine to a JSON string
         let json_data = serde_json::to_string(&turbine).expect("Failed to serialize turbine");
 
+        // Check whether data directory exists, if not create it
+        if !std::path::Path::new("data").exists() {
+            std::fs::create_dir("data").expect("Failed to create data directory");
+        }
+
         // Write the JSON string to the specified file
         std::fs::write(path, json_data).expect("Failed to write turbine data to file");   
     }

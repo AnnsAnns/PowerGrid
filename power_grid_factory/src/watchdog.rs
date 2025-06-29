@@ -21,7 +21,7 @@ impl PowerGrid {
         for (i, turbine) in self.turbine.iter_mut().enumerate() {
             if turbine.is_finished() {
                 tracing::warn!("Turbine {} task has stopped. Restarting...", i);
-                *turbine = tokio::task::spawn(turbine::start_turbine());
+                *turbine = tokio::task::spawn(turbine::start_turbine(i));
             }
         }
 
