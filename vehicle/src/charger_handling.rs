@@ -80,7 +80,7 @@ pub async fn accept_offer(handler: SharedVehicle) {
 
     // drive to the charger
     handler.vehicle.set_status(VehicleStatus::SearchingForCharger);
-    handler.vehicle.set_next_stop(accepted_offer.charger_position.clone());
+    handler.vehicle.set_next_stop(accepted_offer.charger_position);
 
     info!(
         "Accepting best offer from {}: {} kWh at {}€",
@@ -142,7 +142,7 @@ fn get_best_offer(offers: &[ChargeOffer], vehicle: Vehicle) -> Option<ChargeOffe
         }
     };
     debug!("No satisfying offer found, returning best unsatisfying offer: {:?}", sorted_offers.first());
-    return sorted_offers.first().cloned();// If no satifiable offer was found, return the best offer that doesn't satisfy
+    sorted_offers.first().cloned()// If no satifiable offer was found, return the best offer that doesn't satisfy
 }
 
 /// # Description
@@ -269,7 +269,7 @@ pub async fn get_ack_handling(handler: SharedVehicle, payload: Bytes) {
             handler.vehicle.set_status(VehicleStatus::Random);
             handler.target_charger = None;
             let destination = handler.vehicle.get_destination();
-            let seed = handler.seed.clone();
+            let seed = handler.seed;
             handler.vehicle.set_next_stop(destination);
         }
     }

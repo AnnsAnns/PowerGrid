@@ -1,8 +1,7 @@
 use bitcode::{Decode, Encode};
-use fake::faker::impls::name;
 use rand::rngs::StdRng;
 use rand::SeedableRng;
-use rand::{seq::IteratorRandom, Rng};
+use rand::Rng;
 use serde::Serialize;
 
 pub mod charger;
@@ -57,15 +56,7 @@ pub enum OwnType {
 /// Generate a random seed based on the index and the type of entity.
 /// There is a low probability of collisions, but it is acceptable for our use case.
 pub fn generate_seed(i: u64, own_type: OwnType) -> u64 {
-    // Generate a seed based on the index and the type of entity
-    let prime = match own_type {
-        OwnType::Charger => OwnType::Charger as u64,
-        OwnType::Vehicle => OwnType::Vehicle as u64,
-        OwnType::Consumer => OwnType::Consumer as u64,
-        OwnType::Turbine => OwnType::Turbine as u64,
-    };
-    // Use a prime number to ensure uniqueness
-    (i+1) * prime + RANDOM_SEED
+    (i+1) * own_type as u64 + RANDOM_SEED
 }
 
 // Kiel

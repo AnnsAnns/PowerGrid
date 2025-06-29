@@ -145,8 +145,8 @@ impl Charger {
             return 0; // No packages needed if already full
         }
 
-        let packages_needed = (remaining_capacity as f64 / OFFER_PACKAGE_SIZE).ceil() as usize;
-        packages_needed
+        
+        (remaining_capacity as f64 / OFFER_PACKAGE_SIZE).ceil() as usize
     }
 
     /// Gets the price of the charger if it had a charge of `amount` added to it.

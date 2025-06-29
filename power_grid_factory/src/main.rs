@@ -1,6 +1,6 @@
 use consumer::consumer::ConsumerType;
-use tokio::task::{self, JoinHandle};
-use tracing_subscriber::{field::debug, fmt::writer::MakeWriterExt};
+use tokio::task::{JoinHandle};
+use tracing_subscriber::fmt::writer::MakeWriterExt;
 
 mod shutdown;
 mod spawn_tasks;

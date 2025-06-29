@@ -1,4 +1,3 @@
-use powercable::RANDOM_SEED;
 use rand::{rngs::StdRng, seq::IndexedRandom, SeedableRng};
 
 const EV_DATABASE: &[(&str, f64, f64, usize)] = &[
