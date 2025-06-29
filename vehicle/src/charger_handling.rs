@@ -74,7 +74,7 @@ pub async fn accept_offer(handler: SharedVehicle) {
     }
 
     // Determine the best offer based on the vehicle's algorithm
-    let best_offer = match handler.vehicle.get_algorithm() {
+    let accepted_offer = match handler.vehicle.get_algorithm() {
         VehicleAlgorithm::Best => get_best_offer(&handler.charge_offers, handler.vehicle.clone()),
         VehicleAlgorithm::Random => get_random_offer(&handler.charge_offers),
         VehicleAlgorithm::Cheapest => get_cheapest_offer(&handler.charge_offers),
@@ -83,18 +83,18 @@ pub async fn accept_offer(handler: SharedVehicle) {
 
     // drive to the charger
     handler.vehicle.set_status(VehicleStatus::SearchingForCharger);
-    handler.vehicle.set_destination(best_offer.charger_position.clone());
+    handler.vehicle.set_destination(accepted_offer.charger_position.clone());
 
     info!(
         "Accepting best offer from {}: {} kWh at {}€",
-        best_offer.charger_name, best_offer.charge_amount, best_offer.charge_price
+        accepted_offer.charger_name, accepted_offer.charge_amount, accepted_offer.charge_price
     );
 
     handler.charge_offers.clear();
-    handler.target_charger = Some(best_offer.clone());
+    handler.target_charger = Some(accepted_offer.clone());
 
     let acceptance = ChargeAccept {
-        charger_name: best_offer.charger_name.clone(),
+        charger_name: accepted_offer.charger_name.clone(),
         vehicle_name: handler.vehicle.get_name().clone(),
     };
 

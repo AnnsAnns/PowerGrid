@@ -20,7 +20,7 @@ const AERODYNAMIC_DRAG: f64 = 0.00003; // approximate drag factor
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum VehicleStatus {
     Random,
-    Waiting,
+    Parked,
     SearchingForCharger,
     Charging,
     Broken,
@@ -54,7 +54,7 @@ pub enum VehicleAlgorithm {
 /// - `destination`: The destination position of the vehicle.
 /// - `consumption`: The consumption of the vehicle in kWh per 100 km.
 /// - `scale`: A scale factor for the vehicle's consumption, default is 1.0.
-/// - `speed`: The speed of the vehicle in km/h, default is 50 km/h.
+/// - `speed`: The speed of the vehicle in km/h.
 /// - `algorithm`: The algorithm used by the vehicle to determine its behavior when searching for a charger.
 #[derive(Clone, Debug, Serialize)]
 pub struct Vehicle {
@@ -90,12 +90,12 @@ impl Vehicle {
         Vehicle {
             name,
             model: model.to_owned(),
-            status: VehicleStatus::Random,
+            status: VehicleStatus::Parked,
             location,
             destination: location,// Initially, the destination is the same as the location
             consumption,
             scale: 1.0,
-            speed: 50,
+            speed: 0,
             battery,
             algorithm: VehicleAlgorithm::Best,
         }
@@ -231,6 +231,21 @@ impl Vehicle {
 
     /// # Description
     pub fn drive(&mut self) {
+        // check status and set speed
+        if self.status == VehicleStatus::Parked
+        || self.status == VehicleStatus::Charging
+        || self.status == VehicleStatus::Broken {
+            self.speed = 0;
+            return;
+        } else {
+            match self.battery.get_soc() {
+                0.0..0.2 => self.speed = 30,
+                0.2..0.5 => self.speed = 60,
+                _ => self.speed = 90,
+            }
+        }
+
+        // compute energy demand
         let wanted_distance = self.get_speed() as f64 * PHASE_AS_HOUR;// km/h * h = km
         let wanted_energy = (self.get_current_consumption() / 100.0) * wanted_distance;// kWh/km * km = kWh
         let used_energy = self.battery.remove_charge(wanted_energy);
@@ -239,6 +254,7 @@ impl Vehicle {
 
         let charge_factor = wanted_energy / used_energy;
 
+        // drive
         let total_distance = self.distance_to(self.get_destination()) * charge_factor;
         debug!("Total distance: {}", total_distance);
         if total_distance > 0.0 {
