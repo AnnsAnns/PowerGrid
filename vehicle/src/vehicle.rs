@@ -48,12 +48,12 @@ pub enum VehicleAlgorithm {
 /// The `Deadline` struct represents a deadline for a vehicle to reach a certain level of charge by a certain tick.
 /// 
 /// # Fields
-/// - `tick`: The tick at which the deadline is set.
-/// - `level`: The level of charge that the vehicle must reach by the deadline, in kWh.
+/// - `ticks_remaining`: The tick at which the deadline is set. Counts down, each tick represents 5 minutes.
+/// - `target_soc`: The state of charge that the vehicle must reach by the deadline.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
-pub struct Deadline {
-    pub tick: u64,
-    pub level: f64,
+pub struct VehicleDeadline {
+    pub ticks_remaining: i64,
+    pub target_soc: f64,
 }
 
 /// # Description
@@ -85,6 +85,7 @@ pub struct Vehicle {
     speed: usize,
     battery: Battery,
     algorithm: VehicleAlgorithm,
+    deadline: VehicleDeadline,
 }
 
 impl Vehicle {
@@ -116,6 +117,7 @@ impl Vehicle {
             speed: 0,
             battery,
             algorithm: VehicleAlgorithm::Best,
+            deadline: VehicleDeadline { ticks_remaining: 12 * 24, target_soc: 0.8 }
         }
     }
 
@@ -260,8 +262,22 @@ impl Vehicle {
         self.algorithm
     }
 
+    /// # Sets
+    /// The deadline to which a the battery must be charged.
+    pub fn set_deadline(&mut self, deadline: VehicleDeadline) {
+        self.deadline = deadline;
+    }
+
+    /// # Returns
+    /// The deadline to which a the battery must be charged.
+    pub fn get_deadline(&self) -> VehicleDeadline {
+        self.deadline
+    }
+
     /// # Description
     pub fn drive(&mut self) {
+        self.deadline.ticks_remaining -= 1;
+
         // check status and set speed
         if self.status == VehicleStatus::Parked
         || self.status == VehicleStatus::Charging

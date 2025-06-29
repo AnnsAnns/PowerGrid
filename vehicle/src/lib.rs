@@ -7,7 +7,7 @@ use topic_handler::{tick_handler, worldmap_event_handler};
 use charger_handling::{receive_offer};
 use vehicle::Vehicle;
 
-use crate::{charger_handling::get_ack_handling, topic_handler::{algorithm_handler, scale_handler}, vehicle::Deadline};
+use crate::{charger_handling::get_ack_handling, topic_handler::{algorithm_handler, scale_handler}};
 
 mod battery;
 mod charger_handling;
@@ -22,7 +22,6 @@ struct VehicleHandler {
     pub charge_offers: Vec<ChargeOffer>,
     pub target_charger: Option<ChargeOffer>,
     pub client: AsyncClient,
-    pub deadline: Option<Deadline>,
 }
 
 pub async fn start_vehicle() {
@@ -62,7 +61,6 @@ pub async fn start_vehicle() {
         target_charger: None,
         charge_offers: Vec::new(),
         client: client.clone(),
-        deadline: None,
     }));
 
     while let Ok(notification) = eventloop.poll().await {

@@ -3,7 +3,7 @@ use crate::SharedVehicle;
 use bytes::Bytes;
 use tracing::{debug, info};
 use powercable::{
-    charger::*, generate_rnd_pos, CHARGER_ACCEPT, CHARGER_CHARGING_GET, CHARGER_CHARGING_RELEASE, CHARGER_REQUEST
+    charger::*, CHARGER_ACCEPT, CHARGER_CHARGING_GET, CHARGER_CHARGING_RELEASE, CHARGER_REQUEST
 };
 use rand::Rng;
 use rumqttc::QoS;

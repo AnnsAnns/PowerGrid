@@ -6,7 +6,7 @@ use rumqttc::QoS;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tokio::task;
-use crate::{charger_handling::{accept_offer, create_charger_request, create_get}, vehicle::{VehicleAlgorithm, VehicleStatus}, SharedVehicle};
+use crate::{charger_handling::{accept_offer, create_charger_request, create_get}, vehicle::{VehicleAlgorithm, VehicleDeadline, VehicleStatus}, SharedVehicle};
 
 const FIND_CHARGER_AT_LEAST: f64 = 0.3; // 30% charge left
 
@@ -66,7 +66,7 @@ pub async fn tick_handler(handler: SharedVehicle, payload: Bytes) {
 /// - `handler`: A shared reference to the vehicle handler, which contains the vehicle instance and the MQTT client.
 pub async fn process_tick(handler: SharedVehicle) { // TODO: rework this function cause its chaos
     let mut locked_handler = handler.lock().await;
-  
+
     if locked_handler.target_charger.is_none() {
         if locked_handler.vehicle.battery().get_soc() <= FIND_CHARGER_AT_LEAST { // If the vehicle low on battery, search for a charger
             info!("{} has no charge left, searching for charging station", locked_handler.vehicle.get_name());
@@ -74,14 +74,31 @@ pub async fn process_tick(handler: SharedVehicle) { // TODO: rework this functio
             task::spawn(create_charger_request(handler.clone()));
         }
 
-        if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination() {
-            let mut rng = rand::rng();
-            match rng.random_range(0..11) { // Average parking time is 3 hours (made up)
-                0 => {
-                    locked_handler.vehicle.set_status(VehicleStatus::Random); // Generate new destination
-                    locked_handler.vehicle.set_destination(generate_rnd_pos());
-                },
-                _ => locked_handler.vehicle.set_status(VehicleStatus::Parked), // Usually the car is parked after reaching its destination
+        if locked_handler.vehicle.get_deadline().ticks_remaining <= 0 {
+            if locked_handler.vehicle.battery().get_soc() < locked_handler.vehicle.get_deadline().target_soc {
+                warn!("{} failed the deadline!", locked_handler.vehicle.get_name());
+            }
+            locked_handler.vehicle.set_deadline(VehicleDeadline { ticks_remaining: 12 * 24, target_soc: 0.8 });
+        } else if locked_handler.vehicle.get_deadline().ticks_remaining <= 60 { // deadline soon, need charge
+            if locked_handler.vehicle.battery().get_soc() >= locked_handler.vehicle.get_deadline().target_soc {
+                locked_handler.vehicle.set_status(VehicleStatus::Parked);
+            } else {
+                info!("{} is approaching the deadline, searching for charging station", locked_handler.vehicle.get_name());
+                locked_handler.vehicle.set_status(VehicleStatus::SearchingForCharger);
+                task::spawn(create_charger_request(handler.clone()));
+            }
+        } else {
+            if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination() {
+                let mut rng = rand::rng();
+                match rng.random_range(0..11) { // Average parking time is 3 hours (made up)
+                    0 => {
+                        locked_handler.vehicle.set_status(VehicleStatus::Random); // Generate new destination
+                        locked_handler.vehicle.set_destination(generate_rnd_pos());
+                    },
+                    _ => locked_handler.vehicle.set_status(VehicleStatus::Parked), // Usually the car is parked after reaching its destination
+                }
+            } else { // continue after it parked for deadline
+                locked_handler.vehicle.set_status(VehicleStatus::Random);
             }
         }
     } else { // Driving to a charger
@@ -125,6 +142,7 @@ pub async fn publish_vehicle(handler: SharedVehicle) {
     let mut vehicle_payload = json!(handler.vehicle);
     vehicle_payload["speed_kph"] = json!(handler.vehicle.get_speed());
     vehicle_payload["soc"] = json!((handler.vehicle.battery().get_soc_percentage()) as u32);
+    vehicle_payload["deadline"] = json!(handler.vehicle.get_deadline().ticks_remaining);
 
     let client = &mut handler.client;
     client.publish(
