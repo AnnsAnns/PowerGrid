@@ -42,7 +42,7 @@ pub const VEHICLE_TOPIC: &str = "vehicle";
 pub const MQTT_BROKER: &str = "mosquitto_broker";
 pub const MQTT_BROKER_PORT: u16 = 1883;
 pub const MAP_UPDATE_SPEED_IN_SECS: u64 = 1;
-pub const RANDOM_SEED: u64 = 29_06_25; // Seed for random number generation
+pub const RANDOM_SEED: u64 = 30_06_25; // Seed for random number generation
 
 /// We use prime numbers to represent different types of entities in the system.
 /// This helps to ensure that the generated IDs are unique and can be easily distinguished.

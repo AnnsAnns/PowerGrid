@@ -72,6 +72,7 @@ pub struct VehicleDeadline {
 /// - `speed`: The speed of the vehicle in km/h.
 /// - `battery`: The battery of the vehicle, which contains information about its capacity, current charge level, and maximum charge rate.
 /// - `algorithm`: The algorithm used by the vehicle to determine its behavior when searching for a charger.
+/// - `seed`: To be used for randomness by this vehicle for deterministic but unique outcome.
 #[derive(Clone, Debug, Serialize)]
 pub struct Vehicle {
     name: String,
@@ -86,6 +87,7 @@ pub struct Vehicle {
     battery: Battery,
     algorithm: VehicleAlgorithm,
     deadline: VehicleDeadline,
+    seed: u64,
 }
 
 impl Vehicle {
@@ -118,7 +120,8 @@ impl Vehicle {
             speed: 0,
             battery,
             algorithm: VehicleAlgorithm::Best,
-            deadline: VehicleDeadline { ticks_remaining: 12 * 24, target_soc: 0.8 }
+            deadline: VehicleDeadline { ticks_remaining: 12 * 24, target_soc: 0.8 },
+            seed: seed,
         }
     }
 
@@ -273,6 +276,14 @@ impl Vehicle {
     /// The deadline to which a the battery must be charged.
     pub fn get_deadline(&self) -> VehicleDeadline {
         self.deadline
+    }
+
+    /// # Returns
+    /// Current seed for deterministic randomness. Updates automatically.
+    pub fn get_seed(&mut self) -> u64 {
+        let mut rng = StdRng::seed_from_u64(self.seed);
+        self.seed = rng.random();
+        self.seed
     }
 
     /// # Description

@@ -1,5 +1,5 @@
 use bytes::Bytes;
-use rand::Rng;
+use rand::{rngs::StdRng, Rng, SeedableRng};
 use tracing::{debug, info, trace, warn};
 use powercable::{generate_rnd_pos, tickgen::{Phase, TickPayload}, POWER_LOCATION_TOPIC, VEHICLE_TOPIC};
 use rumqttc::QoS;
@@ -66,7 +66,7 @@ pub async fn tick_handler(handler: SharedVehicle, payload: Bytes) {
 /// - `handler`: A shared reference to the vehicle handler, which contains the vehicle instance and the MQTT client.
 pub async fn process_tick(handler: SharedVehicle) { // TODO: rework this function cause its chaos
     let mut locked_handler = handler.lock().await;
-    let seed = locked_handler.seed;
+    //let seed = locked_handler.seed.clone();
 
     if locked_handler.target_charger.is_none() {
         if locked_handler.vehicle.battery().get_soc() <= FIND_CHARGER_AT_LEAST { // If the vehicle low on battery, search for a charger
@@ -89,7 +89,8 @@ pub async fn process_tick(handler: SharedVehicle) { // TODO: rework this functio
                 task::spawn(create_charger_request(handler.clone()));
             }
         } else if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_destination() {
-            let mut rng = rand::rng();
+            let seed = locked_handler.vehicle.get_seed();
+            let mut rng = StdRng::seed_from_u64(seed);
             match rng.random_range(0..11) { // Average parking time is 3 hours (made up)
                 0 => {
                     locked_handler.vehicle.set_status(VehicleStatus::Random); // Generate new destination
