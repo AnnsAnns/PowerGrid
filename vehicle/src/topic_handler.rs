@@ -124,23 +124,24 @@ pub async fn publish_location(handler: SharedVehicle) {
     let destination = handler.vehicle.get_destination();
     let percentage = handler.vehicle.battery().get_soc_percentage();// TODO: why still warning about speed?
     let client = &mut handler.client;
-    let location_payload = json!({
-        "name" : name,
-        "lat": location.latitude,
-        "lon": location.longitude,
-        "line": [[location.latitude, location.longitude], [next_stop.latitude, next_stop.longitude]],
-        "color": "red",
-        "icon": ":car:",
-        "label": format!("{:.1}%", percentage),
-    })
-    .to_string();
     let destination_payload = json!({
         "name" : format!("{}-destination", name),
         "lat": destination.latitude,
         "lon": destination.longitude,
         "line": [[location.latitude, location.longitude], [destination.latitude, destination.longitude]],
         "color": "grey",
+        "dashArray": "8,8",
         "icon": ":triangular_flag_on_post:",
+    })
+    .to_string();
+    let location_payload = json!({
+        "name" : name,
+        "lat": location.latitude,
+        "lon": location.longitude,
+        "line": [[location.latitude, location.longitude], [next_stop.latitude, next_stop.longitude]],
+        "color": "#B07070",
+        "icon": ":car:",
+        "label": format!("{:.1}%", percentage),
     })
     .to_string();
 
@@ -148,13 +149,13 @@ pub async fn publish_location(handler: SharedVehicle) {
         POWER_LOCATION_TOPIC,
         QoS::ExactlyOnce,
         true,
-        location_payload,
+        destination_payload,
     ).await.unwrap();
     client.publish(
         POWER_LOCATION_TOPIC,
         QoS::ExactlyOnce,
         true,
-        destination_payload,
+        location_payload,
     ).await.unwrap();
 }
 
