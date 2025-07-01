@@ -274,5 +274,5 @@ pub async fn show_handler(handler: SharedVehicle, payload: Bytes) {
     let mut handler = handler.lock().await;
     let value = serde_json::from_slice(&payload).unwrap();
     handler.vehicle.visible = value;
-    warn!("{} visibility set to: {}", handler.vehicle.get_name(), value);
+    debug!("{} visibility set to: {}", handler.vehicle.get_name(), value);
 }

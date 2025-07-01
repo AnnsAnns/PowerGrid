@@ -34,7 +34,7 @@ pub async fn start_charger(i: u64) {
     let charger_name: String = format!("Charger {}", generate_unique_name(seed));
     info!("Starting charger simulation...");
 
-    let charger = Charger::new(charger_name.clone(), generate_rnd_pos(seed), 100, 300, 5);
+    let charger = Charger::new(charger_name.clone(), generate_rnd_pos(seed), 50, 300, 5);
     info!("{:#?}", charger);
 
     let mut mqttoptions = MqttOptions::new(

@@ -185,7 +185,6 @@ async fn publish_location(handler: SharedCharger) {
     let longitude = handler.charger.get_longitude();
     let percentage = handler.charger.get_charge_percentage() * 100.0;
     let visible = handler.charger.visible;
-    warn!("{} Visibility: {}", name, visible);
     let client = &mut handler.client;
     let location_payload = json!({
         "name" : name,
@@ -221,5 +220,5 @@ pub async fn show_handler(handler: SharedCharger, payload: Bytes) {
     let mut handler = handler.lock().await;
     let value = serde_json::from_slice(&payload).unwrap();
     handler.charger.visible = value;
-    warn!("{} visibility set to: {}", handler.charger.get_name(), value);
+    debug!("{} visibility set to: {}", handler.charger.get_name(), value);
 }

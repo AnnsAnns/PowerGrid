@@ -1772,7 +1772,7 @@
         "once": true,
         "onceDelay": 0.1,
         "topic": "config/turbine",
-        "payload": "true",
+        "payload": "false",
         "payloadType": "bool",
         "x": 450,
         "y": 2300,
@@ -1835,7 +1835,7 @@
         "once": true,
         "onceDelay": 0.1,
         "topic": "config/consumer",
-        "payload": "true",
+        "payload": "false",
         "payloadType": "bool",
         "x": 460,
         "y": 2360,
@@ -1893,8 +1893,7 @@
         "y": 2420,
         "wires": [
             [
-                "584b8707e9fff378",
-                "499f6ee46e0a290e"
+                "584b8707e9fff378"
             ]
         ]
     },
@@ -1910,20 +1909,13 @@
             {
                 "p": "topic",
                 "vt": "str"
-            },
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
             }
         ],
         "repeat": "",
         "crontab": "",
         "once": true,
         "onceDelay": 0.1,
-        "topic": "config/charger",
+        "topic": "config/vehicle",
         "payload": "true",
         "payloadType": "bool",
         "x": 450,
@@ -1950,24 +1942,6 @@
         "broker": "c1c49a80.e500e",
         "x": 1020,
         "y": 2420,
-        "wires": []
-    },
-    {
-        "id": "499f6ee46e0a290e",
-        "type": "mqtt out",
-        "z": "5992b366.f9457c",
-        "name": "",
-        "topic": "config/charger",
-        "qos": "2",
-        "retain": "true",
-        "respTopic": "",
-        "contentType": "",
-        "userProps": "",
-        "correl": "",
-        "expiry": "",
-        "broker": "c1c49a80.e500e",
-        "x": 1020,
-        "y": 2480,
         "wires": []
     },
     {
