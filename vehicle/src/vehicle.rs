@@ -45,7 +45,7 @@ pub enum VehicleAlgorithm {
 }
 
 /// # Description
-/// The `Deadline` struct represents a deadline for a vehicle to reach a certain level of charge by a certain tick.
+/// The `VehicleDeadline` struct represents a deadline for a vehicle to reach a certain level of charge by a certain tick.
 /// 
 /// # Fields
 /// - `ticks_remaining`: The tick at which the deadline is set. Counts down, each tick represents 5 minutes.
@@ -72,6 +72,7 @@ pub struct VehicleDeadline {
 /// - `speed`: The speed of the vehicle in km/h.
 /// - `battery`: The battery of the vehicle, which contains information about its capacity, current charge level, and maximum charge rate.
 /// - `algorithm`: The algorithm used by the vehicle to determine its behavior when searching for a charger.
+/// - `deadline`: The deadline to which the vehicle must charge its battery.
 /// - `seed`: To be used for randomness by this vehicle for deterministic but unique outcome.
 #[derive(Clone, Debug, Serialize)]
 pub struct Vehicle {
@@ -97,6 +98,7 @@ impl Vehicle {
     /// # Arguments
     /// - `name`: The name of the vehicle.
     /// - `location`: The initial geographical position of the vehicle.
+    /// - `seed`: A seed for the random number generator to ensure deterministic behavior.
     /// 
     /// # Returns
     /// A new `Vehicle` instance with the specified `name` and `location`, and a random `model`, `consumption`, `battery`.

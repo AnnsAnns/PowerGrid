@@ -1,6 +1,5 @@
 use tracing::debug;
 
-
 use super::{power_coefficient::find_closest_coefficient_for_wind, Turbine};
 
 const GAS_CONSTANT: f64 = 287.1; // J/(kg·K)

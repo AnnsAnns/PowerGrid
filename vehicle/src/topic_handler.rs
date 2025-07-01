@@ -228,10 +228,9 @@ pub async fn worldmap_event_handler(handler: SharedVehicle, payload: Bytes) {
 /// - `payload`: The incoming payload containing the scale configuration in JSON format.
 pub async fn scale_handler(handler: SharedVehicle, payload: Bytes) {
     let mut handler = handler.lock().await;
-    trace!("Received scale: {:?}", payload);
     let scale = serde_json::from_slice(&payload).unwrap();
     handler.vehicle.set_scale(scale);
-    debug!("Consumption Scale set to: {}", scale);
+    debug!("{} received scale: {:?}", handler.vehicle.get_name(), payload);
 }
 
 /// # Description

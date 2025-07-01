@@ -131,14 +131,17 @@ pub async fn accept_offer_handler(handler: SharedConsumer, payload: Bytes) {
     }
 }
 
+/// # Description
+/// The `scale_handler` function processes incoming scale configuration messages for the consumer.<br>
+/// It updates the consumer's consumption scale based on the received payload.<br>
+/// It is called when a message is received on the `CONFIG_CONSUMER_SCALE` topic.<br>
+/// 
+/// # Arguments
+/// - `handler`: A shared reference to the consumer handler, which contains the consumer instance.
+/// - `payload`: The incoming payload containing the scale configuration in JSON format.
 pub async fn scale_handler(handler: SharedConsumer, payload: Bytes) {
-    debug!("Received scale: {:?}", payload);
     let scale = serde_json::from_slice(&payload).unwrap();
     let mut handler = handler.lock().await;
     handler.consumer.set_scale(scale);
-    trace!(
-        "Consumer {} scale set to {}",
-        handler.consumer.get_consumer_type().to_string(),
-        scale
-    );
+    debug!("{} received scale: {:?}", handler.consumer.get_consumer_type().to_string(), payload);
 }

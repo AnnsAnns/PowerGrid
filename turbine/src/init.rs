@@ -127,5 +127,9 @@ pub async fn subscribe(handler: SharedTurbine) {
         .subscribe(ACK_ACCEPT_BUY_OFFER_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
+    client
+        .subscribe(CONFIG_TURBINE_SCALE, QoS::ExactlyOnce)
+        .await
+        .unwrap();
     info!("Subscribed to topics");
 }

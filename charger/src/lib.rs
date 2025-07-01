@@ -1,6 +1,6 @@
 use car_handling::{accept_handler, answer_get, receive_request};
 use charger::Charger;
-use tracing::{debug, info};
+use tracing::{info, warn};
 use offer_handling::ReservedOffer;
 use powercable::{
     generate_rnd_pos, generate_seed, generate_unique_name, OfferHandler, OwnType, ACCEPT_BUY_OFFER_TOPIC, CHARGER_ACCEPT, CHARGER_CHARGING_GET, CHARGER_CHARGING_RELEASE, CHARGER_REQUEST, TICK_TOPIC
@@ -81,27 +81,25 @@ pub async fn start_charger(i: u64) {
         if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = notification {
             match p.topic.as_str() {
                 TICK_TOPIC => {
-                    let _ = task::spawn(tick_handler(shared_charger.clone(), p.payload));
+                    task::spawn(tick_handler(shared_charger.clone(), p.payload));
                 }
                 ACCEPT_BUY_OFFER_TOPIC => {
-                    let _ = task::spawn(accept_offer_handler(shared_charger.clone(), p.payload));
+                    task::spawn(accept_offer_handler(shared_charger.clone(), p.payload));
                 }
                 CHARGER_REQUEST => {
-                    let _ = task::spawn(receive_request(shared_charger.clone(), p.payload));
+                    task::spawn(receive_request(shared_charger.clone(), p.payload));
                 }
                 CHARGER_ACCEPT => {
-                    let _ = task::spawn(accept_handler(shared_charger.clone(), p.payload));
+                    task::spawn(accept_handler(shared_charger.clone(), p.payload));
                 }
                 CHARGER_CHARGING_GET => {
                     task::spawn(answer_get(shared_charger.clone(), p.payload));
                 }
                 CHARGER_CHARGING_RELEASE => {
-                    let _ = task::spawn(release_car(shared_charger.clone(), p.payload));
+                    task::spawn(release_car(shared_charger.clone(), p.payload));
                 }
                 _ => {
-                    let _ = task::spawn(async move {
-                        debug!("Unknown topic: {}", p.topic);
-                    });
+                    warn!("Unknown topic: {}", p.topic);
                 }
             }
         }

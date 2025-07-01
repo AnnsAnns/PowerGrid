@@ -68,7 +68,7 @@ pub struct Consumer {
     position: Position,
     consumer_type: ConsumerType,
     current_consumption: usize,
-    scale: usize,
+    scale: f64,
     timeline: Vec<f32>,
     current_pointer: usize,
 }
@@ -79,7 +79,7 @@ impl Consumer {
             position,
             consumer_type,
             current_consumption: 0,
-            scale: 1,
+            scale: 1.0, // Default scale is 1.0
             timeline: Vec::new(),
             current_pointer: 0,
         }
@@ -155,7 +155,7 @@ impl Consumer {
     /// 
     /// # Arguments
     /// - `scale`: The new scale value to set for the consumer.
-    pub fn set_scale(&mut self, scale: usize) {
+    pub fn set_scale(&mut self, scale: f64) {
         self.scale = scale;
     }
 }

@@ -1,10 +1,12 @@
 use handler::{ack_buy_offer, handle_buy_offer, handle_tick};
-use tracing::{debug, info};
+use tracing::{info, warn};
 use powercable::*;
 use precalculated_turbine::PrecalculatedTurbine;
 use rumqttc::AsyncClient;
 use std::sync::Arc;
 use tokio::{sync::Mutex, task};
+
+use crate::handler::scale_handler;
 
 mod handler;
 mod init;
@@ -29,36 +31,34 @@ pub async fn start_turbine(location: usize) {
     //println!("Current working directory: {:?}", std::env::current_dir());
 
     let seed = generate_seed(location as u64, OwnType::Turbine);
-    let (handler, mut eventloop) = init::init(location, true, seed).await;
+    let (shared_turbine, mut eventloop) = init::init(location, true, seed).await;
 
-    let name = handler.lock().await.name.clone();
+    let name = shared_turbine.lock().await.name.clone();
     info!("Turbine simulation started with name: {}", name);
 
-    init::subscribe(handler.clone()).await;
+    init::subscribe(shared_turbine.clone()).await;
 
     info!("Turbine simulation started. Waiting for messages...");
-    loop {
-        let event = eventloop.poll().await;
-        match event {
-            Ok(v) => {
-                debug!("Event = {v:?}");
-                if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = v {
-                    match p.topic.as_str() {
-                        TICK_TOPIC => task::spawn(handle_tick(handler.clone(), p.payload.clone())),
-                        BUY_OFFER_TOPIC => {
-                            task::spawn(handle_buy_offer(handler.clone(), p.payload.clone()))
-                        }
-                        ACK_ACCEPT_BUY_OFFER_TOPIC => task::spawn(ack_buy_offer(handler.clone(), p.payload.clone())),
-                        _ => task::spawn(async move {
-                            debug!("Unknown topic: {}", p.topic);
-                        }),
-                    };
-                };
-            }
-            Err(e) => {
-                debug!("Error = {e:?}");
-                break;
+    while let Ok(notification) = eventloop.poll().await {
+        if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = notification {
+            match p.topic.as_str() {
+                TICK_TOPIC => {
+                    task::spawn(handle_tick(shared_turbine.clone(), p.payload.clone()));
+                }
+                BUY_OFFER_TOPIC => {
+                    task::spawn(handle_buy_offer(shared_turbine.clone(), p.payload.clone()));
+                }
+                ACK_ACCEPT_BUY_OFFER_TOPIC => {
+                    task::spawn(ack_buy_offer(shared_turbine.clone(), p.payload.clone()));
+                }
+                CONFIG_TURBINE_SCALE => {
+                    task::spawn(scale_handler(shared_turbine.clone(), p.payload));
+                }
+                _ => {
+                    warn!("Unknown topic: {}", p.topic);
+                }
             }
         }
     }
+    println!("Exiting turbine simulation...");
 }

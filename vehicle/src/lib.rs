@@ -1,4 +1,4 @@
-use tracing::{debug, info};
+use tracing::{info, warn};
 use powercable::{charger::ChargeOffer, CHARGER_CHARGING_ACK, CHARGER_OFFER, CONFIG_VEHICLE_SCALE, MQTT_BROKER, MQTT_BROKER_PORT, TICK_TOPIC, CONFIG_VEHICLE_ALGORITHM, WORLDMAP_EVENT_TOPIC};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
@@ -88,9 +88,7 @@ pub async fn start_vehicle(i: u64) {
                     let _ = task::spawn(algorithm_handler(shared_vehicle.clone(), p.payload));
                 }
                 _ => {
-                    let _ = task::spawn(async move {
-                        debug!("Unknown topic: {}", p.topic);
-                    });
+                    warn!("Unknown topic: {}", p.topic);
                 }
             }
         }

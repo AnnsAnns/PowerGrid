@@ -2,7 +2,7 @@ use tracing::{debug, info, trace, warn};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task};
-use powercable::{generate_seed, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CONFIG_SCALE_CONSUMER, TICK_TOPIC};
+use powercable::{generate_seed, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CONFIG_CONSUMER_SCALE, TICK_TOPIC};
 use consumer::{Consumer, ConsumerType};
 use topic_handler::{accept_offer_handler, tick_handler, scale_handler};
 
@@ -46,10 +46,10 @@ pub async fn start_consumer(consumer_type: ConsumerType, i: u64) {
         .unwrap();
     trace!("Subscribed to {} topic", ACCEPT_BUY_OFFER_TOPIC);
     client
-        .subscribe(CONFIG_SCALE_CONSUMER, QoS::ExactlyOnce)
+        .subscribe(CONFIG_CONSUMER_SCALE, QoS::ExactlyOnce)
         .await
         .unwrap();
-    trace!("Subscribed to {} topic", CONFIG_SCALE_CONSUMER);
+    trace!("Subscribed to {} topic", CONFIG_CONSUMER_SCALE);
 
     consumer.parse_csv().await.unwrap();
     
@@ -66,18 +66,16 @@ pub async fn start_consumer(consumer_type: ConsumerType, i: u64) {
         if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = notification {
             match p.topic.as_str() {
                 TICK_TOPIC => {
-                    let _ = task::spawn(tick_handler(shared_consumer.clone(), p.payload));
+                    task::spawn(tick_handler(shared_consumer.clone(), p.payload));
                 }
                 ACCEPT_BUY_OFFER_TOPIC => {
-                    let _ = task::spawn(accept_offer_handler(shared_consumer.clone(), p.payload));
+                    task::spawn(accept_offer_handler(shared_consumer.clone(), p.payload));
                 }
-                CONFIG_SCALE_CONSUMER => {
-                    let _ = task::spawn( scale_handler(shared_consumer.clone(), p.payload));
+                CONFIG_CONSUMER_SCALE => {
+                    task::spawn(scale_handler(shared_consumer.clone(), p.payload));
                 }
                 _ => {
-                    let _ = task::spawn(async move {
-                        warn!("Unknown topic: {}", p.topic);
-                    });
+                    warn!("Unknown topic: {}", p.topic);
                 }
             }
         }
