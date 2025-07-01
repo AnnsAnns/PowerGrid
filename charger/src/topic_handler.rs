@@ -27,7 +27,7 @@ pub async fn tick_handler(handler: SharedCharger, payload: Bytes) {
             commerce_tick(handler, payload).await;
         }
         Phase::PowerImport => {
-            // No action needed
+            publish_location(handler.clone()).await;
         }
     }
 }
@@ -102,8 +102,6 @@ async fn process_tick(handler: SharedCharger, payload: TickPayload) {
             .await
             .unwrap()
     }
-
-    publish_location(handler.clone()).await;
 }
 
 /**
