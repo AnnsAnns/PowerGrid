@@ -27,7 +27,7 @@ pub async fn tick_handler(handler: SharedCharger, payload: Bytes) {
             commerce_tick(handler, payload).await;
         }
         Phase::PowerImport => {
-            // No action needed
+            publish_location(handler.clone()).await;
         }
     }
 }
@@ -102,8 +102,6 @@ async fn process_tick(handler: SharedCharger, payload: TickPayload) {
             .await
             .unwrap()
     }
-
-    publish_location(handler.clone()).await;
 }
 
 /**
@@ -186,6 +184,7 @@ async fn publish_location(handler: SharedCharger) {
     let latitude = handler.charger.get_latitude();
     let longitude = handler.charger.get_longitude();
     let percentage = handler.charger.get_charge_percentage() * 100.0;
+    let visible = handler.charger.visible;
     let client = &mut handler.client;
     let location_payload = json!({
         "name" : name,
@@ -193,6 +192,7 @@ async fn publish_location(handler: SharedCharger) {
         "lon": longitude,
         "icon": ":battery:",
         "label": format!("{:.1}%", percentage),
+        "deleted": !visible,
     })
     .to_string();
 
@@ -206,4 +206,19 @@ async fn publish_location(handler: SharedCharger) {
         .await
         .unwrap();
     debug!("Location published: {}", location_payload);
+}
+
+/// # Description
+/// The `show_handler` function processes incoming visibility configuration messages for the charger.<br>
+/// It updates the charger's visibility based on the received payload.<br>
+/// It is called when a message is received on the `CONFIG_CHARGER` topic.<br>
+/// 
+/// # Arguments
+/// - `handler`: A shared reference to the charger handler, which contains the charger instance.
+/// - `payload`: The incoming payload containing the visibility configuration in JSON format.
+pub async fn show_handler(handler: SharedCharger, payload: Bytes) {
+    let mut handler = handler.lock().await;
+    let value = serde_json::from_slice(&payload).unwrap();
+    handler.charger.visible = value;
+    debug!("{} visibility set to: {}", handler.charger.get_name(), value);
 }

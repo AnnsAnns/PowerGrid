@@ -90,6 +90,11 @@ pub async fn start_transformer() {
                         .await
                         .unwrap();
 
+                    if sell_amount == 0.0 && sells_total == 0.0 {
+                        debug!("No sells this tick, skipping price calculations");
+                        continue;
+                    }
+
                     client.publish(
                         POWER_TRANSFORMER_PRICE_TOPIC,
                         QoS::ExactlyOnce,
@@ -123,6 +128,7 @@ pub async fn start_transformer() {
                     sell_amount = 0.0;
                     transformer.reset();
                 }
+
                 powercable::POWER_TRANSFORMER_GENERATION_TOPIC => {
                     let payload = ChartEntry::from_bytes(p.payload).unwrap();
                     if payload.topic == OWN_TOPIC {
@@ -132,6 +138,7 @@ pub async fn start_transformer() {
                     
                     transformer.add_power(payload.payload as f64);
                 }
+
                 powercable::POWER_TRANSFORMER_CONSUMPTION_TOPIC => {
                     let payload = ChartEntry::from_bytes(p.payload).unwrap();
                     if payload.topic == OWN_TOPIC {
@@ -141,8 +148,14 @@ pub async fn start_transformer() {
                     
                     transformer.add_consumption(payload.payload as f64);
                 }
+
                 ACK_ACCEPT_BUY_OFFER_TOPIC => {
                     let offer = Offer::from_bytes(p.payload).unwrap();
+                    debug!("Received Offer ACK: {:?}", offer);
+                    if offer.get_id().starts_with("L") || offer.get_id().starts_with("G") || offer.get_id().starts_with("H") {
+                        debug!("Ignoring Consumer ACKs");
+                        continue;
+                    }
 
                     sells_total += offer.get_price();
                     sell_amount += 1.0;

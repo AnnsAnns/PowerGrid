@@ -11,6 +11,8 @@ pub struct PrecalculatedTurbine {
     longitude: f64, // in degrees
     cached_power_output: Vec<f64>,
     ticker: usize,
+    scale: f64,
+    pub visible: bool,
 }
 
 impl PrecalculatedTurbine {
@@ -40,11 +42,13 @@ impl PrecalculatedTurbine {
             longitude,
             cached_power_output,
             ticker: turbine.get_tick(),
+            scale: 1.0, // Default scale is 1.0
+            visible: true,
         }
     }
 
     pub fn get_power_output(&self) -> f64 {
-        self.cached_power_output[self.ticker % CACHED_ENTRIES]
+        self.cached_power_output[self.ticker % CACHED_ENTRIES] * self.scale as f64
     }
 
     pub fn get_latitude(&self) -> f64 {
@@ -57,6 +61,12 @@ impl PrecalculatedTurbine {
 
     pub fn get_tick(&self) -> usize {
         self.ticker
+    }
+
+    /// # Sets
+    /// The scale for the power output.
+    pub fn set_scale(&mut self, scale: f64) {
+        self.scale = scale;
     }
 
     pub fn tick(&mut self) {

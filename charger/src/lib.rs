@@ -1,16 +1,17 @@
 use car_handling::{accept_handler, answer_get, receive_request};
 use charger::Charger;
-use tracing::{debug, info};
+use tracing::{info, warn};
 use offer_handling::ReservedOffer;
 use powercable::{
-    generate_rnd_pos, generate_seed, generate_unique_name, OfferHandler, OwnType, ACCEPT_BUY_OFFER_TOPIC, CHARGER_ACCEPT, CHARGER_CHARGING_GET, CHARGER_CHARGING_RELEASE, CHARGER_REQUEST, TICK_TOPIC
+    generate_rnd_pos, generate_seed, generate_unique_name, OfferHandler, OwnType,
+    ACCEPT_BUY_OFFER_TOPIC, CHARGER_ACCEPT, CHARGER_CHARGING_GET, CHARGER_CHARGING_RELEASE, CHARGER_REQUEST, CONFIG_VEHICLE, TICK_TOPIC
 };
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task};
 use topic_handler::{accept_offer_handler, tick_handler};
 
-use crate::car_handling::release_car;
+use crate::{car_handling::release_car, topic_handler::show_handler};
 
 mod car_handling;
 mod charger;
@@ -33,7 +34,7 @@ pub async fn start_charger(i: u64) {
     let charger_name: String = format!("Charger {}", generate_unique_name(seed));
     info!("Starting charger simulation...");
 
-    let charger = Charger::new(charger_name.clone(), generate_rnd_pos(seed), 100, 300, 5);
+    let charger = Charger::new(charger_name.clone(), generate_rnd_pos(seed), 50, 300, 5);
     info!("{:#?}", charger);
 
     let mut mqttoptions = MqttOptions::new(
@@ -67,6 +68,10 @@ pub async fn start_charger(i: u64) {
         .subscribe(CHARGER_CHARGING_RELEASE, QoS::ExactlyOnce)
         .await
         .unwrap();
+    client
+        .subscribe(CONFIG_VEHICLE, QoS::ExactlyOnce)
+        .await
+        .unwrap();
     info!("Connected to MQTT broker");
 
     let shared_charger = Arc::new(Mutex::new(ChargerHandler {
@@ -81,27 +86,28 @@ pub async fn start_charger(i: u64) {
         if let rumqttc::Event::Incoming(rumqttc::Packet::Publish(p)) = notification {
             match p.topic.as_str() {
                 TICK_TOPIC => {
-                    let _ = task::spawn(tick_handler(shared_charger.clone(), p.payload));
+                    task::spawn(tick_handler(shared_charger.clone(), p.payload));
                 }
                 ACCEPT_BUY_OFFER_TOPIC => {
-                    let _ = task::spawn(accept_offer_handler(shared_charger.clone(), p.payload));
+                    task::spawn(accept_offer_handler(shared_charger.clone(), p.payload));
                 }
                 CHARGER_REQUEST => {
-                    let _ = task::spawn(receive_request(shared_charger.clone(), p.payload));
+                    task::spawn(receive_request(shared_charger.clone(), p.payload));
                 }
                 CHARGER_ACCEPT => {
-                    let _ = task::spawn(accept_handler(shared_charger.clone(), p.payload));
+                    task::spawn(accept_handler(shared_charger.clone(), p.payload));
                 }
                 CHARGER_CHARGING_GET => {
                     task::spawn(answer_get(shared_charger.clone(), p.payload));
                 }
                 CHARGER_CHARGING_RELEASE => {
-                    let _ = task::spawn(release_car(shared_charger.clone(), p.payload));
+                    task::spawn(release_car(shared_charger.clone(), p.payload));
+                }
+                CONFIG_VEHICLE => {
+                    task::spawn(show_handler(shared_charger.clone(), p.payload));    
                 }
                 _ => {
-                    let _ = task::spawn(async move {
-                        debug!("Unknown topic: {}", p.topic);
-                    });
+                    warn!("Unknown topic: {}", p.topic);
                 }
             }
         }

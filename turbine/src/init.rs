@@ -86,6 +86,7 @@ pub async fn publish_location(handler: SharedTurbine) {
     let longitude = handler.turbine.get_longitude();
     let power = handler.turbine.get_power_output();
     let earned = handler.total_earned;
+    let visible = handler.turbine.visible;
     let client = &mut handler.client;
     let location_payload = json!({
         "name" : name,
@@ -93,6 +94,7 @@ pub async fn publish_location(handler: SharedTurbine) {
         "lon": longitude,
         "icon": ":zap:",
         "label": format!("{:.1}kW ({:.1}€)", power, earned),
+        "deleted": !visible,
     })
     .to_string();
 
@@ -125,6 +127,14 @@ pub async fn subscribe(handler: SharedTurbine) {
         .unwrap();
     client
         .subscribe(ACK_ACCEPT_BUY_OFFER_TOPIC, QoS::ExactlyOnce)
+        .await
+        .unwrap();
+    client
+        .subscribe(CONFIG_TURBINE_SCALE, QoS::ExactlyOnce)
+        .await
+        .unwrap();
+    client
+        .subscribe(CONFIG_TURBINE, QoS::ExactlyOnce)
         .await
         .unwrap();
     info!("Subscribed to topics");

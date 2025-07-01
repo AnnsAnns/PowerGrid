@@ -17,6 +17,7 @@ pub async fn map_update_task(handler: SharedConsumer) {
                 "lon": handler.consumer.get_longitude(),
                 "icon": handler.consumer.get_consumer_type().to_icon(),
                 "label": format!("{:.1}kW", handler.consumer.get_current_consumption()),
+                "deleted": !handler.consumer.visible,
             })
             .to_string();
             handler

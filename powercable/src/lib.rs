@@ -13,7 +13,11 @@ pub use chart_entry::ChartEntry;
 pub use offer::offer_handler::OfferHandler;
 pub use offer::Offer;
 
-pub const CONFIG_SCALE_CONSUMER: &str = "config/scale/consumer";
+pub const CONFIG_TURBINE : &str = "config/turbine"; // also for fusion reactor
+pub const CONFIG_CONSUMER: &str = "config/consumer";
+pub const CONFIG_VEHICLE: &str = "config/vehicle"; // also for chargers
+pub const CONFIG_TURBINE_SCALE: &str = "config/turbine/scale";
+pub const CONFIG_CONSUMER_SCALE: &str = "config/consumer/scale";
 pub const CONFIG_VEHICLE_SCALE: &str = "config/vehicle/scale";
 pub const CONFIG_VEHICLE_ALGORITHM: &str = "config/vehicle/algorithm";
 pub const BUY_OFFER_TOPIC: &str = "market/buy_offer";
@@ -158,6 +162,14 @@ pub fn generate_rnd_pos(seed: u64) -> Position {
     Position::new(latitude, longitude)
 }
 
+/// # Description
+/// Extracts the ID from a topic string.
+/// 
+/// # Arguments
+/// - `topic`: The topic string from which the ID is extracted.
+/// 
+/// # Returns
+/// - A String containing the ID extracted from the topic. If the topic does not contain enough parts, an empty string is returned.
 pub fn get_id_from_topic(topic: &str) -> String {
     // Split the topic into parts
     let parts: Vec<&str> = topic.split('/').collect();
@@ -173,8 +185,8 @@ pub fn generate_unique_name(seed: u64) -> String {
     let mut rng = StdRng::seed_from_u64(seed);
     let vowels = "aeiou";
     let consonants = "bcdfghjklmnpqrstvwxyz";
-    let rand_vowel = |rng: &mut StdRng| vowels.chars().nth(rng.gen_range(0..vowels.len())).unwrap();
-    let rand_consonant = |rng: &mut StdRng| consonants.chars().nth(rng.gen_range(0..consonants.len())).unwrap();
+    let rand_vowel = |rng: &mut StdRng| vowels.chars().nth(rng.random_range(0..vowels.len())).unwrap();
+    let rand_consonant = |rng: &mut StdRng| consonants.chars().nth(rng.random_range(0..consonants.len())).unwrap();
 
     let mut word: String = "".to_owned();
     for _ in 2..5 {

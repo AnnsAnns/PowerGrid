@@ -1,4 +1,4 @@
-use tracing::info;
+use tracing::{info, warn};
 use powercable::tickgen::TICK_AS_MIN;
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
@@ -113,7 +113,7 @@ pub async fn start_tickgen() {
                     });
                 }
                 _ => {
-                    info!("Unknown topic: {}", p.topic);
+                    warn!("Unknown topic: {}", p.topic);
                 }
             }
         }

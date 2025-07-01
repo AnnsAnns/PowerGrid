@@ -13,6 +13,7 @@ use powercable::{offer::structure::OFFER_PACKAGE_SIZE, Position};
 /// - `current_charge`: The current charge level of the charger in kWh.
 /// - `charging_ports`: The number of charging ports available on the charger.
 /// - `reserved_ports`: The number of charging ports currently reserved.
+/// - `visible`: Indicates whether the charger is visible in the simulation.
 #[derive(Debug, Clone)]
 pub struct Charger {
     name: String,
@@ -23,6 +24,7 @@ pub struct Charger {
     current_charge: usize,// in kWh
     charging_ports: usize,
     reserved_ports: usize,
+    pub visible: bool,
 }
 
 impl Charger {
@@ -54,6 +56,7 @@ impl Charger {
             current_charge: 0,
             charging_ports,
             reserved_ports: 0,
+            visible: true,
         }
     }
 
@@ -133,7 +136,7 @@ impl Charger {
     }
 
     pub fn get_current_price(&self) -> f64 {
-        1.1 - self.get_charge_percentage()// TODO: !!!@Tom!!! habe das auf 1.1 gesetzt, damit es nie 0.0 wird, weil dann alle Offers gleichen Preis haben obowhl sie unterschiedlich weit weg sind
+        1.01 - self.get_charge_percentage()// TODO: !!!@Tom!!! habe das auf 1.1 gesetzt, damit es nie 0.0 wird, weil dann alle Offers gleichen Preis haben obowhl sie unterschiedlich weit weg sind
     }
 
     /// Gets the amount of charge needed to fill the charger
