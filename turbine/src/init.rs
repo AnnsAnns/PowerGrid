@@ -4,7 +4,7 @@ use powercable::*;
 use rumqttc::{AsyncClient, EventLoop, MqttOptions, QoS};
 use serde_json::json;
 use tokio::sync::Mutex;
-use tracing::{info, trace, warn};
+use tracing::{info, trace};
 
 use crate::{
     meta_data, precalculated_turbine::PrecalculatedTurbine, turbine, SharedTurbine, TurbineHandler,
@@ -137,6 +137,5 @@ pub async fn subscribe(handler: SharedTurbine) {
         .subscribe(CONFIG_TURBINE, QoS::ExactlyOnce)
         .await
         .unwrap();
-    warn!("{} subscribed to CONFIG_TURBINE and CONFIG_TURBINE_SCALE", handler.name);
     info!("Subscribed to topics");
 }
