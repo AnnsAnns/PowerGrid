@@ -12,6 +12,7 @@ pub struct PrecalculatedTurbine {
     cached_power_output: Vec<f64>,
     ticker: usize,
     scale: f64,
+    pub visible: bool,
 }
 
 impl PrecalculatedTurbine {
@@ -42,6 +43,7 @@ impl PrecalculatedTurbine {
             cached_power_output,
             ticker: turbine.get_tick(),
             scale: 1.0, // Default scale is 1.0
+            visible: true,
         }
     }
 

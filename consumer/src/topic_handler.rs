@@ -145,3 +145,18 @@ pub async fn scale_handler(handler: SharedConsumer, payload: Bytes) {
     handler.consumer.set_scale(scale);
     debug!("{} received scale: {:?}", handler.consumer.get_consumer_type().to_string(), payload);
 }
+
+/// # Description
+/// The `show_handler` function processes incoming visibility configuration messages for the consumer.<br>
+/// It updates the consumer's visibility based on the received payload.<br>
+/// It is called when a message is received on the `CONFIG_CONSUMER` topic.<br>
+/// 
+/// # Arguments
+/// - `handler`: A shared reference to the consumer handler, which contains the consumer instance.
+/// - `payload`: The incoming payload containing the visibility configuration in JSON format.
+pub async fn show_handler(handler: SharedConsumer, payload: Bytes) {
+    let mut handler = handler.lock().await;
+    let value = serde_json::from_slice(&payload).unwrap();
+    handler.consumer.visible = value;
+    debug!("{} visibility set to: {}", handler.consumer.get_consumer_type().to_string(), value);
+}

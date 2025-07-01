@@ -208,6 +208,17 @@
         "className": ""
     },
     {
+        "id": "c87c429f141b3ac3",
+        "type": "ui_group",
+        "name": "Config",
+        "tab": "4c5728327e2ec2a9",
+        "order": 3,
+        "disp": true,
+        "width": "24",
+        "collapse": false,
+        "className": ""
+    },
+    {
         "id": "bf2cf521.1772e",
         "type": "inject",
         "z": "5992b366.f9457c",
@@ -559,8 +570,8 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 350,
-        "y": 820,
+        "x": 330,
+        "y": 1560,
         "wires": [
             [
                 "1d02d875ec166027"
@@ -599,8 +610,8 @@
         "mapurl": "",
         "mapopt": "",
         "mapwms": false,
-        "x": 640,
-        "y": 820,
+        "x": 620,
+        "y": 1560,
         "wires": []
     },
     {
@@ -1680,9 +1691,9 @@
         "once": true,
         "onceDelay": 0.1,
         "topic": "config/turbine/scale",
-        "payload": "1",
+        "payload": "0.25",
         "payloadType": "num",
-        "x": 200,
+        "x": 210,
         "y": 400,
         "wires": [
             [
@@ -1706,6 +1717,275 @@
         "broker": "c1c49a80.e500e",
         "x": 790,
         "y": 400,
+        "wires": []
+    },
+    {
+        "id": "62426e6861cc66f3",
+        "type": "ui_switch",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "label": "Show Turbines and Fusion Reactor",
+        "tooltip": "",
+        "group": "c87c429f141b3ac3",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "topic",
+        "topicType": "msg",
+        "style": "",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "animate": false,
+        "className": "",
+        "x": 760,
+        "y": 2300,
+        "wires": [
+            [
+                "0c5e6f25f2e1c40c"
+            ]
+        ]
+    },
+    {
+        "id": "d59eb995757d6ba6",
+        "type": "inject",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "config/turbine",
+        "payload": "true",
+        "payloadType": "bool",
+        "x": 450,
+        "y": 2300,
+        "wires": [
+            [
+                "62426e6861cc66f3"
+            ]
+        ]
+    },
+    {
+        "id": "5f41db8acc0f28bf",
+        "type": "ui_switch",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "label": "Show Consumers",
+        "tooltip": "",
+        "group": "c87c429f141b3ac3",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "topic",
+        "topicType": "msg",
+        "style": "",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "animate": false,
+        "className": "",
+        "x": 710,
+        "y": 2360,
+        "wires": [
+            [
+                "b9c4bb2d029a9fc8"
+            ]
+        ]
+    },
+    {
+        "id": "b035b7a3340070f8",
+        "type": "inject",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "config/consumer",
+        "payload": "true",
+        "payloadType": "bool",
+        "x": 460,
+        "y": 2360,
+        "wires": [
+            [
+                "5f41db8acc0f28bf"
+            ]
+        ]
+    },
+    {
+        "id": "b9c4bb2d029a9fc8",
+        "type": "mqtt out",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "topic": "config/consumer",
+        "qos": "2",
+        "retain": "true",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "c1c49a80.e500e",
+        "x": 980,
+        "y": 2360,
+        "wires": []
+    },
+    {
+        "id": "4711123d5bc785a3",
+        "type": "ui_switch",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "label": "Show Vehicles and Chargers",
+        "tooltip": "",
+        "group": "c87c429f141b3ac3",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "topic",
+        "topicType": "msg",
+        "style": "",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "animate": false,
+        "className": "",
+        "x": 740,
+        "y": 2420,
+        "wires": [
+            [
+                "584b8707e9fff378",
+                "499f6ee46e0a290e"
+            ]
+        ]
+    },
+    {
+        "id": "e7462e6ddc5cf11a",
+        "type": "inject",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "config/charger",
+        "payload": "true",
+        "payloadType": "bool",
+        "x": 450,
+        "y": 2420,
+        "wires": [
+            [
+                "4711123d5bc785a3"
+            ]
+        ]
+    },
+    {
+        "id": "584b8707e9fff378",
+        "type": "mqtt out",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "topic": "config/vehicle",
+        "qos": "2",
+        "retain": "true",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "c1c49a80.e500e",
+        "x": 980,
+        "y": 2420,
+        "wires": []
+    },
+    {
+        "id": "499f6ee46e0a290e",
+        "type": "mqtt out",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "topic": "config/charger",
+        "qos": "2",
+        "retain": "true",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "c1c49a80.e500e",
+        "x": 980,
+        "y": 2480,
+        "wires": []
+    },
+    {
+        "id": "0c5e6f25f2e1c40c",
+        "type": "mqtt out",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "topic": "config/turbine",
+        "qos": "2",
+        "retain": "true",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "c1c49a80.e500e",
+        "x": 980,
+        "y": 2300,
         "wires": []
     }
 ]

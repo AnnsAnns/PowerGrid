@@ -166,7 +166,8 @@ pub async fn publish_location(handler: SharedVehicle) {
     let location = handler.vehicle.get_location();
     let next_stop = handler.vehicle.get_next_stop();
     let destination = handler.vehicle.get_destination();
-    let percentage = handler.vehicle.battery().get_soc_percentage();// TODO: why still warning about speed?
+    let percentage = handler.vehicle.battery().get_soc_percentage();
+    let visible = handler.vehicle.visible;
     let client = &mut handler.client;
     let destination_payload = json!({
         "name" : format!("{}-destination", name),
@@ -176,6 +177,7 @@ pub async fn publish_location(handler: SharedVehicle) {
         "color": "grey",
         "dashArray": "8,8",
         "icon": ":triangular_flag_on_post:",
+        "deleted": !visible,
     })
     .to_string();
     let location_payload = json!({
@@ -186,6 +188,7 @@ pub async fn publish_location(handler: SharedVehicle) {
         "color": "#B07070",
         "icon": ":car:",
         "label": format!("{:.1}%", percentage),
+        "deleted": !visible,
     }).to_string();
 
     client.publish(
@@ -257,4 +260,19 @@ pub async fn algorithm_handler(handler: SharedVehicle, payload: Bytes) {
     };
     handler.vehicle.set_algorithm(algorithm);
     debug!("Algorithm set to: {:?}", algorithm);
+}
+
+/// # Description
+/// The `show_handler` function processes incoming visibility configuration messages for the vehicle.<br>
+/// It updates the vehicle's visibility based on the received payload.<br>
+/// It is called when a message is received on the `CONFIG_VEHICLE` topic.<br>
+/// 
+/// # Arguments
+/// - `handler`: A shared reference to the vehicle handler, which contains the vehicle instance.
+/// - `payload`: The incoming payload containing the visibility configuration in JSON format.
+pub async fn show_handler(handler: SharedVehicle, payload: Bytes) {
+    let mut handler = handler.lock().await;
+    let value = serde_json::from_slice(&payload).unwrap();
+    handler.vehicle.visible = value;
+    warn!("{} visibility set to: {}", handler.vehicle.get_name(), value);
 }

@@ -73,6 +73,7 @@ pub struct VehicleDeadline {
 /// - `battery`: The battery of the vehicle, which contains information about its capacity, current charge level, and maximum charge rate.
 /// - `algorithm`: The algorithm used by the vehicle to determine its behavior when searching for a charger.
 /// - `deadline`: The deadline to which the vehicle must charge its battery.
+/// - `visible`: A flag indicating whether the vehicle is visible on the world map.
 /// - `seed`: To be used for randomness by this vehicle for deterministic but unique outcome.
 #[derive(Clone, Debug, Serialize)]
 pub struct Vehicle {
@@ -88,6 +89,7 @@ pub struct Vehicle {
     battery: Battery,
     algorithm: VehicleAlgorithm,
     deadline: VehicleDeadline,
+    pub visible: bool,
     seed: u64,
 }
 
@@ -123,6 +125,7 @@ impl Vehicle {
             battery,
             algorithm: VehicleAlgorithm::Best,
             deadline: VehicleDeadline { ticks_remaining: 12 * 24, target_soc: 0.8 },
+            visible: true,
             seed: seed,
         }
     }

@@ -2,7 +2,7 @@ use tracing::{debug, info, trace, warn};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task};
-use powercable::{generate_seed, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CONFIG_CONSUMER_SCALE, TICK_TOPIC};
+use powercable::{generate_seed, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, CONFIG_CONSUMER, CONFIG_CONSUMER_SCALE, TICK_TOPIC};
 use consumer::{Consumer, ConsumerType};
 use topic_handler::{accept_offer_handler, tick_handler, scale_handler};
 
@@ -50,6 +50,11 @@ pub async fn start_consumer(consumer_type: ConsumerType, i: u64) {
         .await
         .unwrap();
     trace!("Subscribed to {} topic", CONFIG_CONSUMER_SCALE);
+    client
+        .subscribe(CONFIG_CONSUMER, QoS::ExactlyOnce)
+        .await
+        .unwrap();
+    trace!("Subscribed to {} topic", CONFIG_CONSUMER);
 
     consumer.parse_csv().await.unwrap();
     
@@ -73,6 +78,9 @@ pub async fn start_consumer(consumer_type: ConsumerType, i: u64) {
                 }
                 CONFIG_CONSUMER_SCALE => {
                     task::spawn(scale_handler(shared_consumer.clone(), p.payload));
+                }
+                CONFIG_CONSUMER => {
+                    task::spawn(topic_handler::show_handler(shared_consumer.clone(), p.payload));
                 }
                 _ => {
                     warn!("Unknown topic: {}", p.topic);

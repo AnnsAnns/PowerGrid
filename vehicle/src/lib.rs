@@ -1,5 +1,5 @@
 use tracing::{info, warn};
-use powercable::{charger::ChargeOffer, CHARGER_CHARGING_ACK, CHARGER_OFFER, CONFIG_VEHICLE_SCALE, MQTT_BROKER, MQTT_BROKER_PORT, TICK_TOPIC, CONFIG_VEHICLE_ALGORITHM, WORLDMAP_EVENT_TOPIC};
+use powercable::{charger::ChargeOffer, CHARGER_CHARGING_ACK, CHARGER_OFFER, CONFIG_VEHICLE_SCALE, CONFIG_VEHICLE, MQTT_BROKER, MQTT_BROKER_PORT, TICK_TOPIC, CONFIG_VEHICLE_ALGORITHM, WORLDMAP_EVENT_TOPIC};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task};
@@ -7,7 +7,7 @@ use topic_handler::{tick_handler, worldmap_event_handler};
 use charger_handling::{receive_offer};
 use vehicle::Vehicle;
 
-use crate::{charger_handling::get_ack_handling, topic_handler::{algorithm_handler, scale_handler}};
+use crate::{charger_handling::get_ack_handling, topic_handler::{algorithm_handler, scale_handler, show_handler}};
 
 mod battery;
 mod charger_handling;
@@ -56,6 +56,9 @@ pub async fn start_vehicle(i: u64) {
     client
         .subscribe(CONFIG_VEHICLE_ALGORITHM, QoS::ExactlyOnce)
         .await.unwrap();
+    client
+        .subscribe(CONFIG_VEHICLE, QoS::ExactlyOnce)
+        .await.unwrap();
     info!("Connected to MQTT broker");
 
     let shared_vehicle = Arc::new(Mutex::new(VehicleHandler {
@@ -86,6 +89,9 @@ pub async fn start_vehicle(i: u64) {
                 }
                 CONFIG_VEHICLE_ALGORITHM => {
                     let _ = task::spawn(algorithm_handler(shared_vehicle.clone(), p.payload));
+                }
+                CONFIG_VEHICLE => {
+                    task::spawn(show_handler(shared_vehicle.clone(), p.payload));
                 }
                 _ => {
                     warn!("Unknown topic: {}", p.topic);

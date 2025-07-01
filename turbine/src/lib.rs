@@ -3,10 +3,11 @@ use tracing::{info, warn};
 use powercable::*;
 use precalculated_turbine::PrecalculatedTurbine;
 use rumqttc::AsyncClient;
-use std::sync::Arc;
+use std::{sync::Arc, thread::spawn};
 use tokio::{sync::Mutex, task};
 
 use crate::handler::scale_handler;
+use crate::handler::show_handler;
 
 mod handler;
 mod init;
@@ -53,6 +54,9 @@ pub async fn start_turbine(location: usize) {
                 }
                 CONFIG_TURBINE_SCALE => {
                     task::spawn(scale_handler(shared_turbine.clone(), p.payload));
+                }
+                CONFIG_TURBINE => {
+                    task::spawn(show_handler(shared_turbine.clone(), p.payload));
                 }
                 _ => {
                     warn!("Unknown topic: {}", p.topic);

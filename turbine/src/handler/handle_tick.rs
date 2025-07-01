@@ -5,13 +5,9 @@ use powercable::{offer::structure::OFFER_PACKAGE_SIZE, tickgen::{Phase, TickPayl
 use rumqttc::QoS;
 use tokio::sync::Mutex;
 
-use crate::{init, TurbineHandler};
+use crate::{init, SharedTurbine, TurbineHandler};
 
-pub async fn process_tick(
-    handler: Arc<Mutex<TurbineHandler>>,
-    payload: TickPayload,
-) {
-
+pub async fn process_tick(handler: SharedTurbine, payload: TickPayload) {
     let (client, power, name) = {
         let mut handler = handler.lock().await;
         handler.turbine.tick();
@@ -38,6 +34,7 @@ pub async fn process_tick(
     .await;
 
     init::publish_location(handler.clone()).await;
+    
 
     client.publish(
         POWER_TRANSFORMER_EARNED_TOPIC,
@@ -51,9 +48,7 @@ pub async fn process_tick(
     ).await.unwrap();
 }
 
-pub async fn commerce_tick(
-    handler: Arc<Mutex<TurbineHandler>>,
-) {
+pub async fn commerce_tick(handler: SharedTurbine) {
     while handler.lock().await.remaining_power > OFFER_PACKAGE_SIZE && handler.lock().await.offer_handler.has_offers() {
         let mut handler = handler.lock().await;
         let mut offer = match handler.offer_handler.get_best_non_sent_offer() {

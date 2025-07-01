@@ -4,7 +4,7 @@ use powercable::*;
 use rumqttc::{AsyncClient, EventLoop, MqttOptions, QoS};
 use serde_json::json;
 use tokio::sync::Mutex;
-use tracing::{info, trace};
+use tracing::{info, trace, warn};
 
 use crate::{
     meta_data, precalculated_turbine::PrecalculatedTurbine, turbine, SharedTurbine, TurbineHandler,
@@ -86,6 +86,7 @@ pub async fn publish_location(handler: SharedTurbine) {
     let longitude = handler.turbine.get_longitude();
     let power = handler.turbine.get_power_output();
     let earned = handler.total_earned;
+    let visible = handler.turbine.visible;
     let client = &mut handler.client;
     let location_payload = json!({
         "name" : name,
@@ -93,6 +94,7 @@ pub async fn publish_location(handler: SharedTurbine) {
         "lon": longitude,
         "icon": ":zap:",
         "label": format!("{:.1}kW ({:.1}€)", power, earned),
+        "deleted": !visible,
     })
     .to_string();
 
@@ -131,5 +133,10 @@ pub async fn subscribe(handler: SharedTurbine) {
         .subscribe(CONFIG_TURBINE_SCALE, QoS::ExactlyOnce)
         .await
         .unwrap();
+    client
+        .subscribe(CONFIG_TURBINE, QoS::ExactlyOnce)
+        .await
+        .unwrap();
+    warn!("{} subscribed to CONFIG_TURBINE and CONFIG_TURBINE_SCALE", handler.name);
     info!("Subscribed to topics");
 }

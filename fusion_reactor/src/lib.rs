@@ -1,10 +1,11 @@
 use tracing::{debug, info, warn};
 use powercable::{
-    tickgen::{Phase, TickPayload, TICK_AS_SEC}, ChartEntry, Offer, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, MAP_UPDATE_SPEED_IN_SECS, POWER_LOCATION_TOPIC, POWER_TRANSFORMER_EARNED_TOPIC, POWER_TRANSFORMER_GENERATION_TOPIC
+    tickgen::{Phase, TickPayload, TICK_AS_SEC}, ChartEntry, Offer, OfferHandler, ACCEPT_BUY_OFFER_TOPIC, ACK_ACCEPT_BUY_OFFER_TOPIC, BUY_OFFER_TOPIC, CONFIG_TURBINE, MAP_UPDATE_SPEED_IN_SECS, POWER_LOCATION_TOPIC, POWER_TRANSFORMER_EARNED_TOPIC, POWER_TRANSFORMER_GENERATION_TOPIC, TICK_TOPIC
 };
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use serde_json::json;
 use std::{sync::Arc, time::Duration};
+use bytes::Bytes;
 use tokio::{sync::Mutex, task, time::sleep};
 
 const OWN_TOPIC: &str = "Fusion Reactor";
@@ -16,6 +17,7 @@ struct FusionReactor {
     offer_handler: OfferHandler,
     client: AsyncClient,
     power_sold_this_tick: f64,
+    visible: bool,
 }
 
 async fn map_update_task(handler: Arc<Mutex<FusionReactor>>) {
@@ -29,6 +31,7 @@ async fn map_update_task(handler: Arc<Mutex<FusionReactor>>) {
                 "lon": 9.881024137175093,
                 "icon": ":repeat:",
                 "label": format!("{:.1}kW {:.1}€", handler.total_power_produced, handler.cash_earned),
+                "deleted": !handler.visible,
             })
             .to_string();
             handler
@@ -180,6 +183,13 @@ async fn process_tick(handler: Arc<Mutex<FusionReactor>>, tick_payload: TickPayl
     handler.power_sold_this_tick = 0.0;
 }
 
+async fn show_handler(handler: Arc<Mutex<FusionReactor>>, payload: Bytes) {
+    let mut handler = handler.lock().await;
+    let value = serde_json::from_slice(&payload).unwrap();
+    handler.visible = value;
+    debug!("Fusion Reactor visibility set to: {}", value);
+}
+
 pub async fn start_fusion_gen() {
     info!("Starting fusion reactor simulation...");
 
@@ -197,18 +207,23 @@ pub async fn start_fusion_gen() {
         offer_handler: OfferHandler::new(),
         client: client.clone(),
         power_sold_this_tick: 0.0,
+        visible: true,
     }));
 
     client
-        .subscribe(powercable::TICK_TOPIC, QoS::ExactlyOnce)
+        .subscribe(TICK_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     client
-        .subscribe(powercable::BUY_OFFER_TOPIC, QoS::ExactlyOnce)
+        .subscribe(BUY_OFFER_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     client
-        .subscribe(powercable::ACK_ACCEPT_BUY_OFFER_TOPIC, QoS::ExactlyOnce)
+        .subscribe(ACK_ACCEPT_BUY_OFFER_TOPIC, QoS::ExactlyOnce)
+        .await
+        .unwrap();
+    client
+        .subscribe(CONFIG_TURBINE, QoS::ExactlyOnce)
         .await
         .unwrap();
     info!("Connected to MQTT broker");
@@ -233,13 +248,16 @@ pub async fn start_fusion_gen() {
                         }
                     }
                 }
-                powercable::BUY_OFFER_TOPIC => {
+                BUY_OFFER_TOPIC => {
                     let offer = Offer::from_bytes(p.payload).unwrap();
                     task::spawn(process_buy(fusion_reactor.clone(), offer));
                 }
-                powercable::ACK_ACCEPT_BUY_OFFER_TOPIC => {
+                ACK_ACCEPT_BUY_OFFER_TOPIC => {
                     let offer = Offer::from_bytes(p.payload).unwrap();
                     task::spawn(process_accept_buy_offer(fusion_reactor.clone(), offer));
+                }
+                CONFIG_TURBINE => {
+                    task::spawn(show_handler(fusion_reactor.clone(), p.payload));
                 }
                 _ => {
                     warn!("Unknown topic: {}", p.topic);

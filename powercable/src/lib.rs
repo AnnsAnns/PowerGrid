@@ -13,6 +13,9 @@ pub use chart_entry::ChartEntry;
 pub use offer::offer_handler::OfferHandler;
 pub use offer::Offer;
 
+pub const CONFIG_TURBINE : &str = "config/turbine"; // also for fusion reactor
+pub const CONFIG_CONSUMER: &str = "config/consumer";
+pub const CONFIG_VEHICLE: &str = "config/vehicle"; // also for chargers
 pub const CONFIG_TURBINE_SCALE: &str = "config/turbine/scale";
 pub const CONFIG_CONSUMER_SCALE: &str = "config/consumer/scale";
 pub const CONFIG_VEHICLE_SCALE: &str = "config/vehicle/scale";
