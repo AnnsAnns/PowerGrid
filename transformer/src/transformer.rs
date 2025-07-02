@@ -1,3 +1,4 @@
+#[derive(Debug, Clone)]
 pub struct Transformer {
     total_consumption: f64,
     total_power: f64,
