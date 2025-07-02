@@ -173,6 +173,8 @@ pub async fn drive_vehicle(handler: SharedVehicle) {
                 true,
                 detour_payload,
             ).await.unwrap();
+
+            handler.vehicle.set_distance_travelled(0.0);
         }
         None => {
             // No action needed
