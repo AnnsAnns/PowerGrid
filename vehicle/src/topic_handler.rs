@@ -54,27 +54,7 @@ pub async fn tick_handler(handler: SharedVehicle, payload: Bytes) {
     }
 
     // drive on all ticks (every 5 minutes)
-    match handler.lock().await.vehicle.drive() {
-        Some(distance_travelled) => {
-            let distance_direct = handler.lock().await.vehicle.distance_to(handler.lock().await.vehicle.get_origin());
-            let detour = distance_travelled - distance_direct;
-            warn!("Distance direct: {}, distance travelled: {}, detour: {}", distance_direct, distance_travelled, detour);
-            
-            //let name = handler.lock().await.vehicle.get_name().clone();
-            let detour_payload = json!(detour).to_string();
-
-            let client = &mut handler.lock().await.client;
-            client.publish(
-                DISTANCE_TOPIC,
-                QoS::ExactlyOnce,
-                true,
-                detour_payload,
-            ).await.unwrap();
-        }
-        None => {
-            // No action needed
-        }
-    }
+    drive_vehicle(handler.clone()).await;
     publish_vehicle(handler.clone()).await;
     publish_location(handler.clone()).await;
 }
@@ -165,6 +145,37 @@ pub async fn commerce_tick(handler: SharedVehicle) {
     }
     trace!("{} has received charge offers, accepting the best one", l_handler.vehicle.get_name());
     task::spawn(accept_offer(handler.clone()));
+}
+
+/// # Description
+/// Drive and redirect detour.
+/// 
+/// # Arguments
+/// - `handler`: A shared reference to the vehicle handler, which contains the vehicle instance and the MQTT client.
+pub async fn drive_vehicle(handler: SharedVehicle) {
+    let mut handler = handler.lock().await;
+
+    match handler.vehicle.drive() {
+        Some(distance_travelled) => {
+            let distance_direct = handler.vehicle.distance_to(handler.vehicle.get_origin());
+            let detour = distance_travelled - distance_direct;
+            warn!("Distance direct: {}, distance travelled: {}, detour: {}", distance_direct, distance_travelled, detour);
+            
+            //let name = handler.lock().await.vehicle.get_name().clone();
+            let detour_payload = json!(detour).to_string();
+
+            let client = &mut handler.client;
+            client.publish(
+                DISTANCE_TOPIC,
+                QoS::ExactlyOnce,
+                true,
+                detour_payload,
+            ).await.unwrap();
+        }
+        None => {
+            // No action needed
+        }
+    }
 }
 
 /// # Description

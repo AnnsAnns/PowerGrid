@@ -260,7 +260,7 @@ pub async fn start_transformer() {
 
                     transformer.add_vehicle_detour(detour);
                     let total_detour = transformer.get_total_vehicle_detour();
-                    info!("New total detour is {} km.", total_detour);
+                    warn!("New total detour is {} km.", total_detour);
                     let detour_payload = json!(total_detour).to_string();
 
                     client

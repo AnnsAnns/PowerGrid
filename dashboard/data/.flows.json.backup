@@ -2158,7 +2158,7 @@
         "type": "mqtt in",
         "z": "5992b366.f9457c",
         "name": "",
-        "topic": "distance",
+        "topic": "detour",
         "qos": "2",
         "datatype": "auto-detect",
         "broker": "c1c49a80.e500e",
@@ -2166,56 +2166,33 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 320,
+        "x": 310,
         "y": 1480,
         "wires": [
             [
-                "4bfd0a7fb389cf34"
+                "178003be69031546"
             ]
         ]
     },
     {
-        "id": "4bfd0a7fb389cf34",
-        "type": "ui_chart",
+        "id": "178003be69031546",
+        "type": "ui_text",
         "z": "5992b366.f9457c",
-        "name": "",
         "group": "faabda12666136a4",
         "order": 0,
-        "width": "24",
-        "height": "4",
-        "label": "Vehicle Distance",
-        "chartType": "line",
-        "legend": "false",
-        "xformat": "HH:mm:ss",
-        "interpolate": "linear",
-        "nodata": "",
-        "dot": false,
-        "ymin": "",
-        "ymax": "",
-        "removeOlder": 1,
-        "removeOlderPoints": "",
-        "removeOlderUnit": "86400",
-        "cutout": 0,
-        "useOneColor": false,
-        "useUTC": false,
-        "colors": [
-            "#1f77b4",
-            "#aec7e8",
-            "#ff7f0e",
-            "#2ca02c",
-            "#98df8a",
-            "#d62728",
-            "#ff9896",
-            "#9467bd",
-            "#c5b0d5"
-        ],
-        "outputs": 1,
-        "useDifferentColor": false,
+        "width": "10",
+        "height": "1",
+        "name": "",
+        "label": "Total detour",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
         "className": "",
-        "x": 790,
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 630,
         "y": 1480,
-        "wires": [
-            []
-        ]
+        "wires": []
     }
 ]

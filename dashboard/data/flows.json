@@ -2184,7 +2184,7 @@
         "height": "1",
         "name": "",
         "label": "Total detour",
-        "format": "{{msg.payload}}",
+        "format": "{{value}}",
         "layout": "row-left",
         "className": "",
         "style": false,
