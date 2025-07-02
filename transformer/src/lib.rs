@@ -1,6 +1,5 @@
 use powercable::{
-    tickgen::{Phase, TickPayload, TICK_AS_SEC},
-    ChartEntry, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, POWER_TRANSFORMER_PRICE_TOPIC,
+    charger::ChargeAccept, tickgen::{Phase, TickPayload, TICK_AS_SEC}, ChartEntry, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, CHARGER_ACCEPT, CHARGER_OFFER_AVG_COST, CHARGER_OFFER_AVG_DISTANCE, CHARGER_OFFER_AVG_PRICE, POWER_TRANSFORMER_PRICE_TOPIC
 };
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::time::Duration;
@@ -24,6 +23,16 @@ pub async fn start_transformer() {
     let mut lowest_sell_price_of_tick = 0.0;
     let mut sells_total: f64 = 0.0;
     let mut sell_amount: f64 = 0.0;
+
+    let mut count_accepted_charge_offers: f64 = 0.0;
+
+    let mut avg_accepted_charge_offer_price: f64 = 0.0;
+    let mut total_accepted_charge_offers_price: f64 = 0.0;
+    let mut avg_accepted_charge_offer_distance: f64 = 0.0;
+    let mut total_accepted_charge_offer_distance: f64 = 0.0;
+    let mut avg_accepted_charge_offer_cost: f64 = 0.0;
+    let mut total_accepted_charge_offer_cost: f64 = 0.0;
+
     mqttoptions.set_keep_alive(Duration::from_secs(5));
     let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
     client
@@ -52,6 +61,8 @@ pub async fn start_transformer() {
         .subscribe(ACK_ACCEPT_BUY_OFFER_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
+    client.subscribe(CHARGER_ACCEPT, QoS::ExactlyOnce)
+        .await.unwrap();
     info!("Connected to MQTT broker");
 
     while let Ok(notification) = eventloop.poll().await {
@@ -63,6 +74,34 @@ pub async fn start_transformer() {
                         debug!("Ignoring tick payload");
                         continue;
                     }
+
+                    client.publish(
+                        CHARGER_OFFER_AVG_PRICE,
+                        QoS::ExactlyOnce,
+                        false,
+                        ChartEntry::new(
+                            "Avg. OfferAccept price".to_string(),
+                            (avg_accepted_charge_offer_price * 100.0) as isize,
+                            tick_payload.timestamp - TICK_AS_SEC).to_string(),
+                    ).await.unwrap();
+                    client.publish(
+                        CHARGER_OFFER_AVG_DISTANCE,
+                        QoS::ExactlyOnce,
+                        false,
+                        ChartEntry::new(
+                            "Avg. OfferAccept distance".to_string(),
+                            avg_accepted_charge_offer_distance as isize,
+                            tick_payload.timestamp - TICK_AS_SEC).to_string(),
+                    ).await.unwrap();
+                    client.publish(
+                        CHARGER_OFFER_AVG_COST,
+                        QoS::ExactlyOnce,
+                        false,
+                        ChartEntry::new(
+                            "Avg. OfferAccept cost".to_string(),
+                            (avg_accepted_charge_offer_cost * 100.0) as isize,
+                            tick_payload.timestamp - TICK_AS_SEC).to_string(),
+                    ).await.unwrap();
 
                     client
                         .publish(
@@ -194,6 +233,23 @@ pub async fn start_transformer() {
                     sells_total = 0.0;
                     sell_amount = 0.0;
                     transformer.reset();
+                }
+
+                CHARGER_ACCEPT => {
+                    count_accepted_charge_offers += 1.0;
+                    let charge_offer = ChargeAccept::from_bytes(p.payload).unwrap();
+
+                    total_accepted_charge_offers_price += charge_offer.charge_price;
+                    total_accepted_charge_offer_distance += charge_offer.distance;
+                    total_accepted_charge_offer_cost += charge_offer.cost;
+                    avg_accepted_charge_offer_price = total_accepted_charge_offers_price / count_accepted_charge_offers;
+                    avg_accepted_charge_offer_distance = total_accepted_charge_offer_distance / count_accepted_charge_offers;
+                    avg_accepted_charge_offer_cost = total_accepted_charge_offer_cost / count_accepted_charge_offers;
+                    debug!("Calculated averages: count: {}, price: {}, distance: {}, cost: {}",
+                        count_accepted_charge_offers,
+                        avg_accepted_charge_offer_price,
+                        avg_accepted_charge_offer_distance,
+                        avg_accepted_charge_offer_cost);
                 }
 
                 powercable::POWER_CHARGER_TOPIC => {
