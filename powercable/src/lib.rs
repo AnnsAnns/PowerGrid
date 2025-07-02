@@ -72,6 +72,9 @@ const SOUTH_LIMIT: (f64, f64) = (49.11158947259421, 10.206213793834436);
 // Essen
 const WEST_LIMIT: (f64, f64) = (51.00929968161735, 6.282484743251983);
 
+/// The threshold for considering two positions as "near" each other, in kilometers.
+const NEAR_THRESHOLD: f64 = 6.0;
+
 /// # Description
 /// The Position struct represents a geographical position defined by latitude and longitude.
 /// It is used to represent the position of vehicles, chargers, and other entities in the system.
@@ -147,6 +150,18 @@ impl Position {
     /// - A tuple containing the latitude and longitude of the position.
     pub fn to_tuple(&self) -> (f64, f64) {
         (self.latitude, self.longitude)
+    }
+
+    /// # Description
+    /// Checks if the current position is near another position within a defined threshold.
+    /// 
+    /// # Arguments
+    /// - `other_position`: The other position to check against.
+    /// 
+    /// # Returns
+    /// - A boolean indicating whether the current position is near the other position.
+    pub fn is_near(&self, other_position: Position) -> bool {
+        self.distance_to(other_position) < NEAR_THRESHOLD
     }
 }
 

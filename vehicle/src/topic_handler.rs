@@ -102,9 +102,13 @@ pub async fn process_tick(handler: SharedVehicle) { // TODO: rework this functio
             locked_handler.vehicle.set_status(VehicleStatus::Random);
         }
     } else { // Driving to a charger
-        if locked_handler.vehicle.get_location() == locked_handler.vehicle.get_next_stop() {
+        if locked_handler.vehicle.get_location().is_near(locked_handler.vehicle.get_next_stop()) {
             if locked_handler.vehicle.get_status().eq(&VehicleStatus::SearchingForCharger) {
-                info!("{} has arrived at the destination, requesting charge", locked_handler.vehicle.get_name());
+                info!(
+                    "{} has arrived at the destination, requesting charge and is {} km away",
+                    locked_handler.vehicle.get_name(),
+                    locked_handler.vehicle.get_location().distance_to(locked_handler.vehicle.get_next_stop())
+                );
                 locked_handler.vehicle.set_status(VehicleStatus::Charging);
             }
             if locked_handler.vehicle.get_status().eq(&VehicleStatus::Charging) {
