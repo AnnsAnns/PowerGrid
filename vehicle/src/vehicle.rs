@@ -70,6 +70,7 @@ pub struct VehicleDeadline {
 /// - `consumption`: The consumption of the vehicle in kWh per 100 km.
 /// - `scale`: A scale factor for the vehicle's consumption, default is 1.0.
 /// - `speed`: The speed of the vehicle in km/h.
+/// - `distance_travelled`: The distance travelled since leaving last destination.
 /// - `battery`: The battery of the vehicle, which contains information about its capacity, current charge level, and maximum charge rate.
 /// - `algorithm`: The algorithm used by the vehicle to determine its behavior when searching for a charger.
 /// - `deadline`: The deadline to which the vehicle must charge its battery.
@@ -80,12 +81,14 @@ pub struct Vehicle {
     name: String,
     model: String,
     status: VehicleStatus,
+    origin: Position,
     location: Position,
     next_stop: Position,
     destination: Position,
     consumption: f64,
     scale: f64,
     speed: usize,
+    distance_travelled: f64,
     battery: Battery,
     algorithm: VehicleAlgorithm,
     deadline: VehicleDeadline,
@@ -116,12 +119,14 @@ impl Vehicle {
             name,
             model: model.to_owned(),
             status: VehicleStatus::Parked,
+            origin: location,
             location,
             next_stop: location,
             destination: location,// Initially, the destination is the same as the location
             consumption,
             scale: 1.0,
             speed: 0,
+            distance_travelled: 0.0,
             battery,
             algorithm: VehicleAlgorithm::Best,
             deadline: VehicleDeadline { ticks_remaining: 12 * 24, target_soc: 0.8 },
@@ -155,6 +160,12 @@ impl Vehicle {
     /// The current status of the vehicle as a `VehicleStatus`.
     pub fn get_status(&self) -> VehicleStatus {
         self.status
+    }
+
+    /// # Returns
+    /// The location of the vehicle as a `Position`.
+    pub fn get_origin(&self) -> Position {
+        self.origin
     }
 
     /// # Returns
@@ -241,6 +252,18 @@ impl Vehicle {
         self.speed
     }
 
+    /// # Sets
+    /// The speed of the vehicle in km/h.
+    pub fn set_distance_travelled(&mut self, distance_travelled: f64) {
+        self.distance_travelled = distance_travelled;
+    }
+
+    /// # Returns
+    /// The speed of the vehicle in km/h.
+    pub fn get_distance_traveled(&self) -> f64 {
+        self.distance_travelled
+    }
+
     /// # Returns
     /// The battery of the vehicle as a mutable reference.
     pub fn battery(&mut self) -> &mut Battery {
@@ -292,7 +315,7 @@ impl Vehicle {
     }
 
     /// # Description
-    pub fn drive(&mut self) {
+    pub fn drive(&mut self) -> Option<f64> {
         self.deadline.ticks_remaining -= 1;
 
         // check status and set speed
@@ -300,7 +323,7 @@ impl Vehicle {
         || self.status == VehicleStatus::Charging
         || self.status == VehicleStatus::Broken {
             self.speed = 0;
-            return;
+            return None;
         } else {
             match self.battery.get_soc() {
                 0.0..0.2 => self.speed = 30,
@@ -322,6 +345,7 @@ impl Vehicle {
         let total_distance = self.distance_to(self.get_next_stop()) * charge_factor;
         debug!("Total distance: {}", total_distance);
         if total_distance > 0.0 {
+            self.distance_travelled += wanted_distance;
             let step_ratio = wanted_distance/ total_distance;
             self.location.latitude += step_ratio * (self.next_stop.latitude - self.location.latitude);
             self.location.longitude += step_ratio * (self.next_stop.longitude - self.location.longitude);
@@ -329,7 +353,11 @@ impl Vehicle {
             // do the rest for free :)
             if total_distance <= wanted_distance {
                 self.location = self.next_stop;
+                if self.location == self.destination {
+                    return Some(self.distance_travelled);
+                }
             }
         }
+        return None;
     }
 }

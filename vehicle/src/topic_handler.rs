@@ -1,7 +1,7 @@
 use bytes::Bytes;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use tracing::{debug, info, trace, warn};
-use powercable::{generate_rnd_pos, tickgen::{Phase, TickPayload}, POWER_LOCATION_TOPIC, VEHICLE_TOPIC};
+use powercable::{generate_rnd_pos, tickgen::{Phase, TickPayload}, DISTANCE_TOPIC, POWER_LOCATION_TOPIC, VEHICLE_TOPIC};
 use rumqttc::QoS;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -54,7 +54,33 @@ pub async fn tick_handler(handler: SharedVehicle, payload: Bytes) {
     }
 
     // drive on all ticks (every 5 minutes)
-    handler.lock().await.vehicle.drive();
+    match handler.lock().await.vehicle.drive() {
+        Some(distance_travelled) => {
+            let distance_direct = handler.lock().await.vehicle.distance_to(handler.lock().await.vehicle.get_origin());
+            let detour = distance_travelled - distance_direct;
+            info!("Distance direct: {}, distance travelled: {}, detour: {}", distance_direct, distance_travelled, detour);
+            
+            let name = handler.lock().await.vehicle.get_name().clone();
+            let distance_payload = json!({
+                "name" : format!("{}", name),
+                "distance_direct": distance_direct,
+                "distance_travelled": distance_travelled,
+                "detour": detour,
+            })
+            .to_string();
+
+            let client = &mut handler.lock().await.client;
+            client.publish(
+                format!("{}/{}", DISTANCE_TOPIC, name),
+                QoS::ExactlyOnce,
+                true,
+                serde_json::to_string(&distance_payload).unwrap(),
+            ).await.unwrap();
+        }
+        None => {
+            // No action needed
+        }
+    }
     publish_vehicle(handler.clone()).await;
     publish_location(handler.clone()).await;
 }

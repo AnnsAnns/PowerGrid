@@ -43,6 +43,7 @@ pub const CHARGER_CHARGING_GET: &str = "charger/charging/get";// vehicle request
 pub const CHARGER_CHARGING_ACK: &str = "charger/charging/ack";// charger responds with energy to vehicle
 pub const CHARGER_CHARGING_RELEASE: &str = "charger/charging/release";
 pub const VEHICLE_TOPIC: &str = "vehicle";
+pub const DISTANCE_TOPIC: &str = "distance";
 pub const MQTT_BROKER: &str = "mosquitto_broker";
 pub const MQTT_BROKER_PORT: u16 = 1883;
 pub const MAP_UPDATE_SPEED_IN_SECS: u64 = 1;
