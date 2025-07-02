@@ -136,7 +136,7 @@ impl Charger {
     }
 
     pub fn get_current_price(&self) -> f64 {
-        1.01 - self.get_charge_percentage()// TODO: !!!@Tom!!! habe das auf 1.1 gesetzt, damit es nie 0.0 wird, weil dann alle Offers gleichen Preis haben obowhl sie unterschiedlich weit weg sind
+        1.01 - self.get_charge_percentage()// TODO: !!!@Tom!!! habe das auf 1.01 gesetzt, damit es nie 0.0 wird, weil dann alle Offers gleichen Preis haben obowhl sie unterschiedlich weit weg sind
     }
 
     /// Gets the amount of charge needed to fill the charger

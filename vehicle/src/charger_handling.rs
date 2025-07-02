@@ -2,7 +2,7 @@ use crate::vehicle::{Vehicle, VehicleAlgorithm, VehicleStatus};
 use crate::SharedVehicle;
 use bytes::Bytes;
 use rand::rngs::StdRng;
-use tracing::{debug, info};
+use tracing::{debug, info, warn};
 use powercable::{
     charger::*, CHARGER_ACCEPT, CHARGER_CHARGING_GET, CHARGER_CHARGING_RELEASE, CHARGER_REQUEST
 };
@@ -93,7 +93,11 @@ pub async fn accept_offer(handler: SharedVehicle) {
     let acceptance = ChargeAccept {
         charger_name: accepted_offer.charger_name.clone(),
         vehicle_name: handler.vehicle.get_name().clone(),
+        charge_price: accepted_offer.charge_price,
+        distance: handler.vehicle.distance_to(accepted_offer.charger_position) as f64,
+        cost: accepted_offer.charge_price * accepted_offer.charge_amount as f64,
     };
+    info!("Accepting charge offer: {:?} with amount of {} kWh", acceptance, accepted_offer.charge_amount);
 
     handler
         .client

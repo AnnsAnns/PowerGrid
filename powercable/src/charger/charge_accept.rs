@@ -7,10 +7,16 @@ use bytes::Bytes;
 /// # Fields
 /// - `charger_name`: The name of the charger accepting the request.
 /// - `vehicle_name`: The name of the vehicle that is being accepted for charging.
+/// - `charge_price`: The price per unit of charge, which is calculated based on the distance to the vehicle and the current price of electricity.
+/// - `distance`: The distance from the charger to the vehicle.
+/// - `cost`: The total cost for the charging service, calculated as `charge_price * charge_amount`.
 #[derive(Debug, Clone, Encode, Decode)]
 pub struct ChargeAccept {
     pub charger_name: String,
     pub vehicle_name: String,
+    pub charge_price: f64,
+    pub distance: f64,
+    pub cost: f64,
     // TODO: estimated arrival time
 }
 
@@ -21,16 +27,25 @@ impl ChargeAccept {
     /// # Arguments
     /// - `charger_name`: The name of the charger accepting the request.
     /// - `vehicle_name`: The name of the vehicle that is being accepted for charging.
+    /// - `charge_price`: The price per unit of charge, which is calculated based on the distance to the vehicle and the current price of electricity.
+    /// - `distance`: The distance from the charger to the vehicle.
+    /// - `cost`: The total price for the charging service, calculated as `charge_price * charge_amount`.
     /// 
     /// # Returns
-    /// A new ChargeAccept instance with the specified charger and vehicle names.
+    /// A new ChargeAccept instance with the specified charger and vehicle names and price.
     pub fn new(
         charger_name: String,
         vehicle_name: String,
+        charge_price: f64,
+        distance: f64,
+        cost: f64,
     ) -> Self {
         ChargeAccept {
             charger_name,
             vehicle_name,
+            charge_price,
+            distance,
+            cost,
         }
     }
 
