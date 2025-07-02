@@ -160,7 +160,7 @@
         "type": "ui_group",
         "name": "Consumer",
         "tab": "8d5b248b.b32978",
-        "order": 4,
+        "order": 3,
         "disp": true,
         "width": "24",
         "collapse": true,
@@ -190,7 +190,7 @@
         "type": "ui_group",
         "name": "Charger",
         "tab": "8d5b248b.b32978",
-        "order": 6,
+        "order": 4,
         "disp": true,
         "width": "24",
         "collapse": true,
@@ -205,6 +205,17 @@
         "disp": true,
         "width": "24",
         "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "faabda12666136a4",
+        "type": "ui_group",
+        "name": "Distance",
+        "tab": "8d5b248b.b32978",
+        "order": 5,
+        "disp": true,
+        "width": "24",
+        "collapse": false,
         "className": ""
     },
     {
@@ -2141,5 +2152,70 @@
         "x": 450,
         "y": 280,
         "wires": []
+    },
+    {
+        "id": "4a11696b1d6481ca",
+        "type": "mqtt in",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "topic": "distance",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "c1c49a80.e500e",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 320,
+        "y": 1480,
+        "wires": [
+            [
+                "4bfd0a7fb389cf34"
+            ]
+        ]
+    },
+    {
+        "id": "4bfd0a7fb389cf34",
+        "type": "ui_chart",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "group": "faabda12666136a4",
+        "order": 0,
+        "width": "24",
+        "height": "4",
+        "label": "Vehicle Distance",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 790,
+        "y": 1480,
+        "wires": [
+            []
+        ]
     }
 ]
