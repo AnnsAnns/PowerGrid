@@ -265,7 +265,8 @@
             [
                 "ea18c282.7d0be8",
                 "8d7fdecc.5b539",
-                "873cbb5af1b9fce8"
+                "873cbb5af1b9fce8",
+                "8cedfba171018d64"
             ]
         ]
     },
@@ -570,8 +571,8 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 330,
-        "y": 1560,
+        "x": 410,
+        "y": 1820,
         "wires": [
             [
                 "1d02d875ec166027"
@@ -610,8 +611,8 @@
         "mapurl": "",
         "mapopt": "",
         "mapwms": false,
-        "x": 620,
-        "y": 1560,
+        "x": 700,
+        "y": 1820,
         "wires": []
     },
     {
@@ -716,8 +717,8 @@
         "name": "",
         "path": "/worldmap",
         "events": "connect,disconnect,point,draw,layer,bounds,files,other",
-        "x": 280,
-        "y": 1660,
+        "x": 360,
+        "y": 1920,
         "wires": [
             [
                 "db2a35d281ee9665"
@@ -736,8 +737,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 510,
-        "y": 1660,
+        "x": 590,
+        "y": 1920,
         "wires": [
             [
                 "12f40904cd61f394"
@@ -758,8 +759,8 @@
         "correl": "",
         "expiry": "",
         "broker": "c1c49a80.e500e",
-        "x": 740,
-        "y": 1660,
+        "x": 820,
+        "y": 1920,
         "wires": []
     },
     {
@@ -1118,8 +1119,8 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 280,
-        "y": 1760,
+        "x": 360,
+        "y": 2020,
         "wires": [
             [
                 "562cc384048cde12"
@@ -1143,8 +1144,8 @@
         "font": "",
         "fontSize": 16,
         "color": "#000000",
-        "x": 730,
-        "y": 1760,
+        "x": 810,
+        "y": 2020,
         "wires": []
     },
     {
@@ -1164,8 +1165,8 @@
         "checkall": "true",
         "repair": false,
         "outputs": 1,
-        "x": 500,
-        "y": 1760,
+        "x": 580,
+        "y": 2020,
         "wires": [
             [
                 "2d3de53ff98b4a6e",
@@ -1197,8 +1198,8 @@
         "font": "",
         "fontSize": 16,
         "color": "#000000",
-        "x": 750,
-        "y": 1880,
+        "x": 830,
+        "y": 2140,
         "wires": []
     },
     {
@@ -1218,8 +1219,8 @@
         "font": "",
         "fontSize": 16,
         "color": "#000000",
-        "x": 740,
-        "y": 1840,
+        "x": 820,
+        "y": 2100,
         "wires": []
     },
     {
@@ -1239,8 +1240,8 @@
         "font": "",
         "fontSize": 16,
         "color": "#000000",
-        "x": 730,
-        "y": 1800,
+        "x": 810,
+        "y": 2060,
         "wires": []
     },
     {
@@ -1260,8 +1261,8 @@
         "font": "",
         "fontSize": 16,
         "color": "#000000",
-        "x": 730,
-        "y": 1920,
+        "x": 810,
+        "y": 2180,
         "wires": []
     },
     {
@@ -1288,8 +1289,8 @@
         "seg2": "",
         "diff": false,
         "className": "",
-        "x": 730,
-        "y": 2000,
+        "x": 810,
+        "y": 2260,
         "wires": []
     },
     {
@@ -1316,8 +1317,8 @@
         "seg2": "",
         "diff": false,
         "className": "",
-        "x": 730,
-        "y": 1960,
+        "x": 810,
+        "y": 2220,
         "wires": []
     },
     {
@@ -1358,8 +1359,8 @@
         "outputs": 1,
         "useDifferentColor": false,
         "className": "",
-        "x": 950,
-        "y": 2040,
+        "x": 1030,
+        "y": 2300,
         "wires": [
             []
         ]
@@ -1376,8 +1377,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 730,
-        "y": 2040,
+        "x": 810,
+        "y": 2300,
         "wires": [
             [
                 "066f6cc453b66c2a"
@@ -1641,8 +1642,8 @@
         "seg2": "60",
         "diff": false,
         "className": "",
-        "x": 740,
-        "y": 2080,
+        "x": 820,
+        "y": 2340,
         "wires": []
     },
     {
@@ -1745,8 +1746,8 @@
         "offcolor": "",
         "animate": false,
         "className": "",
-        "x": 760,
-        "y": 2300,
+        "x": 840,
+        "y": 2560,
         "wires": [
             [
                 "0c5e6f25f2e1c40c"
@@ -1774,8 +1775,8 @@
         "topic": "config/turbine",
         "payload": "false",
         "payloadType": "bool",
-        "x": 450,
-        "y": 2300,
+        "x": 530,
+        "y": 2560,
         "wires": [
             [
                 "62426e6861cc66f3"
@@ -1808,8 +1809,8 @@
         "offcolor": "",
         "animate": false,
         "className": "",
-        "x": 710,
-        "y": 2360,
+        "x": 790,
+        "y": 2620,
         "wires": [
             [
                 "b9c4bb2d029a9fc8"
@@ -1837,8 +1838,8 @@
         "topic": "config/consumer",
         "payload": "false",
         "payloadType": "bool",
-        "x": 460,
-        "y": 2360,
+        "x": 540,
+        "y": 2620,
         "wires": [
             [
                 "5f41db8acc0f28bf"
@@ -1859,8 +1860,8 @@
         "correl": "",
         "expiry": "",
         "broker": "c1c49a80.e500e",
-        "x": 1020,
-        "y": 2360,
+        "x": 1100,
+        "y": 2620,
         "wires": []
     },
     {
@@ -1889,8 +1890,8 @@
         "offcolor": "",
         "animate": false,
         "className": "",
-        "x": 740,
-        "y": 2420,
+        "x": 820,
+        "y": 2680,
         "wires": [
             [
                 "584b8707e9fff378"
@@ -1918,8 +1919,8 @@
         "topic": "config/vehicle",
         "payload": "true",
         "payloadType": "bool",
-        "x": 450,
-        "y": 2420,
+        "x": 530,
+        "y": 2680,
         "wires": [
             [
                 "4711123d5bc785a3"
@@ -1940,8 +1941,8 @@
         "correl": "",
         "expiry": "",
         "broker": "c1c49a80.e500e",
-        "x": 1020,
-        "y": 2420,
+        "x": 1100,
+        "y": 2680,
         "wires": []
     },
     {
@@ -1958,8 +1959,8 @@
         "correl": "",
         "expiry": "",
         "broker": "c1c49a80.e500e",
-        "x": 1020,
-        "y": 2300,
+        "x": 1100,
+        "y": 2560,
         "wires": []
     },
     {
@@ -2119,5 +2120,298 @@
                 "a4cdc60c14ce5c22"
             ]
         ]
+    },
+    {
+        "id": "8cedfba171018d64",
+        "type": "ui_text",
+        "z": "5992b366.f9457c",
+        "group": "a02ac196.2c23f",
+        "order": 1,
+        "width": "8",
+        "height": "1",
+        "name": "",
+        "label": "Remaining Ticks:",
+        "format": "{{msg.payload.configuration.amount_to_run}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": "",
+        "color": "#000000",
+        "x": 450,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "e2616c4eca466f8a",
+        "type": "mqtt in",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "topic": "charger/offer/avg/price",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "c1c49a80.e500e",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 260,
+        "y": 1460,
+        "wires": [
+            [
+                "a7d277c3cea41c01",
+                "87d54608449230da"
+            ]
+        ]
+    },
+    {
+        "id": "a7d277c3cea41c01",
+        "type": "function",
+        "z": "5992b366.f9457c",
+        "name": "ParsePayload",
+        "func": "return {payload: msg.payload[\"payload\"], topic: msg.payload[\"topic\"], timestamp: msg.payload[\"timestamp\"]}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 540,
+        "y": 1460,
+        "wires": [
+            [
+                "2613e8d74de5e439"
+            ]
+        ]
+    },
+    {
+        "id": "2613e8d74de5e439",
+        "type": "ui_chart",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "group": "b716f2f0eaa43633",
+        "order": 5,
+        "width": "24",
+        "height": "6",
+        "label": "Price",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "dd HH:mm",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "604800",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 770,
+        "y": 1460,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c93f2749d214ee0e",
+        "type": "mqtt in",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "topic": "charger/offer/avg/distance",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "c1c49a80.e500e",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 270,
+        "y": 1520,
+        "wires": [
+            [
+                "40cffae06033c12f"
+            ]
+        ]
+    },
+    {
+        "id": "40cffae06033c12f",
+        "type": "function",
+        "z": "5992b366.f9457c",
+        "name": "ParsePayload",
+        "func": "return {payload: msg.payload[\"payload\"], topic: msg.payload[\"topic\"], timestamp: msg.payload[\"timestamp\"]}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 540,
+        "y": 1520,
+        "wires": [
+            [
+                "2fb455357db1fdc9"
+            ]
+        ]
+    },
+    {
+        "id": "2fb455357db1fdc9",
+        "type": "ui_chart",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "group": "b716f2f0eaa43633",
+        "order": 5,
+        "width": "24",
+        "height": "6",
+        "label": "Distance",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "dd HH:mm",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "604800",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 780,
+        "y": 1520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "aad6a6add9eaa69c",
+        "type": "mqtt in",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "topic": "charger/offer/avg/cost",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "c1c49a80.e500e",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 260,
+        "y": 1580,
+        "wires": [
+            [
+                "72695f2c2e7c98cb"
+            ]
+        ]
+    },
+    {
+        "id": "72695f2c2e7c98cb",
+        "type": "function",
+        "z": "5992b366.f9457c",
+        "name": "ParsePayload",
+        "func": "return {payload: msg.payload[\"payload\"], topic: msg.payload[\"topic\"], timestamp: msg.payload[\"timestamp\"]}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 540,
+        "y": 1580,
+        "wires": [
+            [
+                "31b5633db10e29ad"
+            ]
+        ]
+    },
+    {
+        "id": "31b5633db10e29ad",
+        "type": "ui_chart",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "group": "b716f2f0eaa43633",
+        "order": 5,
+        "width": "24",
+        "height": "6",
+        "label": "Cost",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "dd HH:mm",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "604800",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 770,
+        "y": 1580,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "87d54608449230da",
+        "type": "debug",
+        "z": "5992b366.f9457c",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 410,
+        "y": 1480,
+        "wires": []
     }
 ]
