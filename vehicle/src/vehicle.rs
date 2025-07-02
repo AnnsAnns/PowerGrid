@@ -353,7 +353,7 @@ impl Vehicle {
             // do the rest for free :)
             if total_distance <= wanted_distance {
                 self.location = self.next_stop;
-                if self.location == self.destination {
+                if self.destination.distance_to(self.next_stop) < 1.0 {
                     return Some(self.distance_travelled);
                 }
             }

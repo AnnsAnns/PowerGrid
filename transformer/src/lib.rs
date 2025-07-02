@@ -3,6 +3,7 @@ use powercable::{
     ChartEntry, Offer, ACK_ACCEPT_BUY_OFFER_TOPIC, POWER_TRANSFORMER_PRICE_TOPIC,
 };
 use rumqttc::{AsyncClient, MqttOptions, QoS};
+use serde_json::json;
 use std::time::Duration;
 use tracing::{debug, info, warn};
 use transformer::Transformer;
@@ -50,6 +51,10 @@ pub async fn start_transformer() {
         .unwrap();
     client
         .subscribe(ACK_ACCEPT_BUY_OFFER_TOPIC, QoS::ExactlyOnce)
+        .await
+        .unwrap();
+    client
+        .subscribe(powercable::DISTANCE_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     info!("Connected to MQTT broker");
@@ -248,6 +253,27 @@ pub async fn start_transformer() {
                         lowest_sell_price_of_tick = offer.get_price();
                     }
                 }
+
+                powercable::DISTANCE_TOPIC => {
+                    let detour: f64 = serde_json::from_slice(&p.payload).unwrap();
+                    debug!("Received detour: {}", detour);
+
+                    transformer.add_vehicle_detour(detour);
+                    let total_detour = transformer.get_total_vehicle_detour();
+                    info!("New total detour is {} km.", total_detour);
+                    let detour_payload = json!(total_detour).to_string();
+
+                    client
+                        .publish(
+                            "detour",
+                            QoS::ExactlyOnce,
+                            false,
+                            detour_payload,
+                        )
+                        .await
+                        .unwrap();
+                }
+
                 _ => {
                     warn!("Unknown topic: {}", p.topic);
                 }

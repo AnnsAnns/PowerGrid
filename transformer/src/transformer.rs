@@ -5,6 +5,7 @@ pub struct Transformer {
     current_charger_consumption: f64,
     current_power: f64,
     battery: f64,
+    total_vehicle_detour: f64,
 }
 
 impl Transformer {
@@ -16,6 +17,7 @@ impl Transformer {
             current_charger_consumption: 0.0,
             current_power: 0.0,
             battery: 100.0, // Start with a full battery
+            total_vehicle_detour: 0.0,
         }
     }
 
@@ -32,6 +34,10 @@ impl Transformer {
     pub fn add_power(&mut self, power: f64) {
         self.current_power += power;
         self.total_power += power;
+    }
+
+    pub fn add_vehicle_detour(&mut self, detour: f64) {
+        self.total_vehicle_detour += detour;
     }
 
     pub fn get_current_consumer_consumption(&self) -> f64 {
@@ -67,5 +73,9 @@ impl Transformer {
 
     pub fn get_battery(&self) -> f64 {
         self.battery
+    }
+
+    pub fn get_total_vehicle_detour(&self) -> f64 {
+        self.total_vehicle_detour
     }
 }

@@ -58,23 +58,17 @@ pub async fn tick_handler(handler: SharedVehicle, payload: Bytes) {
         Some(distance_travelled) => {
             let distance_direct = handler.lock().await.vehicle.distance_to(handler.lock().await.vehicle.get_origin());
             let detour = distance_travelled - distance_direct;
-            info!("Distance direct: {}, distance travelled: {}, detour: {}", distance_direct, distance_travelled, detour);
+            warn!("Distance direct: {}, distance travelled: {}, detour: {}", distance_direct, distance_travelled, detour);
             
-            let name = handler.lock().await.vehicle.get_name().clone();
-            let distance_payload = json!({
-                "name" : format!("{}", name),
-                "distance_direct": distance_direct,
-                "distance_travelled": distance_travelled,
-                "detour": detour,
-            })
-            .to_string();
+            //let name = handler.lock().await.vehicle.get_name().clone();
+            let detour_payload = json!(detour).to_string();
 
             let client = &mut handler.lock().await.client;
             client.publish(
-                format!("{}/{}", DISTANCE_TOPIC, name),
+                DISTANCE_TOPIC,
                 QoS::ExactlyOnce,
                 true,
-                serde_json::to_string(&distance_payload).unwrap(),
+                detour_payload,
             ).await.unwrap();
         }
         None => {
