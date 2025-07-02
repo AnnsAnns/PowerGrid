@@ -1,7 +1,7 @@
 use bytes::Bytes;
 use bitcode::{Encode, Decode};
 
-pub const OFFER_PACKAGE_SIZE: f64 = 25.0;
+pub const OFFER_PACKAGE_SIZE: f64 = 10.0;
 
 #[derive(Debug, Clone, Encode, Decode)]
 pub struct Offer {

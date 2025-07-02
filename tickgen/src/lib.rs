@@ -1,8 +1,8 @@
-use tracing::{info, warn};
 use powercable::tickgen::TICK_AS_MIN;
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task, time};
+use tracing::{info, warn};
 
 pub async fn start_tickgen() {
     info!("Starting TickGen simulation...");
@@ -22,6 +22,10 @@ pub async fn start_tickgen() {
         .subscribe(powercable::TICK_CONFIGURE_SPEED, QoS::ExactlyOnce)
         .await
         .unwrap();
+    client
+        .subscribe(powercable::TICK_CONFIGURE_AMOUNT_TO_RUN, QoS::ExactlyOnce)
+        .await
+        .unwrap();
     info!("Connected to MQTT broker");
 
     let configuration = Arc::new(Mutex::new(powercable::tickgen::TickPayload {
@@ -31,6 +35,7 @@ pub async fn start_tickgen() {
         configuration: powercable::tickgen::TickConfig {
             speed: 10.0,
             start_date: chrono::Utc::now().to_string(),
+            amount_to_run: 0,
         },
     }));
 
@@ -40,9 +45,21 @@ pub async fn start_tickgen() {
         loop {
             {
                 let mut config = configuration_clone.lock().await;
+
                 speed = config.configuration.speed;
                 match config.phase {
                     powercable::tickgen::Phase::Process => {
+                        if config.configuration.amount_to_run <= 0 {
+                            info!("No ticks to run, waiting for configuration...");
+                            time::sleep(Duration::from_secs(1)).await;
+                            continue;
+                        } else {
+                            config.configuration.amount_to_run -= 1;
+                            info!(
+                                "Running tick {} of {}",
+                                config.tick, config.configuration.amount_to_run
+                            );
+                        }
                         config.phase = powercable::tickgen::Phase::Commerce;
                     }
                     powercable::tickgen::Phase::Commerce => {
@@ -60,7 +77,9 @@ pub async fn start_tickgen() {
                     .unwrap();
                 // Each tick is 15 minutes
                 config.timestamp = (start_date
-                    + chrono::Duration::minutes((config.tick * TICK_AS_MIN as u64).try_into().unwrap()))
+                    + chrono::Duration::minutes(
+                        (config.tick * TICK_AS_MIN as u64).try_into().unwrap(),
+                    ))
                 .timestamp_millis() as usize;
                 client
                     .publish(
@@ -110,6 +129,21 @@ pub async fn start_tickgen() {
                         let mut config = config_copy.lock().await;
                         config.configuration = new_config;
                         info!("Updated configuration: {:?}", config);
+                    });
+                }
+                powercable::TICK_CONFIGURE_AMOUNT_TO_RUN => {
+                    let new_amount: usize = match std::str::from_utf8(&p.payload) {
+                        Ok(s) => s.parse().unwrap_or(0),
+                        Err(_) => {
+                            info!("Invalid UTF-8 in amount configuration");
+                            0
+                        }
+                    };
+                    let config_copy = configuration.clone();
+                    task::spawn(async move {
+                        let mut config = config_copy.lock().await;
+                        config.configuration.amount_to_run = new_amount;
+                        info!("Updated amount to run: {:?}", config);
                     });
                 }
                 _ => {

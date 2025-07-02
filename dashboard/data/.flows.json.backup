@@ -390,7 +390,7 @@
         "type": "mqtt in",
         "z": "5992b366.f9457c",
         "name": "",
-        "topic": "power/transformer/consumption",
+        "topic": "power/transformer/consumption/transformed",
         "qos": "2",
         "datatype": "json",
         "broker": "c1c49a80.e500e",
@@ -398,7 +398,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 270,
+        "x": 230,
         "y": 1080,
         "wires": [
             [
@@ -1772,7 +1772,7 @@
         "once": true,
         "onceDelay": 0.1,
         "topic": "config/turbine",
-        "payload": "true",
+        "payload": "false",
         "payloadType": "bool",
         "x": 450,
         "y": 2300,
@@ -1835,7 +1835,7 @@
         "once": true,
         "onceDelay": 0.1,
         "topic": "config/consumer",
-        "payload": "true",
+        "payload": "false",
         "payloadType": "bool",
         "x": 460,
         "y": 2360,
@@ -1893,8 +1893,7 @@
         "y": 2420,
         "wires": [
             [
-                "584b8707e9fff378",
-                "499f6ee46e0a290e"
+                "584b8707e9fff378"
             ]
         ]
     },
@@ -1910,20 +1909,13 @@
             {
                 "p": "topic",
                 "vt": "str"
-            },
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
             }
         ],
         "repeat": "",
         "crontab": "",
         "once": true,
         "onceDelay": 0.1,
-        "topic": "config/charger",
+        "topic": "config/vehicle",
         "payload": "true",
         "payloadType": "bool",
         "x": 450,
@@ -1953,24 +1945,6 @@
         "wires": []
     },
     {
-        "id": "499f6ee46e0a290e",
-        "type": "mqtt out",
-        "z": "5992b366.f9457c",
-        "name": "",
-        "topic": "config/charger",
-        "qos": "2",
-        "retain": "true",
-        "respTopic": "",
-        "contentType": "",
-        "userProps": "",
-        "correl": "",
-        "expiry": "",
-        "broker": "c1c49a80.e500e",
-        "x": 1020,
-        "y": 2480,
-        "wires": []
-    },
-    {
         "id": "0c5e6f25f2e1c40c",
         "type": "mqtt out",
         "z": "5992b366.f9457c",
@@ -1987,5 +1961,163 @@
         "x": 1020,
         "y": 2300,
         "wires": []
+    },
+    {
+        "id": "04c2a414eda39432",
+        "type": "mqtt in",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "topic": "power/charger/transformed",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "c1c49a80.e500e",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 250,
+        "y": 1380,
+        "wires": [
+            [
+                "5d8671d00fe5e3c2"
+            ]
+        ]
+    },
+    {
+        "id": "5d8671d00fe5e3c2",
+        "type": "function",
+        "z": "5992b366.f9457c",
+        "name": "ParsePayload",
+        "func": "return {payload: msg.payload[\"payload\"], topic: msg.payload[\"topic\"], timestamp: msg.payload[\"timestamp\"]}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 540,
+        "y": 1380,
+        "wires": [
+            [
+                "6f08f73f05a60a13"
+            ]
+        ]
+    },
+    {
+        "id": "6f08f73f05a60a13",
+        "type": "ui_chart",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "group": "83cd261e79d613c8",
+        "order": 4,
+        "width": "24",
+        "height": "6",
+        "label": "Battery in kWh",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "dd HH:mm",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "604800",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 800,
+        "y": 1380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "787590f26769c5da",
+        "type": "inject",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "tickgen/configure_amount_to_run",
+        "payload": "0",
+        "payloadType": "num",
+        "x": 240,
+        "y": 740,
+        "wires": [
+            [
+                "5d04373bd7edcd72"
+            ]
+        ]
+    },
+    {
+        "id": "a4cdc60c14ce5c22",
+        "type": "mqtt out",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "topic": "tickgen/configure_amount_to_run",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "c1c49a80.e500e",
+        "x": 920,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "5d04373bd7edcd72",
+        "type": "ui_text_input",
+        "z": "5992b366.f9457c",
+        "name": "",
+        "label": "How many Ticks to run the simulation for: ",
+        "tooltip": "",
+        "group": "a02ac196.2c23f",
+        "order": 8,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "mode": "text",
+        "delay": 300,
+        "topic": "topic",
+        "sendOnBlur": true,
+        "className": "",
+        "topicType": "msg",
+        "x": 580,
+        "y": 740,
+        "wires": [
+            [
+                "a4cdc60c14ce5c22"
+            ]
+        ]
     }
 ]
