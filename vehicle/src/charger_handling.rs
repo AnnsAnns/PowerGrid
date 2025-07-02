@@ -93,6 +93,9 @@ pub async fn accept_offer(handler: SharedVehicle) {
     let acceptance = ChargeAccept {
         charger_name: accepted_offer.charger_name.clone(),
         vehicle_name: handler.vehicle.get_name().clone(),
+        charge_price: accepted_offer.charge_price,
+        distance: handler.vehicle.distance_to(accepted_offer.charger_position),
+        cost: accepted_offer.charge_price * accepted_offer.charge_amount as f64,
     };
 
     handler
