@@ -26,13 +26,16 @@ pub const ACK_ACCEPT_BUY_OFFER_TOPIC: &str = "market/ack_accept_buy_offer";
 pub const TICK_TOPIC: &str = "tickgen/tick";
 pub const TICK_CONFIGURE: &str = "tickgen/configure";
 pub const TICK_CONFIGURE_SPEED: &str = "tickgen/configure_speed";
+pub const TICK_CONFIGURE_AMOUNT_TO_RUN: &str = "tickgen/configure_amount_to_run";
 pub const POWER_TRANSFORMER_CONSUMPTION_TOPIC: &str = "power/transformer/consumption";
+pub const POWER_TRANSFORMER_CONSUMPTION_TOPIC_FORMATTED: &str = "power/transformer/consumption/transformed";
 pub const POWER_TRANSFORMER_GENERATION_TOPIC: &str = "power/transformer/generation";
 pub const POWER_TRANSFORMER_STATS_TOPIC: &str = "power/transformer/stats";
 pub const POWER_TRANSFORMER_DIFF_TOPIC: &str = "power/transformer/diff";
 pub const POWER_TRANSFORMER_PRICE_TOPIC: &str = "power/transformer/stats/price";
 pub const POWER_TRANSFORMER_EARNED_TOPIC: &str = "power/transformer/stats/earnings";
 pub const POWER_CHARGER_TOPIC: &str = "power/charger";
+pub const POWER_CHARGER_TRANSFORMED_TOPIC: &str = "power/charger/transformed";
 pub const POWER_CONSUMER_TOPIC: &str = "power/consumer";
 pub const POWER_LOCATION_TOPIC: &str = "power/location";
 pub const WORLDMAP_EVENT_TOPIC: &str = "worldmap/event";
@@ -47,7 +50,7 @@ pub const DISTANCE_TOPIC: &str = "distance";
 pub const MQTT_BROKER: &str = "mosquitto_broker";
 pub const MQTT_BROKER_PORT: u16 = 1883;
 pub const MAP_UPDATE_SPEED_IN_SECS: u64 = 1;
-pub const RANDOM_SEED: u64 = 30_06_25; // Seed for random number generation
+pub const RANDOM_SEED: u64 = 02_07_25; // Seed for random number generation
 
 /// We use prime numbers to represent different types of entities in the system.
 /// This helps to ensure that the generated IDs are unique and can be easily distinguished.
