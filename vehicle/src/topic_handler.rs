@@ -102,19 +102,33 @@ pub async fn process_tick(handler: SharedVehicle) { // TODO: rework this functio
             locked_handler.vehicle.set_status(VehicleStatus::Random);
         }
     } else { // Driving to a charger
+        // driving is happening somewhere else
         if locked_handler.vehicle.get_location().is_near(locked_handler.vehicle.get_next_stop()) {
-            if locked_handler.vehicle.get_status().eq(&VehicleStatus::SearchingForCharger) {
-                info!(
-                    "{} has arrived at the destination, requesting charge and is {} km away",
-                    locked_handler.vehicle.get_name(),
-                    locked_handler.vehicle.get_location().distance_to(locked_handler.vehicle.get_next_stop())
-                );
-                locked_handler.vehicle.set_status(VehicleStatus::Charging);
-            }
-            if locked_handler.vehicle.get_status().eq(&VehicleStatus::Charging) {
-                task::spawn(create_get(handler.clone()));
-            }
+            task::spawn(at_charger(handler.clone()));
+        } else {
+            trace!("{} is driving to the charger", locked_handler.vehicle.get_name());
         }
+    }
+}
+
+/// # Description
+/// The `at_charger` function is called when the vehicle is at a charger.<br>
+/// 
+/// # Arguments
+/// - `handler`: A shared reference to the vehicle handler, which contains the vehicle instance and the MQTT client.
+async fn at_charger(handler: SharedVehicle) {
+    let mut l_handler = handler.lock().await;
+    if l_handler.vehicle.get_status().eq(&VehicleStatus::SearchingForCharger) { // Vehicle has arrived, first call so change status to Charging
+        info!(
+            "{} has arrived at the destination, requesting charge and is {} km away",
+            l_handler.vehicle.get_name(),
+            l_handler.vehicle.get_location().distance_to(l_handler.vehicle.get_next_stop())
+        );
+        l_handler.vehicle.set_status(VehicleStatus::Charging);
+    } else if l_handler.vehicle.get_status().eq(&VehicleStatus::Charging) { // Vehicle is in the process of charging
+        task::spawn(create_get(handler.clone()));
+    } else {
+        warn!("drive_to_charger: you should not be here");
     }
 }
 
@@ -124,14 +138,13 @@ pub async fn process_tick(handler: SharedVehicle) { // TODO: rework this functio
 /// # Arguments
 /// - `handler`: A shared reference to the vehicle handler, which contains the vehicle instance and the MQTT client.
 pub async fn commerce_tick(handler: SharedVehicle) {
-    {
-        let l_handler = handler.lock().await;
-        if l_handler.target_charger.is_some() || l_handler.charge_offers.is_empty() {
-            return;
-        }
+    let l_handler = handler.lock().await; // first lock handler to access vehicle and charge offers
+
+    if l_handler.target_charger.is_some() || l_handler.charge_offers.is_empty() {
+        return;
     }
-    trace!("{} has received charge offers, accepting the best one", handler.lock().await.vehicle.get_name());
-    accept_offer(handler.clone()).await;
+    trace!("{} has received charge offers, accepting the best one", l_handler.vehicle.get_name());
+    task::spawn(accept_offer(handler.clone()));
 }
 
 /// # Description
@@ -173,6 +186,8 @@ pub async fn publish_location(handler: SharedVehicle) {
     let percentage = handler.vehicle.battery().get_soc_percentage();
     let visible = handler.vehicle.visible;
     let client = &mut handler.client;
+
+    // Destination payload for the vehicle
     let destination_payload = json!({
         "name" : format!("{}-destination", name),
         "lat": destination.latitude,
@@ -184,6 +199,8 @@ pub async fn publish_location(handler: SharedVehicle) {
         "deleted": !visible,
     })
     .to_string();
+
+    // Location payload for the vehicle
     let location_payload = json!({
         "name" : name,
         "lat": location.latitude,
@@ -195,6 +212,7 @@ pub async fn publish_location(handler: SharedVehicle) {
         "deleted": !visible,
     }).to_string();
 
+    // Publish the destination and location payloads to the MQTT broker
     client.publish(
         POWER_LOCATION_TOPIC,
         QoS::ExactlyOnce,
