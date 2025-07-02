@@ -29,6 +29,7 @@ pub struct TickConfig {
     /// The wait inbetween ticks in seconds
     pub speed: f64,
     pub start_date: String,
+    pub amount_to_run: usize, // how many ticks to run
 }
 
 impl TickPayload {

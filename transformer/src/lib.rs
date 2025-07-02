@@ -10,7 +10,7 @@ const OWN_TOPIC: &str = "Total";
 
 pub async fn start_transformer() {
     info!("Starting turbine simulation...");
-    
+
     let mut transformer = Transformer::new();
 
     let mut mqttoptions = MqttOptions::new(
@@ -38,14 +38,25 @@ pub async fn start_transformer() {
         .await
         .unwrap();
     client
-        .subscribe(powercable::POWER_TRANSFORMER_CONSUMPTION_TOPIC, QoS::ExactlyOnce)
+        .subscribe(
+            powercable::POWER_TRANSFORMER_CONSUMPTION_TOPIC,
+            QoS::ExactlyOnce,
+        )
         .await
         .unwrap();
     client
-        .subscribe(powercable::POWER_TRANSFORMER_GENERATION_TOPIC, QoS::ExactlyOnce)
+        .subscribe(
+            powercable::POWER_TRANSFORMER_GENERATION_TOPIC,
+            QoS::ExactlyOnce,
+        )
         .await
         .unwrap();
-    client.subscribe(ACK_ACCEPT_BUY_OFFER_TOPIC, QoS::ExactlyOnce)
+    client
+        .subscribe(powercable::POWER_CHARGER_TOPIC, QoS::ExactlyOnce)
+        .await
+        .unwrap();
+    client
+        .subscribe(ACK_ACCEPT_BUY_OFFER_TOPIC, QoS::ExactlyOnce)
         .await
         .unwrap();
     client.subscribe(CHARGER_ACCEPT, QoS::ExactlyOnce)
@@ -97,9 +108,10 @@ pub async fn start_transformer() {
                             true,
                             ChartEntry::new(
                                 "Consumption".to_string(),
-                                transformer.get_current_consumption() as isize,
+                                transformer.get_total_current_consumption() as isize,
                                 tick_payload.timestamp - TICK_AS_SEC,
-                            ).to_string(),
+                            )
+                            .to_string(),
                         )
                         .await
                         .unwrap();
@@ -112,7 +124,50 @@ pub async fn start_transformer() {
                                 "Generation".to_string(),
                                 transformer.get_current_power() as isize,
                                 tick_payload.timestamp - TICK_AS_SEC,
-                            ).to_string(),
+                            )
+                            .to_string(),
+                        )
+                        .await
+                        .unwrap();
+                    client
+                        .publish(
+                            powercable::POWER_TRANSFORMER_CONSUMPTION_TOPIC_FORMATTED,
+                            QoS::ExactlyOnce,
+                            true,
+                            ChartEntry::new(
+                                "Chargers".to_string(),
+                                transformer.get_current_charger_consumption() as isize,
+                                tick_payload.timestamp - TICK_AS_SEC,
+                            )
+                            .to_string(),
+                        )
+                        .await
+                        .unwrap();
+                    client
+                        .publish(
+                            powercable::POWER_TRANSFORMER_CONSUMPTION_TOPIC_FORMATTED,
+                            QoS::ExactlyOnce,
+                            true,
+                            ChartEntry::new(
+                                "Consumers".to_string(),
+                                transformer.get_current_consumer_consumption() as isize,
+                                tick_payload.timestamp - TICK_AS_SEC,
+                            )
+                            .to_string(),
+                        )
+                        .await
+                        .unwrap();
+                    client
+                        .publish(
+                            powercable::POWER_CHARGER_TRANSFORMED_TOPIC,
+                            QoS::ExactlyOnce,
+                            true,
+                            ChartEntry::new(
+                                "Charger Battery Charge".to_string(),
+                                transformer.get_battery() as isize,
+                                tick_payload.timestamp - TICK_AS_SEC,
+                            )
+                            .to_string(),
                         )
                         .await
                         .unwrap();
@@ -125,7 +180,8 @@ pub async fn start_transformer() {
                                 OWN_TOPIC.to_string(),
                                 transformer.get_difference() as isize,
                                 tick_payload.timestamp - TICK_AS_SEC,
-                            ).to_string(),
+                            )
+                            .to_string(),
                         )
                         .await
                         .unwrap();
@@ -135,16 +191,20 @@ pub async fn start_transformer() {
                         continue;
                     }
 
-                    client.publish(
-                        POWER_TRANSFORMER_PRICE_TOPIC,
-                        QoS::ExactlyOnce,
-                        false,
-                        ChartEntry::new(
-                            "Lowest Sell Price".to_string(),
-                            (lowest_sell_price_of_tick * 100.0) as isize,
-                            tick_payload.timestamp - TICK_AS_SEC,
-                        ).to_string(),
-                    ).await.unwrap();
+                    client
+                        .publish(
+                            POWER_TRANSFORMER_PRICE_TOPIC,
+                            QoS::ExactlyOnce,
+                            false,
+                            ChartEntry::new(
+                                "Lowest Sell Price".to_string(),
+                                (lowest_sell_price_of_tick * 100.0) as isize,
+                                tick_payload.timestamp - TICK_AS_SEC,
+                            )
+                            .to_string(),
+                        )
+                        .await
+                        .unwrap();
 
                     let average_sell_price = ((sells_total / sell_amount) * 100.0) as isize;
 
@@ -152,16 +212,20 @@ pub async fn start_transformer() {
                     debug!("Total Sells: {}, Sell Amount: {}", sells_total, sell_amount);
                     debug!("Lowest Sell Price of Tick: {}", lowest_sell_price_of_tick);
 
-                    client.publish(
-                        POWER_TRANSFORMER_PRICE_TOPIC,
-                        QoS::ExactlyOnce,
-                        false,
-                        ChartEntry::new(
-                            "Average Sell Price".to_string(),
-                            average_sell_price,
-                            tick_payload.timestamp - TICK_AS_SEC,
-                        ).to_string(),
-                    ).await.unwrap();
+                    client
+                        .publish(
+                            POWER_TRANSFORMER_PRICE_TOPIC,
+                            QoS::ExactlyOnce,
+                            false,
+                            ChartEntry::new(
+                                "Average Sell Price".to_string(),
+                                average_sell_price,
+                                tick_payload.timestamp - TICK_AS_SEC,
+                            )
+                            .to_string(),
+                        )
+                        .await
+                        .unwrap();
 
                     lowest_sell_price_of_tick = 1.0;
                     sells_total = 0.0;
@@ -186,13 +250,23 @@ pub async fn start_transformer() {
                         avg_accepted_charge_offer_cost);
                 }
 
+                powercable::POWER_CHARGER_TOPIC => {
+                    let payload = ChartEntry::from_bytes(p.payload).unwrap();
+                    if payload.topic == OWN_TOPIC {
+                        continue;
+                    }
+                    debug!("Received charger data: {:?}", payload);
+
+                    transformer.add_battery(payload.payload as f64);
+                }
+
                 powercable::POWER_TRANSFORMER_GENERATION_TOPIC => {
                     let payload = ChartEntry::from_bytes(p.payload).unwrap();
                     if payload.topic == OWN_TOPIC {
                         continue;
                     }
                     debug!("Received generation data: {:?}", payload);
-                    
+
                     transformer.add_power(payload.payload as f64);
                 }
 
@@ -202,14 +276,21 @@ pub async fn start_transformer() {
                         continue;
                     }
                     debug!("Received consumption data: {:?}", payload);
-                    
-                    transformer.add_consumption(payload.payload as f64);
+
+                    if payload.topic.starts_with("Charger") {
+                        transformer.add_charger_consumption(payload.payload as f64);
+                    } else {
+                        transformer.add_consumer_consumption(payload.payload as f64);
+                    }
                 }
 
                 ACK_ACCEPT_BUY_OFFER_TOPIC => {
                     let offer = Offer::from_bytes(p.payload).unwrap();
                     debug!("Received Offer ACK: {:?}", offer);
-                    if offer.get_id().starts_with("L") || offer.get_id().starts_with("G") || offer.get_id().starts_with("H") {
+                    if offer.get_id().starts_with("L")
+                        || offer.get_id().starts_with("G")
+                        || offer.get_id().starts_with("H")
+                    {
                         debug!("Ignoring Consumer ACKs");
                         continue;
                     }

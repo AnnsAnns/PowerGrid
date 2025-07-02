@@ -390,7 +390,7 @@
         "type": "mqtt in",
         "z": "5992b366.f9457c",
         "name": "",
-        "topic": "power/transformer/consumption",
+        "topic": "power/transformer/consumption/transformed",
         "qos": "2",
         "datatype": "json",
         "broker": "c1c49a80.e500e",
@@ -398,7 +398,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 270,
+        "x": 230,
         "y": 1080,
         "wires": [
             [
@@ -1963,13 +1963,13 @@
         "wires": []
     },
     {
-        "id": "39c6e71fc7689450",
+        "id": "04c2a414eda39432",
         "type": "mqtt in",
         "z": "5992b366.f9457c",
         "name": "",
-        "topic": "charger/offer/avg/price",
+        "topic": "power/charger/transformed",
         "qos": "2",
-        "datatype": "json",
+        "datatype": "auto-detect",
         "broker": "c1c49a80.e500e",
         "nl": false,
         "rap": true,

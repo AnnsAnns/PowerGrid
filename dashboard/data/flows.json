@@ -265,7 +265,8 @@
             [
                 "ea18c282.7d0be8",
                 "8d7fdecc.5b539",
-                "873cbb5af1b9fce8"
+                "873cbb5af1b9fce8",
+                "8cedfba171018d64"
             ]
         ]
     },
@@ -390,7 +391,7 @@
         "type": "mqtt in",
         "z": "5992b366.f9457c",
         "name": "",
-        "topic": "power/transformer/consumption",
+        "topic": "power/transformer/consumption/transformed",
         "qos": "2",
         "datatype": "json",
         "broker": "c1c49a80.e500e",
@@ -398,7 +399,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 270,
+        "x": 230,
         "y": 1080,
         "wires": [
             [
