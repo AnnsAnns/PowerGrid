@@ -94,6 +94,8 @@ pub async fn process_tick(handler: SharedVehicle) { // TODO: rework this functio
             match rng.random_range(0..11) { // Average parking time is 3 hours (made up)
                 0 => {
                     locked_handler.vehicle.set_status(VehicleStatus::Random); // Generate new destination
+                    let current_location = locked_handler.vehicle.get_location();
+                    locked_handler.vehicle.set_origin(current_location);
                     locked_handler.vehicle.set_destination(generate_rnd_pos(seed));
                 },
                 _ => locked_handler.vehicle.set_status(VehicleStatus::Parked), // Usually the car is parked after reaching its destination

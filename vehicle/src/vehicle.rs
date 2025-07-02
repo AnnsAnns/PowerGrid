@@ -162,8 +162,14 @@ impl Vehicle {
         self.status
     }
 
+    /// # Sets
+    /// The origin location of the vehicle as a `Position`.
+    pub fn set_origin(&mut self, origin: Position) {
+        self.origin = origin;
+    }
+
     /// # Returns
-    /// The location of the vehicle as a `Position`.
+    /// The origin location of the vehicle as a `Position`.
     pub fn get_origin(&self) -> Position {
         self.origin
     }
