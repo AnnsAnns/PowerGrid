@@ -150,3 +150,10 @@ We can see that the system works as intended, with the charging stations being a
 We can also see that the system is able to dynamically adapt to the current state of the power grid in case of component/turbine failures, such as the wind storm breaking all turbines.
 
 Lastly, we can also see that charger prices and the algorithms by which the cars decide where to go can greatly influence the outcome of the simulation, as we can see in the results of the different scenarios.
+
+## 8. Weaknesses of our System
+
+1. Scalability: The system does not adapt well to massive amounts of agents, there are a lot of multicasts within the system that would start massively slowing down
+2. Trust: The system does not have a trust mechanism, meaning that agents can lie about their offers and the system will not be able to detect it. If a charger offers a price of 0€, for example due to a bug, the vehicles would blindly trust it
+3. "Stupid Ticks": There is one centralized architecture choice of tick phases, which makes sense for the grid itself, turbines and the communication with consumers and chargers work in a very "phased" way.
+However, the communication between chargers and cars work on a completely different timescale which the tick phases do not properly reflect. If one would rewrite this project, it might make sense to not adhere to this.
