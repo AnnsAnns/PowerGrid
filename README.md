@@ -92,6 +92,7 @@ There are also additional components for the sake of the simulation, such as a t
 
 - **Scenario 1**: Normal operation with sufficient renewable energy.
 - **Scenario 2**: High demand for charging stations with limited renewable energy.
+- **Scenario 3**: Storm breaks turbines
 
 ### 6.2 Simulation-Based Evaluation Preparation
 
@@ -99,10 +100,60 @@ For Scenario 1 one we set the consumer demand to a normal level, meaning that th
 
 For Scenario 2 we set the consumer demand to a high level, meaning that the households will consume energy at a high rate and the charging stations will have a high amount of requests. We also set the renewable energy sources to a low level, meaning that we will have to buy external energy to cover the demand.
 
+For scenario 3 we have a normal day similar to scenario 1, however, midday a wind storm forces the turbines to go offline at which point power becomes extremely expensive. We expect batteries to dry out over time as charging prices massively increase.
+
 ### 6.3 Preliminary Results and Feedback
 
-@TODO
+#### Scenario 1: Ideal Energy Market
+
+##### Best Offer
+
+![1](docs/data/best_standard/1.png)
+![2](docs/data/best_standard/2.png)
+![3](docs/data/best_standard/3.png)
+![4](docs/data/best_standard/4.png)
+
+##### Random Offer
+
+![1](docs/data/random_standard/1.png)
+![2](docs/data/random_standard/2.png)
+![3](docs/data/random_standard/3.png)
+![4](docs/data/random_standard/4.png)
+
+#### Scenario 2: Worst Case Energy Market
+
+##### Best Offer
+
+![1](docs/data/best_no_turbine/1.png)
+![2](docs/data/best_no_turbine/2.png)
+![3](docs/data/best_no_turbine/3.png)
+![4](docs/data/best_no_turbine/4.png)
+
+##### Random Offer
+
+![1](docs/data/best_no_turbine/1.png)
+![2](docs/data/best_no_turbine/2.png)
+![3](docs/data/best_no_turbine/3.png)
+![4](docs/data/best_no_turbine/4.png)
+
+#### Scenario 3: Storm Breaks Turbines
+
+![1](docs/data/storm_damage/1.png)
+![2](docs/data/storm_damage/2.png)
+![3](docs/data/storm_damage/3.png)
+![4](docs/data/storm_damage/4.png)
 
 ## 7. Conclusion and Outlook
 
-@TODO
+We can see that the system works as intended, with the charging stations being able to reserve themselves based on the offers they receive from the electric vehicles. The power grid energy transfer works as expected, with the producers being able to sell their energy to the consumers based on the price they are willing to pay.
+
+We can also see that the system is able to dynamically adapt to the current state of the power grid in case of component/turbine failures, such as the wind storm breaking all turbines.
+
+Lastly, we can also see that charger prices and the algorithms by which the cars decide where to go can greatly influence the outcome of the simulation, as we can see in the results of the different scenarios.
+
+## 8. Weaknesses of our System
+
+1. Scalability: The system does not adapt well to massive amounts of agents, there are a lot of multicasts within the system that would start massively slowing down
+2. Trust: The system does not have a trust mechanism, meaning that agents can lie about their offers and the system will not be able to detect it. If a charger offers a price of 0€, for example due to a bug, the vehicles would blindly trust it
+3. "Stupid Ticks": There is one centralized architecture choice of tick phases, which makes sense for the grid itself, turbines and the communication with consumers and chargers work in a very "phased" way.
+However, the communication between chargers and cars work on a completely different timescale which the tick phases do not properly reflect. If one would rewrite this project, it might make sense to not adhere to this.
